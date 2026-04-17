@@ -1,0 +1,1212 @@
+[
+  {
+    "template_id": "bp_template_vss_video_summary",
+    "blueprint_id": "nvidia_vss_video_summarization",
+    "workload_family": "multimodal_video_summary",
+    "input_profile_schema": {
+      "required": [
+        "video_duration_seconds",
+        "chunk_size_seconds",
+        "target_summary_style"
+      ],
+      "optional": [
+        "num_parallel_videos",
+        "audio_enabled",
+        "graph_rag_enabled",
+        "burst_mode"
+      ]
+    },
+    "batching_mode": "chunked_dynamic_batching",
+    "availability_profile": "24x7_optional",
+    "stages": [
+      {
+        "stage_id": "ingest",
+        "role_id": "video_io_role",
+        "resource_profile": "io_cpu_decode"
+      },
+      {
+        "stage_id": "vlm_chunk_analysis",
+        "role_id": "vlm_role",
+        "resource_profile": "gpu_vlm_batchable"
+      },
+      {
+        "stage_id": "rag_context",
+        "role_id": "retrieval_role",
+        "resource_profile": "gpu_or_cpu_retrieval_optional"
+      },
+      {
+        "stage_id": "summary_generation",
+        "role_id": "llm_role",
+        "resource_profile": "gpu_llm_prefill_decode"
+      }
+    ],
+    "reference_perf_anchor": "Use VSS health-eval metrics as calibration anchor for chunked summarization.",
+    "language_override_strategy": {
+      "supported": true,
+      "primary_roles": [
+        "llm_role",
+        "retrieval_role"
+      ],
+      "notes": "For Hungarian, prioritize replacing summary-generation and retrieval roles first."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "e2e_latency_vs_video_duration",
+        "gpu_memory_vs_parallel_videos",
+        "chunk_latency_breakdown"
+      ],
+      "decision_cards": [
+        "max_parallel_videos",
+        "p50_latency",
+        "safe_gpu_utilization",
+        "queue_growth_risk"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_warehouse_2d",
+    "blueprint_id": "nvidia_vss_warehouse_2d",
+    "workload_family": "streaming_video_detection",
+    "input_profile_schema": {
+      "required": [
+        "num_streams",
+        "fps",
+        "resolution_profile"
+      ],
+      "optional": [
+        "num_rois",
+        "num_tripwires",
+        "scene_complexity_index",
+        "alert_text_enabled"
+      ]
+    },
+    "batching_mode": "microbatch_by_frame_window",
+    "availability_profile": "24x7_required",
+    "stages": [
+      {
+        "stage_id": "decode_preprocess",
+        "role_id": "detector_role",
+        "resource_profile": "cpu_decode_gpu_preprocess"
+      },
+      {
+        "stage_id": "detection",
+        "role_id": "detector_role",
+        "resource_profile": "gpu_vision_realtime"
+      },
+      {
+        "stage_id": "tracking_analytics",
+        "role_id": "tracking_role",
+        "resource_profile": "cpu_gpu_mixed"
+      },
+      {
+        "stage_id": "optional_reporting",
+        "role_id": "event_reasoning_role",
+        "resource_profile": "gpu_llm_optional"
+      }
+    ],
+    "reference_perf_anchor": "Use published p50 latency on RTX6000pro/DGX Spark/IGX Thor as baseline anchor.",
+    "language_override_strategy": {
+      "supported": true,
+      "primary_roles": [
+        "event_reasoning_role"
+      ],
+      "notes": "Detection remains language-agnostic; only alert/reporting stages usually need Hungarian."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "streams_vs_latency",
+        "streams_vs_gpu_utilization",
+        "roi_tripwire_sensitivity"
+      ],
+      "decision_cards": [
+        "max_streams",
+        "p50_e2e_latency",
+        "safe_headroom",
+        "drop_risk"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_warehouse_2d_agents",
+    "blueprint_id": "nvidia_vss_warehouse_2d_agents",
+    "workload_family": "agentic_video_analytics",
+    "input_profile_schema": {
+      "required": [
+        "num_streams",
+        "fps",
+        "operator_queries_per_minute"
+      ],
+      "optional": [
+        "chat_enabled",
+        "incident_review_enabled",
+        "shared_gpu_mode",
+        "remote_nim_mode"
+      ]
+    },
+    "batching_mode": "realtime_plus_asynchronous_agent_queries",
+    "availability_profile": "24x7_required",
+    "stages": [
+      {
+        "stage_id": "stream_analytics",
+        "role_id": "detector_role",
+        "resource_profile": "gpu_vision_realtime"
+      },
+      {
+        "stage_id": "incident_understanding",
+        "role_id": "vlm_role",
+        "resource_profile": "gpu_vlm_bursty"
+      },
+      {
+        "stage_id": "operator_response",
+        "role_id": "llm_role",
+        "resource_profile": "gpu_llm_interactive"
+      }
+    ],
+    "reference_perf_anchor": "Use 4-stream/30fps DGX Spark p50 baseline for agent-enabled profile.",
+    "language_override_strategy": {
+      "supported": true,
+      "primary_roles": [
+        "vlm_role",
+        "llm_role"
+      ],
+      "notes": "Replace llm_role first for Hungarian operator-facing chat and summaries."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "stream_load_vs_chat_load",
+        "shared_gpu_mode_impact",
+        "incident_queue_growth"
+      ],
+      "decision_cards": [
+        "max_streams_with_agents",
+        "chat_p95_latency",
+        "gpu_sharing_risk",
+        "recommended_gpu_mode"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_warehouse_3d",
+    "blueprint_id": "nvidia_vss_warehouse_3d",
+    "workload_family": "multi_camera_3d_video_analytics",
+    "input_profile_schema": {
+      "required": [
+        "num_streams",
+        "fps",
+        "camera_groups"
+      ],
+      "optional": [
+        "calibration_quality_score",
+        "scene_complexity_index",
+        "incident_reporting_enabled"
+      ]
+    },
+    "batching_mode": "synchronized_multi_camera_windows",
+    "availability_profile": "24x7_required",
+    "stages": [
+      {
+        "stage_id": "multicam_decode",
+        "role_id": "multicam_perception_role",
+        "resource_profile": "cpu_decode_gpu_preprocess"
+      },
+      {
+        "stage_id": "3d_perception",
+        "role_id": "multicam_perception_role",
+        "resource_profile": "gpu_multicam_heavy"
+      },
+      {
+        "stage_id": "analytics",
+        "role_id": "tracking_role",
+        "resource_profile": "cpu_gpu_mixed"
+      },
+      {
+        "stage_id": "optional_reporting",
+        "role_id": "reporting_role",
+        "resource_profile": "gpu_llm_optional"
+      }
+    ],
+    "reference_perf_anchor": "Use Sparse4D p50 baselines from published Warehouse 3D profile.",
+    "language_override_strategy": {
+      "supported": true,
+      "primary_roles": [
+        "reporting_role"
+      ],
+      "notes": "Hungarian normally matters in reports, not 3D perception."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "camera_groups_vs_latency",
+        "fps_vs_capacity",
+        "calibration_quality_sensitivity"
+      ],
+      "decision_cards": [
+        "max_camera_groups",
+        "p50_e2e_latency",
+        "calibration_risk",
+        "safe_utilization"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_rag",
+    "blueprint_id": "nvidia_rag_blueprint",
+    "workload_family": "enterprise_rag",
+    "input_profile_schema": {
+      "required": [
+        "queries_per_second",
+        "avg_context_docs",
+        "avg_prompt_tokens"
+      ],
+      "optional": [
+        "multimodal_queries_enabled",
+        "pdf_parse_enabled",
+        "audio_ingest_enabled",
+        "target_language"
+      ]
+    },
+    "batching_mode": "continuous_query_batching",
+    "availability_profile": "business_critical",
+    "stages": [
+      {
+        "stage_id": "retrieve_embed",
+        "role_id": "embedding_role",
+        "resource_profile": "gpu_embedding_batchable"
+      },
+      {
+        "stage_id": "rerank",
+        "role_id": "reranker_role",
+        "resource_profile": "gpu_rerank_batchable"
+      },
+      {
+        "stage_id": "optional_parse",
+        "role_id": "parse_role",
+        "resource_profile": "gpu_parse_bursty"
+      },
+      {
+        "stage_id": "generate_answer",
+        "role_id": "llm_role",
+        "resource_profile": "gpu_llm_prefill_decode"
+      },
+      {
+        "stage_id": "optional_vlm",
+        "role_id": "vlm_role",
+        "resource_profile": "gpu_vlm_optional"
+      }
+    ],
+    "reference_perf_anchor": "Use default service-to-GPU mapping and deployment characteristics as base topology.",
+    "language_override_strategy": {
+      "supported": true,
+      "primary_roles": [
+        "embedding_role",
+        "reranker_role",
+        "llm_role"
+      ],
+      "notes": "For Hungarian, swap retrieval roles before or together with the LLM."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "qps_vs_latency",
+        "context_tokens_vs_gpu_memory",
+        "component_gpu_map_heatmap"
+      ],
+      "decision_cards": [
+        "max_qps",
+        "p95_latency",
+        "retrieval_quality_risk",
+        "gpu_map_efficiency"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_aiq",
+    "blueprint_id": "nvidia_aiq_research_agent",
+    "workload_family": "agentic_research",
+    "input_profile_schema": {
+      "required": [
+        "concurrent_agent_runs",
+        "avg_research_depth",
+        "avg_docs_per_run"
+      ],
+      "optional": [
+        "rag_enabled",
+        "web_search_enabled",
+        "human_in_the_loop_enabled",
+        "target_language"
+      ]
+    },
+    "batching_mode": "asynchronous_long_running_jobs",
+    "availability_profile": "business_critical",
+    "stages": [
+      {
+        "stage_id": "orchestration",
+        "role_id": "orchestrator_llm_role",
+        "resource_profile": "gpu_llm_interactive"
+      },
+      {
+        "stage_id": "shallow_research",
+        "role_id": "shallow_research_role",
+        "resource_profile": "gpu_llm_bursty"
+      },
+      {
+        "stage_id": "deep_research",
+        "role_id": "deep_research_role",
+        "resource_profile": "gpu_llm_long_context"
+      },
+      {
+        "stage_id": "optional_rag",
+        "role_id": "rag_role",
+        "resource_profile": "componentized_rag_optional"
+      }
+    ],
+    "reference_perf_anchor": "Use Enterprise RA cluster validation as topology anchor, then simulate agent concurrency and report depth.",
+    "language_override_strategy": {
+      "supported": true,
+      "primary_roles": [
+        "orchestrator_llm_role",
+        "deep_research_role",
+        "rag_role"
+      ],
+      "notes": "For Hungarian, both agent reasoning and retrieval should be localized."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "concurrent_runs_vs_completion_time",
+        "research_depth_vs_cost",
+        "rag_on_off_comparison"
+      ],
+      "decision_cards": [
+        "safe_concurrent_runs",
+        "completion_time_p50",
+        "cluster_headroom",
+        "report_quality_risk"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_pdf_to_podcast",
+    "blueprint_id": "nvidia_pdf_to_podcast",
+    "workload_family": "document_to_audio",
+    "input_profile_schema": {
+      "required": [
+        "documents_per_hour",
+        "avg_pdf_pages",
+        "target_audio_minutes_per_doc"
+      ],
+      "optional": [
+        "dialogue_mode",
+        "target_language",
+        "premium_tts_quality",
+        "parallel_tts_jobs"
+      ]
+    },
+    "batching_mode": "pipeline_stage_batching",
+    "availability_profile": "business_hours_or_batch",
+    "stages": [
+      {
+        "stage_id": "parse_pdf",
+        "role_id": "parse_role",
+        "resource_profile": "gpu_parse_bursty"
+      },
+      {
+        "stage_id": "generate_script",
+        "role_id": "script_llm_role",
+        "resource_profile": "gpu_llm_prefill_decode"
+      },
+      {
+        "stage_id": "synthesize_audio",
+        "role_id": "tts_role",
+        "resource_profile": "gpu_tts_streaming_or_batch"
+      }
+    ],
+    "reference_perf_anchor": "Model as a three-stage pipeline: PDF parse -> script generation -> TTS synthesis.",
+    "language_override_strategy": {
+      "supported": true,
+      "primary_roles": [
+        "script_llm_role",
+        "tts_role",
+        "parse_role"
+      ],
+      "notes": "For Hungarian, TTS availability and pronunciation quality should be checked before capacity sign-off."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "docs_per_hour_vs_latency",
+        "pdf_pages_vs_gpu_time",
+        "tts_minutes_vs_capacity"
+      ],
+      "decision_cards": [
+        "throughput_docs_per_hour",
+        "audio_minutes_per_hour",
+        "parse_bottleneck_risk",
+        "tts_bottleneck_risk"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_retail_assistant",
+    "blueprint_id": "nvidia_retail_shopping_assistant",
+    "workload_family": "retail_multimodal_assistant",
+    "input_profile_schema": {
+      "required": [
+        "queries_per_second",
+        "avg_context_products",
+        "avg_prompt_tokens"
+      ],
+      "optional": [
+        "image_queries_enabled",
+        "guardrails_enabled",
+        "target_language",
+        "seasonal_peak_multiplier"
+      ]
+    },
+    "batching_mode": "continuous_query_batching",
+    "availability_profile": "business_critical",
+    "stages": [
+      {
+        "stage_id": "embed_query",
+        "role_id": "embedding_role",
+        "resource_profile": "gpu_embedding_batchable"
+      },
+      {
+        "stage_id": "optional_image_grounding",
+        "role_id": "image_embedding_role",
+        "resource_profile": "gpu_vlm_optional"
+      },
+      {
+        "stage_id": "guardrails_precheck",
+        "role_id": "guardrail_role",
+        "resource_profile": "gpu_or_cpu_guardrail"
+      },
+      {
+        "stage_id": "generate_response",
+        "role_id": "assistant_llm_role",
+        "resource_profile": "gpu_llm_prefill_decode"
+      }
+    ],
+    "reference_perf_anchor": "Use the recommended self-hosted 4x H100 profile as the initial deployment anchor.",
+    "language_override_strategy": {
+      "supported": true,
+      "primary_roles": [
+        "assistant_llm_role",
+        "embedding_role",
+        "guardrail_role"
+      ],
+      "notes": "Localized retail deployments should swap both generation and safety layers, not just the LLM."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "qps_vs_latency",
+        "catalog_size_vs_retrieval_cost",
+        "guardrail_overhead_vs_latency"
+      ],
+      "decision_cards": [
+        "max_qps",
+        "p95_latency",
+        "guardrail_overhead",
+        "multimodal_readiness"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_biomedical_aiq",
+    "blueprint_id": "nvidia_biomedical_aiq_research_agent",
+    "workload_family": "biomedical_agentic_research",
+    "input_profile_schema": {
+      "required": [
+        "concurrent_agent_runs",
+        "avg_research_depth",
+        "avg_docs_per_run"
+      ],
+      "optional": [
+        "tool_calls_per_run",
+        "multimodal_ingest_enabled",
+        "web_search_enabled",
+        "target_language"
+      ]
+    },
+    "batching_mode": "asynchronous_long_running_jobs",
+    "availability_profile": "mission_critical",
+    "stages": [
+      {
+        "stage_id": "retrieve_and_ingest",
+        "role_id": "biomedical_rag_role",
+        "resource_profile": "componentized_rag_optional"
+      },
+      {
+        "stage_id": "deep_reasoning",
+        "role_id": "reasoning_role",
+        "resource_profile": "gpu_llm_long_context"
+      },
+      {
+        "stage_id": "tool_execution",
+        "role_id": "tool_agent_role",
+        "resource_profile": "external_tooling_latency_bound"
+      },
+      {
+        "stage_id": "final_report",
+        "role_id": "report_llm_role",
+        "resource_profile": "gpu_llm_bursty"
+      }
+    ],
+    "reference_perf_anchor": "Treat as a multi-stage agent workflow with heavy external-tool and retrieval variance.",
+    "language_override_strategy": {
+      "supported": true,
+      "primary_roles": [
+        "reasoning_role",
+        "report_llm_role",
+        "biomedical_rag_role"
+      ],
+      "notes": "Language localization is secondary here; domain-tool latency and retrieval quality dominate."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "agent_runs_vs_completion_time",
+        "docs_per_run_vs_gpu_time",
+        "tool_latency_vs_e2e_latency"
+      ],
+      "decision_cards": [
+        "concurrent_runs",
+        "avg_completion_time",
+        "retrieval_load",
+        "tool_latency_risk"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_realtime_voice_calls",
+    "blueprint_id": "nvidia_realtime_voice_call_processing",
+    "workload_family": "realtime_voice_call_processing",
+    "input_profile_schema": {
+      "required": [
+        "concurrent_calls",
+        "audio_chunk_ms",
+        "agent_assist_enabled"
+      ],
+      "optional": [
+        "avg_call_duration_min",
+        "diarization_enabled",
+        "live_translation_enabled",
+        "target_language",
+        "tts_response_enabled"
+      ]
+    },
+    "parameter_definitions": [
+      {
+        "name": "concurrent_calls",
+        "label": "Concurrent calls",
+        "type": "number",
+        "default": 24,
+        "min": 1,
+        "step": 1,
+        "help": "Number of active real-time calls."
+      },
+      {
+        "name": "audio_chunk_ms",
+        "label": "Audio chunk size (ms)",
+        "type": "number",
+        "default": 320,
+        "min": 80,
+        "step": 20,
+        "help": "Audio slices of this many milliseconds move through the streaming pipeline."
+      },
+      {
+        "name": "avg_call_duration_min",
+        "label": "Average call duration (min)",
+        "type": "number",
+        "default": 6,
+        "min": 1,
+        "step": 1,
+        "help": "Helps interpret concurrency and load profile."
+      },
+      {
+        "name": "diarization_enabled",
+        "label": "Diarization",
+        "type": "boolean",
+        "default": true,
+        "help": "Enable speaker diarization."
+      },
+      {
+        "name": "live_translation_enabled",
+        "label": "Live translation",
+        "type": "boolean",
+        "default": false,
+        "help": "Real-time translation with extra GPU/latency overhead."
+      },
+      {
+        "name": "agent_assist_enabled",
+        "label": "Agent assist",
+        "type": "boolean",
+        "default": true,
+        "help": "Real-time agent-assist or summarization layer."
+      },
+      {
+        "name": "tts_response_enabled",
+        "label": "TTS response",
+        "type": "boolean",
+        "default": false,
+        "help": "Voice response or voice-bot output."
+      }
+    ],
+    "ui_defaults": {
+      "arrival_rate_per_sec": 75.0,
+      "sla_latency_p95_ms": 800,
+      "time_horizon_sec": 300,
+      "planning_profile": "safe_24x7"
+    },
+    "runtime_preset_hint": "speech_streaming",
+    "batching_mode": "streaming_microbatching",
+    "availability_profile": "24x7_low_latency",
+    "stages": [
+      {
+        "stage_id": "stream_asr",
+        "role_id": "asr_role",
+        "resource_profile": "gpu_asr_streaming"
+      },
+      {
+        "stage_id": "speaker_diarization",
+        "role_id": "diarization_role",
+        "resource_profile": "gpu_audio_diarization_realtime"
+      },
+      {
+        "stage_id": "optional_live_translation",
+        "role_id": "translation_role",
+        "resource_profile": "gpu_translation_streaming"
+      },
+      {
+        "stage_id": "optional_agent_assist",
+        "role_id": "agent_assist_role",
+        "resource_profile": "gpu_llm_interactive"
+      },
+      {
+        "stage_id": "optional_tts_response",
+        "role_id": "tts_role",
+        "resource_profile": "gpu_tts_streaming_or_batch"
+      }
+    ],
+    "reference_perf_anchor": "Model as streaming ASR + optional diarization/translation/agent-assist branches under tight p95 latency.",
+    "language_override_strategy": {
+      "supported": true,
+      "primary_roles": [
+        "asr_role",
+        "translation_role",
+        "agent_assist_role",
+        "tts_role"
+      ],
+      "notes": "Speech accuracy and TTS quality must be checked per target language."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "concurrent_calls_vs_latency",
+        "chunk_ms_vs_gpu_load",
+        "translation_overhead_vs_latency"
+      ],
+      "decision_cards": [
+        "max_concurrent_calls",
+        "streaming_p95_latency",
+        "agent_assist_overhead",
+        "translation_readiness"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_route_optimization",
+    "blueprint_id": "nvidia_route_optimization",
+    "workload_family": "route_optimization_decisioning",
+    "input_profile_schema": {
+      "required": [
+        "solve_requests_per_minute",
+        "avg_stops_per_job",
+        "avg_vehicle_count"
+      ],
+      "optional": [
+        "constraint_count",
+        "dynamic_replans_enabled",
+        "solve_sla_ms",
+        "eta_publish_enabled"
+      ]
+    },
+    "parameter_definitions": [
+      {
+        "name": "solve_requests_per_minute",
+        "label": "Solve requests / min",
+        "type": "number",
+        "default": 6,
+        "min": 1,
+        "step": 1,
+        "help": "How many optimization jobs or replanning runs execute per minute."
+      },
+      {
+        "name": "avg_stops_per_job",
+        "label": "Average stops / job",
+        "type": "number",
+        "default": 180,
+        "min": 10,
+        "step": 10,
+        "help": "The size of the route optimization problem."
+      },
+      {
+        "name": "avg_vehicle_count",
+        "label": "Average vehicle count",
+        "type": "number",
+        "default": 48,
+        "min": 1,
+        "step": 1,
+        "help": "Number of vehicles provided to the solver."
+      },
+      {
+        "name": "constraint_count",
+        "label": "Constraint count",
+        "type": "number",
+        "default": 40,
+        "min": 0,
+        "step": 1,
+        "help": "Time windows, breaks, capacity limits, policy rules, etc."
+      },
+      {
+        "name": "dynamic_replans_enabled",
+        "label": "Dinamikus replan",
+        "type": "boolean",
+        "default": true,
+        "help": "When enabled, burstiness and complexity become stronger."
+      },
+      {
+        "name": "eta_publish_enabled",
+        "label": "ETA publishing",
+        "type": "boolean",
+        "default": true,
+        "help": "Publishing optimized routes and triggering downstream updates."
+      },
+      {
+        "name": "solve_sla_ms",
+        "label": "Solve SLA (ms)",
+        "type": "number",
+        "default": 4000,
+        "min": 500,
+        "step": 100,
+        "help": "Acceptable p95 solver time."
+      }
+    ],
+    "ui_defaults": {
+      "arrival_rate_per_sec": 0.1,
+      "sla_latency_p95_ms": 4000,
+      "time_horizon_sec": 600,
+      "planning_profile": "baseline"
+    },
+    "runtime_preset_hint": "solver_service",
+    "batching_mode": "solver_request_queue",
+    "availability_profile": "business_critical",
+    "stages": [
+      {
+        "stage_id": "build_problem",
+        "role_id": "route_preprocess_role",
+        "resource_profile": "cpu_route_problem_build"
+      },
+      {
+        "stage_id": "solve_routes",
+        "role_id": "optimization_solver_role",
+        "resource_profile": "gpu_optimization_solver"
+      },
+      {
+        "stage_id": "optional_publish_dispatch",
+        "role_id": "dispatch_publish_role",
+        "resource_profile": "cpu_publish_dispatch"
+      }
+    ],
+    "reference_perf_anchor": "Treat as constraint-driven solver latency, not token generation throughput.",
+    "language_override_strategy": {
+      "supported": false,
+      "primary_roles": [],
+      "notes": "No language-sensitive primary model path; constraints and solve SLA dominate."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "solve_requests_vs_latency",
+        "stops_vs_gpu_time",
+        "constraints_vs_solver_time"
+      ],
+      "decision_cards": [
+        "jobs_per_minute",
+        "p95_solve_latency",
+        "replan_risk",
+        "solver_headroom"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_predictive_maintenance_forecasting",
+    "blueprint_id": "nvidia_predictive_maintenance_forecasting",
+    "workload_family": "predictive_forecasting_analytics",
+    "input_profile_schema": {
+      "required": [
+        "monitored_assets",
+        "metrics_per_asset",
+        "refresh_interval_sec"
+      ],
+      "optional": [
+        "lookback_window_min",
+        "forecast_horizon_min",
+        "anomaly_detection_enabled",
+        "alert_publish_enabled"
+      ]
+    },
+    "parameter_definitions": [
+      {
+        "name": "monitored_assets",
+        "label": "Monitorozott assetek",
+        "type": "number",
+        "default": 250,
+        "min": 1,
+        "step": 1,
+        "help": "How many assets or devices receive regular inference."
+      },
+      {
+        "name": "metrics_per_asset",
+        "label": "Metrics / asset",
+        "type": "number",
+        "default": 24,
+        "min": 1,
+        "step": 1,
+        "help": "Average number of telemetry channels per asset."
+      },
+      {
+        "name": "refresh_interval_sec",
+        "label": "Inference refresh (s)",
+        "type": "number",
+        "default": 30,
+        "min": 1,
+        "step": 1,
+        "help": "How often new forecast/anomaly scoring runs."
+      },
+      {
+        "name": "lookback_window_min",
+        "label": "Lookback ablak (perc)",
+        "type": "number",
+        "default": 180,
+        "min": 5,
+        "step": 5,
+        "help": "Historical lookback window used by the forecasting pipeline."
+      },
+      {
+        "name": "forecast_horizon_min",
+        "label": "Forecast horizont (perc)",
+        "type": "number",
+        "default": 60,
+        "min": 5,
+        "step": 5,
+        "help": "Forecast horizon targeted by the prediction pipeline."
+      },
+      {
+        "name": "anomaly_detection_enabled",
+        "label": "Anomaly detection",
+        "type": "boolean",
+        "default": true,
+        "help": "Optional health / anomaly scoring branch."
+      },
+      {
+        "name": "alert_publish_enabled",
+        "label": "Alert publishing",
+        "type": "boolean",
+        "default": true,
+        "help": "Forward forecast breaches and anomaly alerts to downstream systems."
+      }
+    ],
+    "ui_defaults": {
+      "arrival_rate_per_sec": 8.0,
+      "sla_latency_p95_ms": 2500,
+      "time_horizon_sec": 600,
+      "planning_profile": "safe_24x7"
+    },
+    "runtime_preset_hint": "triton",
+    "batching_mode": "streaming_microbatching",
+    "availability_profile": "24x7_operations",
+    "stages": [
+      {
+        "stage_id": "ingest_sensor_window",
+        "role_id": "sensor_ingest_role",
+        "resource_profile": "cpu_sensor_ingest_stream"
+      },
+      {
+        "stage_id": "forecast_health",
+        "role_id": "forecast_model_role",
+        "resource_profile": "gpu_timeseries_forecast_batchable"
+      },
+      {
+        "stage_id": "optional_detect_anomalies",
+        "role_id": "anomaly_model_role",
+        "resource_profile": "gpu_tabular_anomaly_batchable"
+      },
+      {
+        "stage_id": "optional_publish_alerts",
+        "role_id": "alert_publish_role",
+        "resource_profile": "cpu_event_publish"
+      }
+    ],
+    "reference_perf_anchor": "Treat as recurring telemetry-window inference with optional anomaly branch, not as token generation throughput.",
+    "language_override_strategy": {
+      "supported": false,
+      "primary_roles": [],
+      "notes": "No language-sensitive primary model path in the default predictive maintenance reference."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "assets_vs_latency",
+        "refresh_interval_vs_gpu_load",
+        "telemetry_density_vs_forecast_cost"
+      ],
+      "decision_cards": [
+        "assets_covered",
+        "forecast_p95_latency",
+        "anomaly_branch_overhead",
+        "alerting_headroom"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_recommendation_ranking",
+    "blueprint_id": "nvidia_recommendation_ranking_reference",
+    "workload_family": "recommendation_ranking_service",
+    "input_profile_schema": {
+      "required": [
+        "recommendation_requests_per_sec",
+        "candidate_pool_size",
+        "catalog_filter_count"
+      ],
+      "optional": [
+        "reranking_enabled",
+        "personalization_enabled",
+        "image_grounding_enabled"
+      ]
+    },
+    "parameter_definitions": [
+      {
+        "name": "recommendation_requests_per_sec",
+        "label": "Requests / s",
+        "type": "number",
+        "default": 8,
+        "min": 0.1,
+        "step": 0.1,
+        "help": "Interactive recommendation or ranking requests per second."
+      },
+      {
+        "name": "candidate_pool_size",
+        "label": "Candidate pool size",
+        "type": "number",
+        "default": 120,
+        "min": 10,
+        "step": 10,
+        "help": "How many candidates first-stage retrieval passes to the ranking layer."
+      },
+      {
+        "name": "catalog_filter_count",
+        "label": "Catalog filter count",
+        "type": "number",
+        "default": 6,
+        "min": 0,
+        "step": 1,
+        "help": "Number of policy, availability, merchandising, price, or inventory filters."
+      },
+      {
+        "name": "reranking_enabled",
+        "label": "Reranking",
+        "type": "boolean",
+        "default": true,
+        "help": "Enable cross-encoder or second-stage ranking branch."
+      },
+      {
+        "name": "personalization_enabled",
+        "label": "Personalization",
+        "type": "boolean",
+        "default": true,
+        "help": "User feature joins and profile-context blending."
+      },
+      {
+        "name": "image_grounding_enabled",
+        "label": "Image grounding",
+        "type": "boolean",
+        "default": false,
+        "help": "Image or multimodal grounding during ranking."
+      }
+    ],
+    "ui_defaults": {
+      "arrival_rate_per_sec": 8.0,
+      "sla_latency_p95_ms": 1200,
+      "time_horizon_sec": 300,
+      "planning_profile": "baseline"
+    },
+    "runtime_preset_hint": "triton",
+    "batching_mode": "interactive_microbatching",
+    "availability_profile": "interactive_online",
+    "stages": [
+      {
+        "stage_id": "optional_personalization_features",
+        "role_id": "blending_rules_role",
+        "resource_profile": "cpu_feature_enrichment"
+      },
+      {
+        "stage_id": "retrieve_candidates",
+        "role_id": "candidate_retrieval_role",
+        "resource_profile": "gpu_embedding_batchable"
+      },
+      {
+        "stage_id": "rerank_candidates",
+        "role_id": "ranking_model_role",
+        "resource_profile": "gpu_rerank_batchable"
+      },
+      {
+        "stage_id": "optional_image_grounding",
+        "role_id": "image_embedding_role",
+        "resource_profile": "gpu_vlm_optional"
+      },
+      {
+        "stage_id": "blend_ranked_results",
+        "role_id": "blending_rules_role",
+        "resource_profile": "cpu_merge_results"
+      }
+    ],
+    "reference_perf_anchor": "Treat cost primarily as candidate retrieval plus optional reranking depth under tight p95 latency.",
+    "language_override_strategy": {
+      "supported": true,
+      "primary_roles": [
+        "candidate_retrieval_role",
+        "ranking_model_role"
+      ],
+      "notes": "Multilingual recommendation or search ranking often requires stronger retrieval and reranking models than monolingual defaults."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "requests_vs_latency",
+        "candidate_pool_vs_gpu_cost",
+        "reranking_depth_vs_quality_cost"
+      ],
+      "decision_cards": [
+        "requests_per_sec",
+        "ranking_p95_latency",
+        "candidate_depth",
+        "personalization_overhead"
+      ]
+    }
+  },
+  {
+    "template_id": "bp_template_financial_fraud_detection",
+    "blueprint_id": "nvidia_financial_fraud_detection",
+    "workload_family": "fraud_anomaly_detection",
+    "input_profile_schema": {
+      "required": [
+        "transaction_events_per_sec",
+        "avg_entities_per_case",
+        "false_positive_sensitivity"
+      ],
+      "optional": [
+        "graph_features_enabled",
+        "realtime_blocking_enabled",
+        "explainability_enabled"
+      ]
+    },
+    "parameter_definitions": [
+      {
+        "name": "transaction_events_per_sec",
+        "label": "Transactions / s",
+        "type": "number",
+        "default": 150,
+        "min": 1,
+        "step": 1,
+        "help": "Incoming transaction events per second."
+      },
+      {
+        "name": "avg_entities_per_case",
+        "label": "Entities / case",
+        "type": "number",
+        "default": 6,
+        "min": 1,
+        "step": 1,
+        "help": "Average entity graph fan-out or number of related entities."
+      },
+      {
+        "name": "false_positive_sensitivity",
+        "label": "False positive sensitivity",
+        "type": "number",
+        "default": 0.7,
+        "min": 0.1,
+        "max": 1.5,
+        "step": 0.1,
+        "help": "A lower false-alert target usually requires more features and compute."
+      },
+      {
+        "name": "graph_features_enabled",
+        "label": "Graph features",
+        "type": "boolean",
+        "default": true,
+        "help": "Use a GNN or graph enrichment branch."
+      },
+      {
+        "name": "realtime_blocking_enabled",
+        "label": "Real-time blocking",
+        "type": "boolean",
+        "default": true,
+        "help": "Approve/decline decision with a strict realtime SLA."
+      },
+      {
+        "name": "explainability_enabled",
+        "label": "Explainability",
+        "type": "boolean",
+        "default": true,
+        "help": "Reason-code or analyst-facing explanation branch."
+      }
+    ],
+    "ui_defaults": {
+      "arrival_rate_per_sec": 150.0,
+      "sla_latency_p95_ms": 250,
+      "time_horizon_sec": 300,
+      "planning_profile": "safe_24x7"
+    },
+    "runtime_preset_hint": "triton",
+    "batching_mode": "streaming_microbatching",
+    "availability_profile": "business_critical",
+    "stages": [
+      {
+        "stage_id": "enrich_transaction",
+        "role_id": "transaction_feature_role",
+        "resource_profile": "cpu_transaction_enrichment"
+      },
+      {
+        "stage_id": "optional_graph_risk",
+        "role_id": "graph_risk_role",
+        "resource_profile": "gpu_graph_risk_scoring"
+      },
+      {
+        "stage_id": "classify_fraud",
+        "role_id": "fraud_classifier_role",
+        "resource_profile": "gpu_tabular_anomaly_batchable"
+      },
+      {
+        "stage_id": "optional_case_explainability",
+        "role_id": "case_explain_role",
+        "resource_profile": "cpu_case_explainability"
+      },
+      {
+        "stage_id": "publish_case",
+        "role_id": "case_publish_role",
+        "resource_profile": "cpu_event_publish"
+      }
+    ],
+    "reference_perf_anchor": "Treat as event-driven scoring with optional graph and explainability branches under strict blocking latency targets.",
+    "language_override_strategy": {
+      "supported": false,
+      "primary_roles": [],
+      "notes": "The default fraud pipeline is structured-data centric rather than language-centric."
+    },
+    "visualization_defaults": {
+      "primary_charts": [
+        "events_vs_latency",
+        "graph_fanout_vs_gpu_cost",
+        "false_positive_sensitivity_vs_compute"
+      ],
+      "decision_cards": [
+        "events_per_sec",
+        "blocking_p95_latency",
+        "graph_branch_overhead",
+        "fraud_headroom"
+      ]
+    }
+  }
+]

@@ -1,0 +1,246 @@
+# ============================================================================
+# EGYÉNI SZIMULÁCIÓ BEÁLLÍTÁSA — FELHASZNÁLÓI ÚTMUTATÓ
+# ============================================================================
+#
+# Ez a fájl egy komplett példa arra, hogyan készíthetsz saját szimulációt.
+# Másold le ezt a fájlt, nevezd át, és módosítsd a paramétereket.
+#
+# Futtatás (Docker):
+#   docker build -t qwen3-vram-sim .
+#   docker run --rm -v "${PWD}/scenarios:/app/scenarios" -v "${PWD}/output:/app/output" \
+#       qwen3-vram-sim sh -c "python run_all.py scenarios/my_scenario.yaml --json > /app/output/my_results.json"
+#
+# ============================================================================
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 1. SZCENÁRIÓ NEVE
+# ──────────────────────────────────────────────────────────────────────────────
+# Tetszőleges név, ami az eredményekben azonosítja ezt a futást.
+scenario_name: "pelda_ugyfel_agentic_workload"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 2. HARDVER KIVÁLASZTÁSA
+# ──────────────────────────────────────────────────────────────────────────────
+# Melyik GPU konfigurációra szeretnéd futtatni?
+#
+# Választható értékek:
+#   "h200_8gpu"     → 8× NVIDIA H200 (141 GB/GPU, NVLink, összesen 1128 GB)
+#   "h200_4gpu"     → 4× NVIDIA H200 (141 GB/GPU, NVLink, összesen 564 GB)
+#   "rtx6000_8gpu"  → 8× RTX PRO 6000 Blackwell (96 GB/GPU, PCIe, összesen 768 GB)
+#   "rtx6000_4gpu"  → 4× RTX PRO 6000 Blackwell (96 GB/GPU, PCIe, összesen 384 GB)
+#
+# TIPP: Ha nem adod meg, a rendszer automatikusan mind a 4-re lefuttatja!
+hardware_profile: "h200_8gpu"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 3. MODELL PONTOSSÁGI BEÁLLÍTÁSOK
+# ──────────────────────────────────────────────────────────────────────────────
+
+# A modell súlyainak precíziója (mekkora az egy paraméter mérete a memóriában)
+#   "int8"  → 1 byte/param  → ~219 GB súlyok  ← AJÁNLOTT ALAP
+#   "fp16"  → 2 byte/param  → ~438 GB súlyok  (csak 8-GPU konfigon fér el)
+#   "int4"  → 0.5 byte/param → ~109 GB súlyok (agresszív kvantálás)
+#   "nvfp4" → 0.56 byte/param → ~123 GB súlyok (Blackwell natív FP4)
+weight_precision: "int8"
+
+# A KV cache precíziója (a kontextus memória mérete token-enként)
+#   "fp16" → 188 KB/token  ← ALAP (vLLM default)
+#   "fp8"  →  94 KB/token  (ha a serving framework támogatja)
+#   "int8" →  94 KB/token  (kísérleti)
+kv_cache_precision: "fp16"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 4. RENDSZER PARAMÉTEREK
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Tensor Parallel fokozat — hány GPU-ra osztja szét a modellt
+#   8-GPU rendszernél: 8
+#   4-GPU rendszernél: 4
+tensor_parallel_degree: 8
+
+# Runtime overhead arány — framework, fragmentáció, aktivációk
+# 10% (0.10) konzervatív becslés, 15% (0.15) nagyon konzervatív
+runtime_overhead_ratio: 0.10
+
+# Maximális VRAM kihasználtsági cél (vLLM alapból 0.90-et használ)
+max_vram_utilization_target: 0.95
+
+# Biztonsági tartalék — mekkora részt tartunk fenn váratlan spike-okra
+# 0.05 = 5% tartalék
+safety_headroom_ratio: 0.05
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 5. WORKLOAD TÍPUS KIVÁLASZTÁSA
+# ──────────────────────────────────────────────────────────────────────────────
+# Milyen terhelést szimulálsz?
+#
+#   "fixed_batch"  → Fix méretű batch feladatok (pl. dokumentum feldolgozás)
+#   "mixed_batch"  → Vegyes méretű batch feladatok (rövid + közepes + hosszú)
+#   "agentic"      → Agentic AI futások (tool calling, multi-turn)
+#   "hybrid"       → Batch + agentic egyszerre
+#
+workload_type: "agentic"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 6. WORKLOAD RÉSZLETES BEÁLLÍTÁSA
+# ──────────────────────────────────────────────────────────────────────────────
+workload:
+
+  # --- Induló prompt mérete (tokenben) ---
+  # Mekkora a system prompt + user kérés az első turnben?
+  #
+  # Fix érték megadása:
+  #   initial_prompt_tokens: 1500
+  #
+  # Vagy valószínűségi eloszlás Monte Carlo-hoz:
+  #   type: "lognormal" → log-normális eloszlás (természetes szöveghossz-eloszlás)
+  #   mu: 7.0           → exp(7.0) ≈ 1097 token a medián
+  #   sigma: 0.4         → szórás (nagyobb = változatosabb)
+  #   min_clip: 200      → minimum érték (nem lehet rövidebb ennél)
+  #   max_clip: 8000     → maximum érték (nem lehet hosszabb ennél)
+  #
+  initial_prompt_tokens:
+    type: "lognormal"
+    mu: 7.0
+    sigma: 0.4
+    min_clip: 200
+    max_clip: 8000
+
+  # --- Hány turn (kör) lehet maximum egy agentic futásban? ---
+  # Pl. ha az agent max 12-szer hívhat tool-t egymás után
+  max_turns_per_run: 12
+
+  # --- Tool call valószínűsége minden turnben ---
+  # 0.0 = soha nem hív tool-t (egyszerű Q&A)
+  # 0.5 = fele-fele eséllyel
+  # 0.8 = szinte mindig hív tool-t
+  # 1.0 = minden turnben biztosan hív
+  tool_call_probability: 0.75
+
+  # --- Tool eredmény mérete (tokenben) ---
+  # Pl. egy API válasz, adatbázis eredmény, keresési találatok mérete
+  # Rövid tool output (JSON válasz):    mu: 5.0  (~150 token medián)
+  # Közepes tool output (keresés):      mu: 6.0  (~400 token medián)
+  # Hosszú tool output (kód, dokumentum): mu: 7.5 (~1800 token medián)
+  tool_result_tokens:
+    type: "lognormal"
+    mu: 6.5
+    sigma: 0.6
+    min_clip: 50
+    max_clip: 4000
+
+  # --- Az assistant válaszának mérete minden turnben ---
+  # Rövid válasz:  mu: 4.5  (~90 token)
+  # Közepes válasz: mu: 5.5 (~245 token)
+  # Hosszú válasz:  mu: 6.5 (~665 token)
+  assistant_response_tokens:
+    type: "lognormal"
+    mu: 5.5
+    sigma: 0.5
+    min_clip: 20
+
+  # --- Summarization (kontextus tömörítés) ---
+  # Ha a context túl hosszú lesz, összefoglalható-e kisebbre?
+  # 0.0 = soha (nincs summarization)
+  # 0.2 = 20% eséllyel minden turn után
+  summarization_probability: 0.0
+  # Ha történik summarization, a context hány %-ra csökken?
+  # 0.3 = 30%-ra tömörül (radikális), 0.7 = 70%-ra (enyhe)
+  summarization_compression_ratio: 0.3
+
+  # --- Megállási valószínűség turnonként ---
+  # Milyen eséllyel fejezi be az agent a futást egy adott turn után?
+  # 0.10 = átlagosan 10 turn      (1/0.10)
+  # 0.15 = átlagosan ~6-7 turn    (1/0.15)
+  # 0.25 = átlagosan 4 turn       (1/0.25)
+  # 0.50 = átlagosan 2 turn       (1/0.50)
+  stop_probability_per_turn: 0.15
+
+  # --- Maximum token limit egy teljes futásra ---
+  # Ha a context eléri ezt a limitet, a futás leáll
+  max_total_tokens_per_run: 32768
+
+  # --- Hány agent fut PÁRHUZAMOSAN? ---
+  # Ez a legfontosabb szám a KV cache szempontjából!
+  # Minden párhuzamos agent külön KV cache-et igényel
+  num_parallel_agents: 15
+
+  # --- Kontextus kezelés ---
+  # Max context cap bekapcsolása (ajánlott: true)
+  enable_max_context_cap: true
+  max_context_cap: 32768
+
+  # Context reset: ha a context túl hosszú, reset-eli?
+  # (pl. sliding window viselkedés)
+  enable_context_reset: false
+  context_reset_threshold: 16384
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 7. MONTE CARLO BEÁLLÍTÁSOK
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Monte Carlo szimuláció bekapcsolása
+# true  → N-szer lefuttatja véletlenszerű mintavételezéssel (ajánlott agentic-hoz)
+# false → egyszer futtatja fix értékekkel (elég fixed_batch-hez)
+monte_carlo_enabled: true
+
+# Hányszor ismételje a szimulációt?
+# 1,000   → gyors, de pontatlan
+# 10,000  → jó egyensúly  ← AJÁNLOTT
+# 100,000 → nagyon pontos, de lassabb
+monte_carlo_iterations: 10000
+
+# Random seed — ha ugyanazt akarod kapni újrafuttatáskor, hagyd meg
+# Ha véletlent akarsz, állítsd null-ra
+random_seed: 42
+
+# Milyen percentiliseket számoljon?
+# p50 = medián, p90 = 10-ből 1-nél rosszabb, p95 = 20-ból 1, p99 = 100-ból 1
+percentile_outputs: [50, 90, 95, 99]
+
+
+# ============================================================================
+# EGYÉB WORKLOAD TÍPUSOK PÉLDÁI
+# ============================================================================
+#
+# --- FIXED BATCH (dokumentum feldolgozás) ---
+# workload_type: "fixed_batch"
+# workload:
+#   prompt_tokens: 2000          # minden prompt 2000 token
+#   max_output_tokens: 800       # maximum 800 token válasz
+#   num_parallel_jobs: 20        # 20 párhuzamos feladat
+#
+# --- MIXED BATCH (vegyes terhelés) ---
+# workload_type: "mixed_batch"
+# workload:
+#   classes:
+#     - label: "email_válasz"
+#       prompt_tokens: 300
+#       max_output_tokens: 200
+#       count: 30                # 30 db rövid feladat
+#     - label: "dokumentum_összefoglaló"
+#       prompt_tokens: 4000
+#       max_output_tokens: 1000
+#       count: 5                 # 5 db közepes feladat
+#     - label: "kód_generálás"
+#       prompt_tokens: 8000
+#       max_output_tokens: 4000
+#       count: 2                 # 2 db hosszú feladat
+#
+# --- HYBRID (batch + agentic egyszerre) ---
+# workload_type: "hybrid"
+# workload:
+#   fixed_batch:
+#     prompt_tokens: 1500
+#     max_output_tokens: 500
+#     num_parallel_jobs: 10
+#   agentic:
+#     initial_prompt_tokens: 1000
+#     max_turns_per_run: 8
+#     tool_call_probability: 0.7
+#     tool_result_tokens: 500
+#     assistant_response_tokens: 250
+#     stop_probability_per_turn: 0.2
+#     max_total_tokens_per_run: 16384
+#     num_parallel_agents: 5
+# ============================================================================

@@ -1,0 +1,218 @@
+schema_version: '1.0'
+name: advanced_retrieval_rerank_generation
+description: 'Advanced workload template: Retrieval + Rerank + Generation'
+metadata:
+  source_template_id: lib_retrieval_rerank_generation
+  source_template_library_id: lib_retrieval_rerank_generation
+  template_source: workload_library
+  workload_family: retrieval_rerank_generation
+  template_display_name: Retrieval + Rerank + Generation
+  planning_profile: baseline
+  template_inputs:
+    request_rate_per_sec: 2.2
+    avg_context_docs: 10
+    avg_prompt_tokens: 2800
+    avg_output_tokens: 480
+    rerank_top_k: 32
+    guardrail_enabled: true
+workload_definition:
+  workload_id: lib_retrieval_rerank_generation
+  workload_class: retrieval_augmented
+  input_profile:
+    arrival_pattern:
+      mode: bursty_poisson
+      mean_arrival_rate_per_sec: 2.2
+      burst_multiplier_p95: 1.8
+      business_cycle:
+        enabled: true
+        daily_peak_multiplier: 1.4
+        weekly_peak_multiplier: 1.1
+    work_item:
+      unit_type: request
+      modalities:
+      - text
+      size_distribution:
+        distribution: lognormal
+        p50: 2800.0
+        p95: 5880.0
+      complexity_distribution:
+        distribution: triangular
+        mean: 2.264
+        stddev: 0.22
+        p95: 3.057
+      language_mix:
+      - language: hu
+        share: 0.8
+      - language: en
+        share: 0.19999999999999996
+  pipeline:
+    topology: linear
+    stages:
+    - stage_id: retrieve
+      display_name: Retrieve
+      stage_type: embedding
+      language_sensitive: true
+      model_binding:
+        role_id: embedding_role
+        default_model_id: nvidia/nv-embedqa-e5-v5
+        override_model_id: intfloat/multilingual-e5-large
+        model_source: huggingface
+        requires_manual_validation: true
+        selected_model_id: intfloat/multilingual-e5-large
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 0.12
+        service_time_model:
+          mode: linear
+          base_ms: 5
+          ms_per_input_unit: 0.003
+      batching_profile:
+        batching_mode: dynamic
+        max_batch_size: 32
+        batch_timeout_ms: 8
+        allow_mixed_lengths: true
+    - stage_id: rerank
+      display_name: Rerank
+      stage_type: rerank
+      language_sensitive: true
+      model_binding:
+        role_id: reranker_role
+        default_model_id: nvidia/llama-3.2-nv-rerankqa-1b-v2
+        override_model_id: BAAI/bge-reranker-v2-m3
+        model_source: huggingface
+        requires_manual_validation: true
+        selected_model_id: BAAI/bge-reranker-v2-m3
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 0.22
+        service_time_model:
+          mode: linear
+          base_ms: 10
+          ms_per_input_unit: 0.002
+      batching_profile:
+        batching_mode: dynamic
+        max_batch_size: 16
+        batch_timeout_ms: 10
+        allow_mixed_lengths: true
+    - stage_id: generate
+      display_name: Generate
+      stage_type: generator
+      language_sensitive: true
+      model_binding:
+        role_id: llm_role
+        default_model_id: Qwen/Qwen2.5-32B-Instruct
+        override_model_id: mistralai/Mistral-Small-3.1-24B-Instruct-2503
+        model_source: huggingface
+        requires_manual_validation: true
+        selected_model_id: mistralai/Mistral-Small-3.1-24B-Instruct-2503
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 1.8
+        service_time_model:
+          mode: reference_scaled
+          reference_profile_id: default_llm_stage
+      batching_profile:
+        batching_mode: continuous
+        max_batch_size: 64
+        batch_timeout_ms: 15
+        max_batched_tokens: 32768
+        allow_mixed_lengths: true
+      failure_policy:
+        retry_on_failure: false
+        drop_on_overload: true
+    - stage_id: optional_guardrail
+      display_name: Optional Guardrail
+      stage_type: classifier
+      language_sensitive: true
+      model_binding:
+        role_id: guardrail_role
+        default_model_id: nvidia/nemoguard-reference
+        override_model_id: nvidia/nemoguard-reference
+        model_source: catalog_seed
+        requires_manual_validation: true
+        selected_model_id: nvidia/nemoguard-reference
+      resource_profile:
+        primary_device: hybrid
+        cpu_cores_per_work_item: 0.4
+        gpu_memory_gb_per_work_item: 0.08
+        service_time_model:
+          mode: linear
+          base_ms: 6
+          ms_per_input_unit: 0.0015
+      batching_profile:
+        batching_mode: dynamic
+        max_batch_size: 32
+        batch_timeout_ms: 8
+        allow_mixed_lengths: true
+      optional: true
+  sla_policy:
+    latency_target_ms_p95: 2376.0
+    throughput_target_per_sec: 1.87
+    deadline_per_item_ms: 4500
+    availability_target: 0.999
+    max_drop_rate: 0.01
+    max_queue_wait_ms: 700
+runtime_profile:
+  runtime_family: vllm
+  scheduler_model:
+    mode: vllm_continuous_batching
+    chunked_prefill: true
+    decode_priority: true
+    max_num_batched_tokens: 32768
+    max_num_seqs: 64
+    prefix_cache_enabled: true
+    prefix_cache_hit_rate: 0.25
+    preemption_penalty_ms: 12
+    speculative_decode_enabled: false
+  runtime_penalties:
+    small_batch_efficiency_penalty: 1.08
+    mixed_length_batch_penalty: 1.06
+    queue_timeout_penalty: 1.03
+  runtime_id: vllm_lib_retrieval_rerank_generation
+deployment_profile:
+  deployment_id: bare_metal_container
+  execution_mode: container_on_bare_metal
+  hardware_binding:
+    hardware_catalog_id: nvidia_dgx_h200_8gpu
+    gpu_count: 8
+    tp_size: 8
+    software_stack_id: nvidia_vllm_cuda
+  partitioning:
+    mode: none
+    mig_profile: null
+    virtual_gpus_per_device: null
+    isolation_level: hard
+  overhead_model:
+    static_latency_overhead_ms: 0.0
+    throughput_penalty_factor: 1.0
+    latency_jitter_stddev_ms: 4.0
+  availability:
+    reserved_capacity_fraction: 0.08
+    reserved_capacity_percent: 8.0
+    n_plus_one_enabled: false
+    max_safe_gpu_utilization: 0.82
+  operational_policy:
+    planning_profile: baseline
+    reserved_capacity_fraction: 0.08
+    target_max_gpu_utilization: 0.82
+    target_max_cpu_utilization: 0.8
+    n_plus_one_enabled: false
+simulation_profile:
+  monte_carlo_trials: 40
+  warmup_sec: 30
+  time_horizon_sec: 300
+  time_step_ms: 10
+  random_variables:
+  - name: arrival_noise
+    applies_to: input
+    distribution: lognormal
+    parameters:
+      mean: 0
+      sigma: 0.2
+    target_path: workload_definition.input_profile.arrival_pattern.mean_arrival_rate_per_sec
+  - name: size_noise
+    applies_to: input
+    distribution: lognormal
+    parameters:
+      sigma: 0.25
+    target_path: workload_definition.input_profile.work_item.size_distribution

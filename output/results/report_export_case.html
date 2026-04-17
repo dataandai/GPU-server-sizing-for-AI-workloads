@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <title>report_export_case - Customer sizing report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 28px; color: #0f172a; }
+    h1, h2, h3 { margin: 0 0 8px; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 18px; margin-top: 28px; padding-bottom: 6px; border-bottom: 1px solid #cbd5e1; }
+    .subtitle { color: #475569; margin-bottom: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .card { border: 1px solid #cbd5e1; border-radius: 10px; padding: 14px; background: #f8fafc; }
+    .metric { font-size: 13px; color: #475569; }
+    .metric strong { display: block; font-size: 22px; color: #0f172a; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; font-size: 12px; vertical-align: top; }
+    th { background: #e2e8f0; }
+    .pill { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 11px; border: 1px solid #94a3b8; }
+    ul { margin: 8px 0 0 18px; }
+    code { background: #e2e8f0; padding: 2px 4px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>report_export_case</h1>
+  <div class="subtitle">report_export_case: HIGH kockázat, UPSIZE_REQUIRED procurement band · Többnyire kalibrált</div>
+  <p>Nagyobb hardver vagy több GPU szükséges a célterheléshez.</p>
+
+  <div class="grid">
+    
+    <div class="card metric">Safe 24/7 capacity<strong>1.018 req/s</strong></div>
+    
+    <div class="card metric">Latency p95<strong>1549 ms</strong></div>
+    
+    <div class="card metric">GPU util p95<strong>83.4%</strong></div>
+    
+    <div class="card metric">Gap<strong>-1.982 req/s</strong></div>
+    
+  </div>
+
+  <h2>Workload összefoglaló</h2>
+  <div class="grid">
+    <div class="card">
+      <div><strong>Workload ID</strong>: bp_template_rag</div>
+      <div><strong>Class</strong>: retrieval_augmented</div>
+      <div><strong>Family</strong>: enterprise_rag</div>
+      <div><strong>Arrival rate</strong>: 3.000 req/s</div>
+      <div><strong>Planning profile</strong>: baseline</div>
+      
+    </div>
+    <div class="card">
+      <div><strong>Model bindings</strong></div>
+      <ul>
+        
+        <li><code>embedding_role</code>: intfloat/multilingual-e5-large</li>
+        
+        <li><code>reranker_role</code>: BAAI/bge-reranker-v2-m3</li>
+        
+        <li><code>parse_role</code>: nvidia/nv-ingest-doc-splitter</li>
+        
+        <li><code>llm_role</code>: mistralai/Mistral-Small-3.1-24B-Instruct-2503</li>
+        
+        <li><code>vlm_role</code>: OpenGVLab/InternVL2_5-8B</li>
+        
+      </ul>
+    </div>
+  </div>
+
+  <h2>Hardware ajánlás</h2>
+  <table>
+    <tr><th>Hardware</th><td>NVIDIA DGX H200 — 8× H200</td></tr>
+    <tr><th>GPU count</th><td>8</td></tr>
+    <tr><th>Runtime</th><td>vllm / vllm_continuous_batching</td></tr>
+    <tr><th>Software stack</th><td>vLLM</td></tr>
+    <tr><th>Deployment</th><td>container_on_bare_metal</td></tr>
+  </table>
+
+  <h2>Kalibrációs státusz</h2>
+  <table>
+    <tr><th>Státusz</th><td>Többnyire kalibrált</td></tr>
+    <tr><th>Coverage</th><td>3/5 stage (60.0%)</td></tr>
+    <tr><th>Estimate only</th><td>igen</td></tr>
+    <tr><th>Megjegyzés</th><td>A pipeline több szakasza benchmark anchorhoz illeszkedett, de nem teljes a lefedettség.</td></tr>
+  </table>
+
+  <h2>24/7 safe capacity</h2>
+  <table>
+    <tr><th>Configured arrival</th><td>3.000 req/s</td></tr>
+    <tr><th>Steady-state capacity</th><td>1.708 req/s</td></tr>
+    <tr><th>Safe 24/7 capacity</th><td>1.018 req/s</td></tr>
+    <tr><th>Headroom ratio</th><td>0.17</td></tr>
+    <tr><th>Capacity gap</th><td>-1.982 req/s</td></tr>
+  </table>
+
+  <h2>Model kompatibilitás</h2>
+  <div class="card">
+    <div><strong>Összesített státusz:</strong> warning</div>
+    <div><strong>OK / Warning / Error:</strong> 2 / 3 / 0</div>
+    
+    
+    <ul>
+      <li>embedding_role: Ez a szerepkör inkább service vagy encoder jellegű; Triton/NIM oldali kiszolgálás gyakran egyszerűbb és kiszámíthatóbb.</li><li>reranker_role: Ez a szerepkör inkább service vagy encoder jellegű; Triton/NIM oldali kiszolgálás gyakran egyszerűbb és kiszámíthatóbb.</li><li>parse_role: Service-referencia jellegű szerepkör: a kompatibilitás csak advisory szintű.</li><li>llm_role: Általános on-prem LLM serving útvonal; hosszú context és vegyes batch esetén jó alap.</li><li>vlm_role: Általános on-prem LLM serving útvonal; hosszú context és vegyes batch esetén jó alap.</li>
+    </ul>
+    
+    
+    <div style="margin-top:10px"><strong>Serving javaslat</strong></div>
+    <ul>
+      <li>embedding_role: vLLM continuous batching · BF16 · TP=1 · ctx≈3640 · batch≈12</li><li>reranker_role: vLLM continuous batching · BF16 · TP=1 · ctx≈3640 · batch≈12</li><li>parse_role: vLLM continuous batching · BF16 · TP=1 · ctx≈3640 · batch≈12</li><li>llm_role: vLLM continuous batching · FP8 · TP=1 · ctx≈4096 · batch≈48</li><li>vlm_role: vLLM continuous batching · FP8 · TP=1 · ctx≈4096 · batch≈48</li>
+    </ul>
+    
+    
+    <div style="margin-top:10px"><strong>Engine megjegyzések</strong></div>
+    <ul>
+      <li>Általános on-prem LLM serving útvonal; hosszú context és vegyes batch esetén jó alap.</li><li>Ajánlott engine: vLLM continuous batching, precision: BF16, KV cache: FP16, TP: 1.</li><li>Ajánlott engine: vLLM continuous batching, precision: FP8, KV cache: FP8, TP: 1.</li><li>Becsült context cél: 4096 token, ajánlott max batch: 48, KV cache igény ~1.0 GB összesen.</li><li>Becsült context cél: 4096 token, ajánlott max batch: 48, KV cache igény ~0.6 GB összesen.</li>
+    </ul>
+    
+  </div>
+  
+  <table>
+    <thead><tr><th>Role</th><th>Model</th><th>Serving</th><th>KV / Batch</th></tr></thead>
+    <tbody>
+      
+      <tr>
+        <td>embedding_role</td>
+        <td>nvidia/nv-embedqa-e5-v5</td>
+        <td>vLLM continuous batching · BF16 · TP=1 · ctx≈3640 · batch≈12</td>
+        <td>
+          
+            ctx=3640;
+            batch=12;
+            kv=0.0 GB
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>reranker_role</td>
+        <td>nvidia/llama-3.2-nv-rerankqa-1b-v2</td>
+        <td>vLLM continuous batching · BF16 · TP=1 · ctx≈3640 · batch≈12</td>
+        <td>
+          
+            ctx=3640;
+            batch=12;
+            kv=0.0 GB
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>parse_role</td>
+        <td>nvidia/parse-service-reference</td>
+        <td>vLLM continuous batching · BF16 · TP=1 · ctx≈3640 · batch≈12</td>
+        <td>
+          
+            ctx=3640;
+            batch=12;
+            kv=0.0 GB
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>llm_role</td>
+        <td>Qwen/Qwen2.5-32B-Instruct</td>
+        <td>vLLM continuous batching · FP8 · TP=1 · ctx≈4096 · batch≈48</td>
+        <td>
+          
+            ctx=4096;
+            batch=48;
+            kv=1.0 GB
+          
+        </td>
+      </tr>
+      
+      <tr>
+        <td>vlm_role</td>
+        <td>Qwen/Qwen2.5-VL-7B-Instruct</td>
+        <td>vLLM continuous batching · FP8 · TP=1 · ctx≈4096 · batch≈48</td>
+        <td>
+          
+            ctx=4096;
+            batch=48;
+            kv=0.6 GB
+          
+        </td>
+      </tr>
+      
+    </tbody>
+  </table>
+  
+
+  <h2>Bottleneck</h2>
+  <div class="card">
+    <div><strong>Primary bottleneck stage:</strong> generate_answer</div>
+    <table>
+      <thead><tr><th>Stage</th><th>Share</th></tr></thead>
+      <tbody>
+        
+        <tr><td>generate_answer</td><td>100.0%</td></tr>
+        
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Baseline vs override vs safe profile</h2>
+  <table>
+    <thead><tr><th>Scenario</th><th>Planning</th><th>Safe capacity</th><th>Latency p95</th><th>GPU util p95</th><th>Band</th></tr></thead>
+    <tbody>
+      
+      <tr>
+        <td>report_export_case</td>
+        <td>baseline</td>
+        <td>1.018</td>
+        <td>1549 ms</td>
+        <td>83.4%</td>
+        <td>UPSIZE_REQUIRED</td>
+      </tr>
+      
+    </tbody>
+  </table>
+
+  <h2>Magyar modell override hatása</h2>
+  <table>
+    <tr><th>Baseline vs override latency delta</th><td>None</td></tr>
+    <tr><th>Baseline vs override safe capacity delta</th><td>None</td></tr>
+    <tr><th>Baseline vs safe latency delta</th><td>None</td></tr>
+    <tr><th>Baseline vs safe capacity delta</th><td>None</td></tr>
+  </table>
+
+  <h2>Assumptions & limits</h2>
+  <ul>
+    
+    <li>Runtime: vllm/vllm_continuous_batching</li>
+    
+    <li>Deployment: container_on_bare_metal</li>
+    
+    <li>Hardware: nvidia_dgx_h200_8gpu (8 GPU worker domain)</li>
+    
+    <li>Most frequent bottleneck stage: generate_answer</li>
+    
+    <li>Role bindings: embedding_role=intfloat/multilingual-e5-large, llm_role=mistralai/Mistral-Small-3.1-24B-Instruct-2503, parse_role=nvidia/nv-ingest-doc-splitter, reranker_role=BAAI/bge-reranker-v2-m3, vlm_role=OpenGVLab/InternVL2_5-8B</li>
+    
+    <li>Calibration coverage: 3/5 stages matched to benchmark anchors.</li>
+    
+    <li>Model compatibility: warning (ok=2, warning=3, error=0).</li>
+    
+    <li>Procurement band: UPSIZE_REQUIRED. Nagyobb hardver vagy több GPU szükséges a célterheléshez.</li>
+    
+    <li>Configured arrival rate: 3.00/s, safe 24/7 capacity: 1.02/s.</li>
+    
+    <li>A pipeline több szakasza benchmark anchorhoz illeszkedett, de nem teljes a lefedettség.</li>
+    
+  </ul>
+</body>
+</html>

@@ -1,0 +1,179 @@
+schema_version: '1.0'
+name: General interactive retrieval+generation workload
+description: Általános, nem use-case specifikus pipeline workload.
+workload_definition:
+  workload_id: general_retrieval_generation
+  workload_class: retrieval_augmented
+  input_profile:
+    arrival_pattern:
+      mode: bursty_poisson
+      mean_arrival_rate_per_sec: 4.0
+      burst_multiplier_p95: 2.2
+      business_cycle:
+        enabled: true
+        daily_peak_multiplier: 1.6
+        weekly_peak_multiplier: 1.2
+    work_item:
+      unit_type: request
+      modalities:
+      - text
+      size_distribution:
+        distribution: lognormal
+        p50: 1800
+        p95: 12000
+      complexity_distribution:
+        distribution: triangular
+        mean: 1.0
+        stddev: 0.25
+        p95: 1.5
+      language_mix:
+      - language: hu
+        share: 0.7
+      - language: en
+        share: 0.3
+  pipeline:
+    topology: linear
+    stages:
+    - stage_id: embed_query
+      display_name: Query embedding
+      stage_type: embedding
+      language_sensitive: true
+      model_binding:
+        role_id: embedding_role
+        default_model_id: nvidia/nv-embedqa-e5-v5
+        override_model_id: intfloat/multilingual-e5-large
+        model_source: huggingface
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 0.15
+        service_time_model:
+          mode: linear
+          base_ms: 6
+          ms_per_input_unit: 0.003
+      batching_profile:
+        batching_mode: dynamic
+        max_batch_size: 32
+        batch_timeout_ms: 8
+        allow_mixed_lengths: true
+        queue_priority: fifo
+    - stage_id: rerank
+      display_name: Rerank retrieved candidates
+      stage_type: rerank
+      depends_on:
+      - embed_query
+      language_sensitive: true
+      model_binding:
+        role_id: reranker_role
+        default_model_id: nvidia/llama-3.2-nv-rerankqa-1b-v2
+        override_model_id: BAAI/bge-reranker-v2-m3
+        model_source: huggingface
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 0.25
+        service_time_model:
+          mode: linear
+          base_ms: 12
+          ms_per_input_unit: 0.002
+      batching_profile:
+        batching_mode: dynamic
+        max_batch_size: 16
+        batch_timeout_ms: 10
+        allow_mixed_lengths: true
+        queue_priority: runtime_default
+    - stage_id: generate
+      display_name: LLM generation
+      stage_type: generator
+      depends_on:
+      - rerank
+      language_sensitive: true
+      model_binding:
+        role_id: llm_role
+        default_model_id: nvidia/llama-3.3-nemotron-super-49b-v1
+        override_model_id: mistralai/Mistral-Small-3.1-24B-Instruct-2503
+        model_source: huggingface
+        requires_manual_validation: true
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 1.8
+        service_time_model:
+          mode: reference_scaled
+          reference_profile_id: rag_blueprint_llm_stage
+      batching_profile:
+        batching_mode: continuous
+        max_batch_size: 64
+        batch_timeout_ms: 15
+        max_batched_tokens: 32768
+        allow_mixed_lengths: true
+        queue_priority: runtime_default
+      failure_policy:
+        retry_on_failure: false
+        drop_on_overload: true
+  sla_policy:
+    latency_target_ms_p95: 2200
+    throughput_target_per_sec: 3.5
+    deadline_per_item_ms: 4000
+    availability_target: 0.999
+    max_drop_rate: 0.01
+    max_queue_wait_ms: 800
+runtime_profile:
+  runtime_id: vllm_latency_balanced
+  runtime_family: vllm
+  scheduler_model:
+    mode: vllm_continuous_batching
+    chunked_prefill: true
+    decode_priority: true
+    max_num_batched_tokens: 32768
+    max_num_seqs: 64
+    prefix_cache_enabled: true
+    prefix_cache_hit_rate: 0.35
+    preemption_penalty_ms: 12
+    speculative_decode_enabled: false
+  runtime_penalties:
+    small_batch_efficiency_penalty: 1.1
+    mixed_length_batch_penalty: 1.08
+    queue_timeout_penalty: 1.03
+deployment_profile:
+  deployment_id: bare_metal_h200_4gpu
+  execution_mode: bare_metal
+  hardware_binding:
+    hardware_catalog_id: nvidia_dgx_h200_8gpu
+    gpu_count: 4
+    tp_size: 4
+    software_stack_id: nvidia_vllm_cuda
+  partitioning:
+    mode: none
+    isolation_level: hard
+  overhead_model:
+    static_latency_overhead_ms: 0
+    throughput_penalty_factor: 1.0
+    latency_jitter_stddev_ms: 4
+  availability:
+    reserved_capacity_percent: 20
+    n_plus_one_enabled: false
+    max_safe_gpu_utilization: 0.8
+simulation_profile:
+  monte_carlo_trials: 40
+  warmup_sec: 30
+  time_horizon_sec: 300
+  time_step_ms: 10
+  random_variables:
+  - name: arrival_burst
+    applies_to: input
+    distribution: lognormal
+    parameters:
+      mean: 0
+      sigma: 0.25
+    target_path: workload_definition.input_profile.arrival_pattern.mean_arrival_rate_per_sec
+  - name: prompt_size_noise
+    applies_to: input
+    distribution: lognormal
+    parameters:
+      sigma: 0.35
+    target_path: workload_definition.input_profile.work_item.size_distribution
+  - name: prefix_cache_hit_variation
+    applies_to: runtime
+    distribution: normal
+    parameters:
+      mean: 0.35
+      stddev: 0.08
+    target_path: runtime_profile.scheduler_model.prefix_cache_hit_rate

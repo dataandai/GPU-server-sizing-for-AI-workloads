@@ -1,0 +1,17 @@
+# Scenario 8: Long context stress test — 5 sequences × 32K tokens each
+scenario_name: "long_context_5x32k"
+hardware_profile: "h200_8gpu"
+weight_precision: "int8"
+kv_cache_precision: "fp16"
+tensor_parallel_degree: 8
+runtime_overhead_ratio: 0.10
+max_vram_utilization_target: 0.95
+safety_headroom_ratio: 0.05
+
+workload_type: "fixed_batch"
+workload:
+  prompt_tokens: 24000
+  max_output_tokens: 8768
+  num_parallel_jobs: 5
+
+monte_carlo_enabled: false

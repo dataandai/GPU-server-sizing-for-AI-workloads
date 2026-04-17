@@ -1,0 +1,756 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/workload_simulation.schema.json",
+  "title": "Workload Simulation Schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "workload_definition",
+    "runtime_profile",
+    "deployment_profile",
+    "simulation_profile"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "workload_definition": {
+      "type": "object",
+      "required": [
+        "workload_id",
+        "input_profile",
+        "pipeline",
+        "sla_policy"
+      ],
+      "properties": {
+        "workload_id": {
+          "type": "string"
+        },
+        "workload_class": {
+          "type": "string",
+          "enum": [
+            "general_pipeline",
+            "interactive_inference",
+            "batch_processing",
+            "stream_processing",
+            "multistage_agentic",
+            "retrieval_augmented",
+            "vision_processing",
+            "speech_processing",
+            "document_processing"
+          ]
+        },
+        "input_profile": {
+          "type": "object",
+          "required": [
+            "arrival_pattern",
+            "work_item"
+          ],
+          "properties": {
+            "arrival_pattern": {
+              "type": "object",
+              "required": [
+                "mode"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "poisson",
+                    "scheduled_batch",
+                    "bursty_poisson",
+                    "streaming_fixed_rate",
+                    "piecewise"
+                  ]
+                },
+                "mean_arrival_rate_per_sec": {
+                  "type": "number"
+                },
+                "burst_multiplier_p95": {
+                  "type": "number"
+                },
+                "business_cycle": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "daily_peak_multiplier": {
+                      "type": "number"
+                    },
+                    "weekly_peak_multiplier": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "additionalProperties": true
+            },
+            "work_item": {
+              "type": "object",
+              "required": [
+                "unit_type",
+                "size_distribution"
+              ],
+              "properties": {
+                "unit_type": {
+                  "type": "string",
+                  "enum": [
+                    "request",
+                    "document",
+                    "audio_chunk",
+                    "image",
+                    "video_chunk",
+                    "event",
+                    "agent_task"
+                  ]
+                },
+                "modalities": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "size_distribution": {
+                  "type": "object",
+                  "required": [
+                    "distribution"
+                  ],
+                  "properties": {
+                    "distribution": {
+                      "type": "string",
+                      "enum": [
+                        "fixed",
+                        "normal",
+                        "lognormal",
+                        "uniform",
+                        "empirical",
+                        "triangular"
+                      ]
+                    },
+                    "mean": {
+                      "type": "number"
+                    },
+                    "stddev": {
+                      "type": "number"
+                    },
+                    "p50": {
+                      "type": "number"
+                    },
+                    "p95": {
+                      "type": "number"
+                    },
+                    "samples": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "complexity_distribution": {
+                  "type": "object",
+                  "properties": {
+                    "distribution": {
+                      "type": "string"
+                    },
+                    "mean": {
+                      "type": "number"
+                    },
+                    "stddev": {
+                      "type": "number"
+                    },
+                    "p95": {
+                      "type": "number"
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "language_mix": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "language",
+                      "share"
+                    ],
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      },
+                      "share": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "pipeline": {
+          "type": "object",
+          "required": [
+            "stages"
+          ],
+          "properties": {
+            "topology": {
+              "type": "string",
+              "enum": [
+                "linear",
+                "dag",
+                "fanout",
+                "fanin"
+              ]
+            },
+            "stages": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "stage_id",
+                  "stage_type",
+                  "resource_profile",
+                  "batching_profile"
+                ],
+                "properties": {
+                  "stage_id": {
+                    "type": "string"
+                  },
+                  "display_name": {
+                    "type": "string"
+                  },
+                  "stage_type": {
+                    "type": "string",
+                    "enum": [
+                      "preprocess",
+                      "embedding",
+                      "retrieval",
+                      "rerank",
+                      "encoder",
+                      "decoder",
+                      "generator",
+                      "classifier",
+                      "detector",
+                      "segmenter",
+                      "ocr",
+                      "asr",
+                      "postprocess",
+                      "tool_call",
+                      "aggregation",
+                      "custom"
+                    ]
+                  },
+                  "depends_on": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "optional": {
+                    "type": "boolean"
+                  },
+                  "language_sensitive": {
+                    "type": "boolean"
+                  },
+                  "model_binding": {
+                    "type": "object",
+                    "properties": {
+                      "role_id": {
+                        "type": "string"
+                      },
+                      "default_model_id": {
+                        "type": "string"
+                      },
+                      "override_model_id": {
+                        "type": "string"
+                      },
+                      "model_source": {
+                        "type": "string",
+                        "enum": [
+                          "builtin",
+                          "huggingface",
+                          "catalog"
+                        ]
+                      },
+                      "requires_manual_validation": {
+                        "type": "boolean"
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "resource_profile": {
+                    "type": "object",
+                    "required": [
+                      "primary_device",
+                      "service_time_model"
+                    ],
+                    "properties": {
+                      "primary_device": {
+                        "type": "string",
+                        "enum": [
+                          "gpu",
+                          "cpu",
+                          "hybrid",
+                          "network",
+                          "storage"
+                        ]
+                      },
+                      "gpu_memory_gb_per_work_item": {
+                        "type": "number"
+                      },
+                      "cpu_cores_per_work_item": {
+                        "type": "number"
+                      },
+                      "system_ram_gb_per_work_item": {
+                        "type": "number"
+                      },
+                      "service_time_model": {
+                        "type": "object",
+                        "required": [
+                          "mode"
+                        ],
+                        "properties": {
+                          "mode": {
+                            "type": "string",
+                            "enum": [
+                              "constant",
+                              "linear",
+                              "piecewise_linear",
+                              "empirical",
+                              "reference_scaled"
+                            ]
+                          },
+                          "base_ms": {
+                            "type": "number"
+                          },
+                          "ms_per_input_unit": {
+                            "type": "number"
+                          },
+                          "ms_per_output_unit": {
+                            "type": "number"
+                          },
+                          "reference_profile_id": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "batching_profile": {
+                    "type": "object",
+                    "required": [
+                      "batching_mode"
+                    ],
+                    "properties": {
+                      "batching_mode": {
+                        "type": "string",
+                        "enum": [
+                          "none",
+                          "static",
+                          "dynamic",
+                          "continuous",
+                          "inflight"
+                        ]
+                      },
+                      "max_batch_size": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "batch_timeout_ms": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "max_batched_tokens": {
+                        "type": "integer"
+                      },
+                      "allow_mixed_lengths": {
+                        "type": "boolean"
+                      },
+                      "queue_priority": {
+                        "type": "string",
+                        "enum": [
+                          "fifo",
+                          "priority",
+                          "shortest_first",
+                          "runtime_default"
+                        ]
+                      }
+                    },
+                    "additionalProperties": true
+                  },
+                  "failure_policy": {
+                    "type": "object",
+                    "properties": {
+                      "retry_on_failure": {
+                        "type": "boolean"
+                      },
+                      "max_retries": {
+                        "type": "integer"
+                      },
+                      "degraded_mode_stage_id": {
+                        "type": "string"
+                      },
+                      "drop_on_overload": {
+                        "type": "boolean"
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "sla_policy": {
+          "type": "object",
+          "required": [
+            "latency_target_ms_p95",
+            "availability_target"
+          ],
+          "properties": {
+            "latency_target_ms_p95": {
+              "type": "number"
+            },
+            "throughput_target_per_sec": {
+              "type": "number"
+            },
+            "deadline_per_item_ms": {
+              "type": "number"
+            },
+            "availability_target": {
+              "type": "number"
+            },
+            "max_drop_rate": {
+              "type": "number"
+            },
+            "max_queue_wait_ms": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "runtime_profile": {
+      "type": "object",
+      "required": [
+        "runtime_id",
+        "runtime_family",
+        "scheduler_model"
+      ],
+      "properties": {
+        "runtime_id": {
+          "type": "string"
+        },
+        "runtime_family": {
+          "type": "string",
+          "enum": [
+            "vllm",
+            "tensorrt_llm",
+            "triton",
+            "custom"
+          ]
+        },
+        "scheduler_model": {
+          "type": "object",
+          "required": [
+            "mode"
+          ],
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": [
+                "vllm_continuous_batching",
+                "trtllm_inflight_batching",
+                "triton_dynamic_batching",
+                "custom"
+              ]
+            },
+            "chunked_prefill": {
+              "type": "boolean"
+            },
+            "inflight_batching": {
+              "type": "boolean"
+            },
+            "dynamic_batching": {
+              "type": "boolean"
+            },
+            "decode_priority": {
+              "type": "boolean"
+            },
+            "scheduler_policy": {
+              "type": "string"
+            },
+            "max_num_batched_tokens": {
+              "type": "integer"
+            },
+            "max_num_seqs": {
+              "type": "integer"
+            },
+            "queue_delay_us": {
+              "type": "integer"
+            },
+            "prefix_cache_enabled": {
+              "type": "boolean"
+            },
+            "prefix_cache_hit_rate": {
+              "type": "number"
+            },
+            "preemption_penalty_ms": {
+              "type": "number"
+            },
+            "speculative_decode_enabled": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": true
+        },
+        "runtime_penalties": {
+          "type": "object",
+          "properties": {
+            "small_batch_efficiency_penalty": {
+              "type": "number"
+            },
+            "mixed_length_batch_penalty": {
+              "type": "number"
+            },
+            "queue_timeout_penalty": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "deployment_profile": {
+      "type": "object",
+      "required": [
+        "deployment_id",
+        "execution_mode",
+        "hardware_binding"
+      ],
+      "properties": {
+        "deployment_id": {
+          "type": "string"
+        },
+        "execution_mode": {
+          "type": "string",
+          "enum": [
+            "bare_metal",
+            "container_on_bare_metal",
+            "vm_passthrough",
+            "vmware_vgpu_time_sliced",
+            "vmware_vgpu_mig_backed",
+            "bare_metal_mig"
+          ]
+        },
+        "hardware_binding": {
+          "type": "object",
+          "required": [
+            "hardware_catalog_id"
+          ],
+          "properties": {
+            "hardware_catalog_id": {
+              "type": "string"
+            },
+            "gpu_count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "tp_size": {
+              "type": "integer"
+            },
+            "pp_size": {
+              "type": "integer"
+            },
+            "ep_size": {
+              "type": "integer"
+            },
+            "software_stack_id": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "partitioning": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": [
+                "none",
+                "mig",
+                "time_sliced_vgpu",
+                "mig_backed_vgpu"
+              ]
+            },
+            "mig_profile": {
+              "type": "string"
+            },
+            "virtual_gpus_per_device": {
+              "type": "integer"
+            },
+            "memory_fraction": {
+              "type": "number"
+            },
+            "sm_fraction": {
+              "type": "number"
+            },
+            "isolation_level": {
+              "type": "string",
+              "enum": [
+                "none",
+                "soft",
+                "hard"
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "overhead_model": {
+          "type": "object",
+          "properties": {
+            "static_latency_overhead_ms": {
+              "type": "number"
+            },
+            "throughput_penalty_factor": {
+              "type": "number"
+            },
+            "latency_jitter_stddev_ms": {
+              "type": "number"
+            },
+            "scheduler_quantum_ms": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": true
+        },
+        "availability": {
+          "type": "object",
+          "properties": {
+            "reserved_capacity_percent": {
+              "type": "number"
+            },
+            "n_plus_one_enabled": {
+              "type": "boolean"
+            },
+            "failover_time_sec": {
+              "type": "number"
+            },
+            "max_safe_gpu_utilization": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "simulation_profile": {
+      "type": "object",
+      "required": [
+        "monte_carlo_trials",
+        "time_horizon_sec",
+        "random_variables"
+      ],
+      "properties": {
+        "monte_carlo_trials": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "warmup_sec": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_horizon_sec": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "time_step_ms": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "random_variables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "applies_to",
+              "distribution"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "applies_to": {
+                "type": "string",
+                "enum": [
+                  "input",
+                  "stage",
+                  "runtime",
+                  "deployment",
+                  "availability"
+                ]
+              },
+              "distribution": {
+                "type": "string",
+                "enum": [
+                  "fixed",
+                  "normal",
+                  "lognormal",
+                  "uniform",
+                  "bernoulli",
+                  "triangular",
+                  "empirical"
+                ]
+              },
+              "parameters": {
+                "type": "object"
+              },
+              "target_path": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "latency_p50_ms",
+            "latency_p95_ms",
+            "throughput_per_sec",
+            "queue_wait_p95_ms",
+            "drop_rate",
+            "gpu_util_p95",
+            "cpu_util_p95",
+            "sla_hit_rate",
+            "bottleneck_breakdown"
+          ]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

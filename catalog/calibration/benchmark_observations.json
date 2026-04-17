@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "records": [
+    {
+      "observation_id": "vss_h100_8gpu_30min_30s_graph_off",
+      "blueprint_id": "nvidia_vss_video_summarization",
+      "template_id": "bp_template_vss_video_summary",
+      "source_type": "official_docs",
+      "source_ref": "nvidia_vss_performance_health_eval",
+      "reference_topology": {
+        "gpu_id": "nvidia_h100_sxm_80gb",
+        "gpu_count": 8,
+        "gpu_role_allocation": {
+          "summary_generation": 4,
+          "vlm_chunk_analysis": 2,
+          "rag_context": 2
+        }
+      },
+      "workload_signature": {
+        "video_duration_seconds": 1800,
+        "chunk_size_seconds": 30,
+        "graph_rag_enabled": false
+      },
+      "observed_metrics": {
+        "e2e_latency_seconds": 43.81,
+        "latency_p50_ms": 43810
+      },
+      "confidence": "official_exact"
+    },
+    {
+      "observation_id": "rag_default_service_gpu_mapping",
+      "blueprint_id": "nvidia_rag_blueprint",
+      "template_id": "bp_template_rag",
+      "source_type": "official_docs",
+      "source_ref": "nvidia_rag_service_gpu_mapping",
+      "reference_topology": {
+        "gpu_count": 8,
+        "gpu_role_allocation": {
+          "generate_answer": 4,
+          "retrieve_embed": 2,
+          "rerank": 1,
+          "optional_parse": 1,
+          "optional_vlm": 1
+        }
+      },
+      "observed_metrics": {
+        "rag_ttft_ms": 780,
+        "llm_generation_time_ms": 1450,
+        "context_reranker_time_ms": 115,
+        "retrieval_time_ms": 68
+      },
+      "confidence": "official_topology_guided"
+    },
+    {
+      "observation_id": "aiq_research_agent_reasoning_scale",
+      "blueprint_id": "nvidia_aiq_research_agent",
+      "template_id": "bp_template_aiq",
+      "source_type": "official_pdf",
+      "source_ref": "nvidia_aiq_era_reasoning_scale",
+      "reference_topology": {
+        "gpu_id": "nvidia_rtx_pro_6000_blackwell_se_96gb",
+        "gpu_count": 8,
+        "gpu_role_allocation": {
+          "orchestration": 1,
+          "shallow_research": 2,
+          "deep_research": 5,
+          "optional_rag": 2
+        }
+      },
+      "workload_signature": {
+        "reasoning_scale": "medium",
+        "concurrency": 4,
+        "precision": "fp8"
+      },
+      "observed_metrics": {
+        "workflow_latency_p95_ms": 64000,
+        "llm_latency_p95_ms": 12800,
+        "cumulative_token_throughput_per_sec": 7600
+      },
+      "confidence": "official_summary"
+    }
+  ]
+}

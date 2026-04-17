@@ -1,0 +1,385 @@
+{
+  "schema_version": "1.0",
+  "records": [
+    {
+      "field_id": "scenario_name",
+      "aliases": [
+        "f_scenario_name",
+        "bp_scenario_name",
+        "tpl_scenario_name"
+      ],
+      "title_hu": "Scenario name",
+      "definition_hu": "Defines the value for scenario name in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set scenario name to match the expected production workload.",
+      "source_type": "other_doc",
+      "source_label": "Wikipedia — Scenario planning",
+      "source_url": "https://en.wikipedia.org/wiki/Scenario_planning"
+    },
+    {
+      "field_id": "blueprint_id",
+      "aliases": [
+        "bp_blueprint_id"
+      ],
+      "title_hu": "Blueprint",
+      "definition_hu": "Defines the value for blueprint in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set blueprint to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "NVIDIA AI-Q Blueprint — Architecture Overview",
+      "source_url": "https://docs.nvidia.com/aiq-blueprint/1.2.1/architecture/overview.html"
+    },
+    {
+      "field_id": "template_id",
+      "aliases": [
+        "bp_template_id",
+        "tpl_template_id"
+      ],
+      "title_hu": "Template",
+      "definition_hu": "Defines the value for template in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set template to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "NVIDIA AI-Q Blueprint — Architecture Overview",
+      "source_url": "https://docs.nvidia.com/aiq-blueprint/1.2.1/architecture/overview.html"
+    },
+    {
+      "field_id": "language_code",
+      "aliases": [
+        "f_target_language",
+        "bp_language_code",
+        "tpl_language_code"
+      ],
+      "title_hu": "Target language",
+      "definition_hu": "Defines the value for target language in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set target language to match the expected production workload.",
+      "source_type": "other_doc",
+      "source_label": "Wikipedia — Language code",
+      "source_url": "https://en.wikipedia.org/wiki/Language_code"
+    },
+    {
+      "field_id": "language_share",
+      "aliases": [
+        "bp_language_share",
+        "tpl_language_share"
+      ],
+      "title_hu": "Language share",
+      "definition_hu": "Defines the value for language share in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set language share to match the expected production workload.",
+      "source_type": "other_doc",
+      "source_label": "Wikipedia — Multilingualism",
+      "source_url": "https://en.wikipedia.org/wiki/Multilingualism"
+    },
+    {
+      "field_id": "arrival_rate_per_sec",
+      "aliases": [
+        "bp_arrival_rate",
+        "request_rate_per_sec",
+        "queries_per_second",
+        "query_rate_per_sec",
+        "recommendation_requests_per_sec",
+        "transaction_events_per_sec"
+      ],
+      "title_hu": "Arrival rate / sec",
+      "definition_hu": "Defines the value for arrival rate / sec in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set arrival rate / sec to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "NVIDIA Triton Inference Server — Performance Analyzer",
+      "source_url": "https://docs.nvidia.com/deeplearning/triton-inference-server/archives/triton-inference-server-2310/user-guide/docs/user_guide/perf_analyzer.html"
+    },
+    {
+      "field_id": "sla_latency_p95_ms",
+      "aliases": [
+        "bp_sla_latency",
+        "tpl_sla_latency"
+      ],
+      "title_hu": "SLA p95 latency (ms)",
+      "definition_hu": "Defines the value for sla p95 latency (ms) in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set sla p95 latency (ms) to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "NVIDIA Triton Inference Server — Perf Analyzer CLI",
+      "source_url": "https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/perf_analyzer/docs/cli.html"
+    },
+    {
+      "field_id": "monte_carlo_trials",
+      "aliases": [
+        "f_mc_iter",
+        "bp_mc_trials",
+        "tpl_mc_trials"
+      ],
+      "title_hu": "Monte Carlo iterations",
+      "definition_hu": "Defines the value for monte carlo iterations in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set monte carlo iterations to match the expected production workload.",
+      "source_type": "other_doc",
+      "source_label": "Monte Carlo method",
+      "source_url": "https://en.wikipedia.org/wiki/Monte_Carlo_method"
+    },
+    {
+      "field_id": "time_horizon_sec",
+      "aliases": [
+        "bp_horizon_sec",
+        "tpl_horizon_sec"
+      ],
+      "title_hu": "Time horizon (sec)",
+      "definition_hu": "Defines the value for time horizon (sec) in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set time horizon (sec) to match the expected production workload.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Monte Carlo method",
+      "source_url": "https://en.wikipedia.org/wiki/Monte_Carlo_method"
+    },
+    {
+      "field_id": "planning_profile",
+      "aliases": [
+        "bp_planning_profile",
+        "tpl_planning_profile"
+      ],
+      "title_hu": "Planning profile",
+      "definition_hu": "Defines the value for planning profile in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set planning profile to match the expected production workload.",
+      "source_type": "other_doc",
+      "source_label": "Wikipedia — Capacity planning",
+      "source_url": "https://en.wikipedia.org/wiki/Capacity_planning"
+    },
+    {
+      "field_id": "hardware_catalog_id",
+      "aliases": [
+        "f_hardware_catalog_id",
+        "bp_hardware_catalog_id",
+        "tpl_hardware_catalog_id"
+      ],
+      "title_hu": "Hardware",
+      "definition_hu": "Defines the value for hardware in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set hardware to match the expected production workload.",
+      "source_type": "derived_system_behavior",
+      "source_label": "NVIDIA MIG User Guide",
+      "source_url": "https://docs.nvidia.com/datacenter/tesla/mig-user-guide/"
+    },
+    {
+      "field_id": "software_stack_id",
+      "aliases": [
+        "f_software_stack_id",
+        "bp_software_stack_id",
+        "tpl_software_stack_id"
+      ],
+      "title_hu": "Software stack",
+      "definition_hu": "Defines the value for software stack in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set software stack to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "vLLM Documentation",
+      "source_url": "https://docs.vllm.ai/en/stable/"
+    },
+    {
+      "field_id": "deployment_profile_id",
+      "aliases": [
+        "f_deployment_profile_id",
+        "bp_deployment_profile_id",
+        "tpl_deployment_profile_id"
+      ],
+      "title_hu": "Deployment profile",
+      "definition_hu": "Defines the value for deployment profile in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set deployment profile to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "NVIDIA vGPU for Compute Overview",
+      "source_url": "https://docs.nvidia.com/ai-enterprise/release-8/latest/infra-software/vgpu/overview.html"
+    },
+    {
+      "field_id": "tensor_parallel_degree",
+      "aliases": [
+        "f_tp"
+      ],
+      "title_hu": "Tensor parallel degree",
+      "definition_hu": "Defines the value for tensor parallel degree in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set tensor parallel degree to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "vLLM — Parallelism and Scaling",
+      "source_url": "https://docs.vllm.ai/en/stable/serving/parallelism_scaling/"
+    },
+    {
+      "field_id": "weight_precision",
+      "aliases": [
+        "f_weight_precision"
+      ],
+      "title_hu": "Weight precision",
+      "definition_hu": "Defines the value for weight precision in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set weight precision to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "vLLM — Quantization",
+      "source_url": "https://docs.vllm.ai/en/latest/features/quantization/"
+    },
+    {
+      "field_id": "kv_cache_precision",
+      "aliases": [
+        "f_kv_cache_precision"
+      ],
+      "title_hu": "KV cache precision",
+      "definition_hu": "Defines the value for kv cache precision in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set kv cache precision to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "vLLM Documentation",
+      "source_url": "https://docs.vllm.ai/en/latest/"
+    },
+    {
+      "field_id": "prompt_tokens",
+      "aliases": [
+        "fb_prompt",
+        "ag_prompt",
+        "hy_prompt",
+        "hy_ag_prompt",
+        "query_prompt_tokens",
+        "avg_prompt_tokens"
+      ],
+      "title_hu": "Prompt tokens",
+      "definition_hu": "Defines the value for prompt tokenek in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set prompt tokens to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "vLLM Documentation",
+      "source_url": "https://docs.vllm.ai/en/latest/"
+    },
+    {
+      "field_id": "output_tokens",
+      "aliases": [
+        "fb_output",
+        "ag_response",
+        "hy_output",
+        "hy_ag_resp",
+        "avg_output_tokens",
+        "answer_tokens"
+      ],
+      "title_hu": "Output tokens",
+      "definition_hu": "Defines the value for output tokenek in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set output tokens to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "vLLM Documentation",
+      "source_url": "https://docs.vllm.ai/en/latest/"
+    },
+    {
+      "field_id": "avg_context_docs",
+      "aliases": [
+        "avg_context_docs"
+      ],
+      "title_hu": "Average context documents",
+      "definition_hu": "Defines the value for average context documents in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set average context documents to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "NVIDIA RAG Blueprint",
+      "source_url": "https://docs.nvidia.com/rag/latest/"
+    },
+    {
+      "field_id": "rerank_top_k",
+      "aliases": [
+        "rerank_top_k",
+        "candidate_pool_size"
+      ],
+      "title_hu": "Rerank depth",
+      "definition_hu": "Defines the value for rerank depth in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set rerank depth to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "NVIDIA RAG Blueprint",
+      "source_url": "https://docs.nvidia.com/rag/latest/"
+    },
+    {
+      "field_id": "streams",
+      "aliases": [
+        "streams",
+        "num_streams",
+        "concurrent_calls"
+      ],
+      "title_hu": "Concurrent streams or sessions",
+      "definition_hu": "Defines the value for concurrent streams or sessions in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set concurrent streams or sessions to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "NVIDIA Triton Inference Server — Performance Analyzer",
+      "source_url": "https://docs.nvidia.com/deeplearning/triton-inference-server/archives/triton-inference-server-2310/user-guide/docs/user_guide/perf_analyzer.html"
+    },
+    {
+      "field_id": "fps",
+      "aliases": [
+        "fps"
+      ],
+      "title_hu": "Frames per second",
+      "definition_hu": "Defines the value for frames per second in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set frames per second to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "NVIDIA AI Blueprint Docs",
+      "source_url": "https://docs.nvidia.com/aiq-blueprint/1.2.1/architecture/overview.html"
+    },
+    {
+      "field_id": "queue_budget_ms",
+      "aliases": [
+        "queue_budget_ms"
+      ],
+      "title_hu": "Queue budget (ms)",
+      "definition_hu": "Defines the value for queue budget (ms) in the sizing and workload simulation workflow.",
+      "impact_hu": "Changing this field can affect workload composition, performance estimates, compatibility checks, or capacity recommendations.",
+      "interpretation_hu": "Use a value that reflects expected production behavior rather than an ideal demo case.",
+      "caution_hu": "Unrealistic values can make the estimate too optimistic or too conservative.",
+      "example_hu": "Example: set queue budget (ms) to match the expected production workload.",
+      "source_type": "official_vendor_doc",
+      "source_label": "NVIDIA Triton Inference Server — Performance Analyzer",
+      "source_url": "https://docs.nvidia.com/deeplearning/triton-inference-server/archives/triton-inference-server-2310/user-guide/docs/user_guide/perf_analyzer.html"
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+schema_version: '1.0'
+name: Partitioned workload on MIG-backed VMware
+description: Általános példa MIG és VMware modellezésére.
+workload_definition:
+  workload_id: partitioned_general_batch
+  workload_class: batch_processing
+  input_profile:
+    arrival_pattern:
+      mode: scheduled_batch
+      mean_arrival_rate_per_sec: 1.2
+    work_item:
+      unit_type: document
+      modalities:
+      - text
+      - image
+      size_distribution:
+        distribution: triangular
+        mean: 3500
+        p50: 2800
+        p95: 9500
+      complexity_distribution:
+        distribution: normal
+        mean: 1.0
+        stddev: 0.2
+  pipeline:
+    topology: linear
+    stages:
+    - stage_id: extract
+      stage_type: ocr
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 0.4
+        service_time_model:
+          mode: linear
+          base_ms: 25
+          ms_per_input_unit: 0.004
+      batching_profile:
+        batching_mode: dynamic
+        max_batch_size: 8
+        batch_timeout_ms: 25
+    - stage_id: generate
+      stage_type: generator
+      depends_on:
+      - extract
+      language_sensitive: true
+      model_binding:
+        role_id: llm_role
+        default_model_id: Qwen/Qwen3-32B
+        override_model_id: mistralai/Mistral-Small-3.1-24B-Instruct-2503
+        model_source: huggingface
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 1.2
+        service_time_model:
+          mode: linear
+          base_ms: 55
+          ms_per_input_unit: 0.0015
+          ms_per_output_unit: 0.018
+      batching_profile:
+        batching_mode: dynamic
+        max_batch_size: 12
+        batch_timeout_ms: 20
+        max_batched_tokens: 8192
+        allow_mixed_lengths: true
+  sla_policy:
+    latency_target_ms_p95: 6000
+    throughput_target_per_sec: 0.9
+    availability_target: 0.995
+    max_drop_rate: 0.02
+runtime_profile:
+  runtime_id: trtllm_balanced
+  runtime_family: tensorrt_llm
+  scheduler_model:
+    mode: trtllm_inflight_batching
+    inflight_batching: true
+    chunked_prefill: true
+    scheduler_policy: MAX_UTILIZATION
+    prefix_cache_enabled: false
+    queue_delay_us: 5000
+deployment_profile:
+  deployment_id: vmware_mig_h200
+  execution_mode: vmware_vgpu_mig_backed
+  hardware_binding:
+    hardware_catalog_id: dell_xe9680_8gpu_hgx_h200
+    gpu_count: 1
+    software_stack_id: nvidia_tensorrt_llm
+  partitioning:
+    mode: mig_backed_vgpu
+    mig_profile: 3g.71gb
+    virtual_gpus_per_device: 1
+    memory_fraction: 0.5
+    sm_fraction: 0.43
+    isolation_level: hard
+  overhead_model:
+    static_latency_overhead_ms: 18
+    throughput_penalty_factor: 0.86
+    latency_jitter_stddev_ms: 14
+    scheduler_quantum_ms: 8
+  availability:
+    reserved_capacity_percent: 25
+    n_plus_one_enabled: true
+    failover_time_sec: 45
+    max_safe_gpu_utilization: 0.7
+simulation_profile:
+  monte_carlo_trials: 400
+  warmup_sec: 30
+  time_horizon_sec: 1800
+  time_step_ms: 10
+  random_variables:
+  - name: vmware_jitter
+    applies_to: deployment
+    distribution: normal
+    parameters:
+      mean: 18
+      stddev: 8
+    target_path: deployment_profile.overhead_model.static_latency_overhead_ms
+  - name: batch_size_variation
+    applies_to: runtime
+    distribution: triangular
+    parameters:
+      low: 4
+      mode: 8
+      high: 12
+    target_path: workload_definition.pipeline.stages[1].batching_profile.max_batch_size

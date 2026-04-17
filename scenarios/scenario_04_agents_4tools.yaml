@@ -1,0 +1,40 @@
+# Scenario 4: Agentic — 10 agents, ~4 tool calls (Monte Carlo)
+scenario_name: "agents_10x4tools"
+hardware_profile: "h200_8gpu"
+weight_precision: "int8"
+kv_cache_precision: "fp16"
+tensor_parallel_degree: 8
+runtime_overhead_ratio: 0.10
+max_vram_utilization_target: 0.95
+safety_headroom_ratio: 0.05
+
+workload_type: "agentic"
+workload:
+  initial_prompt_tokens:
+    type: "lognormal"
+    mu: 7.0       # ~1100 tokens median
+    sigma: 0.3
+    min_clip: 100
+  max_turns_per_run: 8
+  tool_call_probability: 0.7
+  tool_result_tokens:
+    type: "lognormal"
+    mu: 6.0       # ~400 tokens median
+    sigma: 0.5
+    min_clip: 50
+  assistant_response_tokens:
+    type: "lognormal"
+    mu: 5.5       # ~245 tokens median
+    sigma: 0.4
+    min_clip: 20
+  summarization_probability: 0.0
+  stop_probability_per_turn: 0.20
+  max_total_tokens_per_run: 32768
+  num_parallel_agents: 10
+  enable_max_context_cap: true
+  max_context_cap: 32768
+
+monte_carlo_enabled: true
+monte_carlo_iterations: 10000
+random_seed: 42
+percentile_outputs: [50, 90, 95, 99]

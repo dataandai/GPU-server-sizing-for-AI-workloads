@@ -1,0 +1,509 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-14",
+  "records": [
+    {
+      "id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_kind": "llm",
+      "param_size_b": 14,
+      "estimated_min_vram_gb_per_gpu": 20,
+      "estimated_recommended_vram_gb_per_gpu": 32,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true,
+      "notes": "Good general-purpose on-prem 14B LLM candidate."
+    },
+    {
+      "id": "Qwen/Qwen2.5-32B-Instruct",
+      "model_kind": "llm",
+      "param_size_b": 32,
+      "estimated_min_vram_gb_per_gpu": 44,
+      "estimated_recommended_vram_gb_per_gpu": 64,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true,
+      "notes": "32B-class on-prem LLM; typically a good fit on H100, H200, or RTX PRO 6000 environments."
+    },
+    {
+      "id": "Qwen/Qwen2.5-72B-Instruct",
+      "model_kind": "llm",
+      "param_size_b": 72,
+      "estimated_min_vram_gb_per_gpu": 90,
+      "estimated_recommended_vram_gb_per_gpu": 120,
+      "recommended_min_gpu_count": 2,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true,
+      "notes": "Large reasoning model; at least 2-way tensor parallelism is recommended."
+    },
+    {
+      "id": "meta-llama/Llama-3.1-70B-Instruct",
+      "model_kind": "llm",
+      "param_size_b": 70,
+      "estimated_min_vram_gb_per_gpu": 90,
+      "estimated_recommended_vram_gb_per_gpu": 120,
+      "recommended_min_gpu_count": 2,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true,
+      "notes": "Large 70B-class generative model; typically requires at least 2 GPUs."
+    },
+    {
+      "id": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+      "model_kind": "llm",
+      "param_size_b": 24,
+      "estimated_min_vram_gb_per_gpu": 34,
+      "estimated_recommended_vram_gb_per_gpu": 48,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true,
+      "notes": "More compact on-prem alternative in the 24B class."
+    },
+    {
+      "id": "mistralai/Mistral-7B-Instruct-v0.3",
+      "model_kind": "llm",
+      "param_size_b": 7,
+      "estimated_min_vram_gb_per_gpu": 12,
+      "estimated_recommended_vram_gb_per_gpu": 16,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "model_kind": "vlm",
+      "param_size_b": 7,
+      "estimated_min_vram_gb_per_gpu": 18,
+      "estimated_recommended_vram_gb_per_gpu": 28,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true,
+      "notes": "For VLM roles; because of multimodal preprocessing, higher VRAM is recommended than for a 7B text-only model."
+    },
+    {
+      "id": "OpenGVLab/InternVL2_5-8B",
+      "model_kind": "vlm",
+      "param_size_b": 8,
+      "estimated_min_vram_gb_per_gpu": 20,
+      "estimated_recommended_vram_gb_per_gpu": 30,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "llava-hf/llava-1.5-7b-hf",
+      "model_kind": "vlm",
+      "param_size_b": 7,
+      "estimated_min_vram_gb_per_gpu": 18,
+      "estimated_recommended_vram_gb_per_gpu": 28,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/nv-embedqa-e5-v5",
+      "model_kind": "embedding",
+      "param_size_b": 0.6,
+      "estimated_min_vram_gb_per_gpu": 6,
+      "estimated_recommended_vram_gb_per_gpu": 8,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "intfloat/multilingual-e5-large",
+      "model_kind": "embedding",
+      "param_size_b": 0.6,
+      "estimated_min_vram_gb_per_gpu": 6,
+      "estimated_recommended_vram_gb_per_gpu": 8,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "BAAI/bge-m3",
+      "model_kind": "embedding",
+      "param_size_b": 0.6,
+      "estimated_min_vram_gb_per_gpu": 6,
+      "estimated_recommended_vram_gb_per_gpu": 8,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/llama-3.2-nv-rerankqa-1b-v2",
+      "model_kind": "reranker",
+      "param_size_b": 1,
+      "estimated_min_vram_gb_per_gpu": 8,
+      "estimated_recommended_vram_gb_per_gpu": 12,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/llama-nemotron-rerank-1b-v2",
+      "model_kind": "reranker",
+      "param_size_b": 1,
+      "estimated_min_vram_gb_per_gpu": 8,
+      "estimated_recommended_vram_gb_per_gpu": 12,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "BAAI/bge-reranker-v2-m3",
+      "model_kind": "reranker",
+      "param_size_b": 0.6,
+      "estimated_min_vram_gb_per_gpu": 6,
+      "estimated_recommended_vram_gb_per_gpu": 8,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "meta-llama/Llama-Guard-3-8B",
+      "model_kind": "guardrail",
+      "param_size_b": 8,
+      "estimated_min_vram_gb_per_gpu": 12,
+      "estimated_recommended_vram_gb_per_gpu": 18,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "ProtectAI/deberta-v3-base-prompt-injection-v2",
+      "model_kind": "guardrail",
+      "param_size_b": 0.2,
+      "estimated_min_vram_gb_per_gpu": 4,
+      "estimated_recommended_vram_gb_per_gpu": 6,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "microsoft/trocr-base-printed",
+      "model_kind": "ocr",
+      "param_size_b": 0.4,
+      "estimated_min_vram_gb_per_gpu": 8,
+      "estimated_recommended_vram_gb_per_gpu": 12,
+      "recommended_min_gpu_count": 1,
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/nemoguard-reference",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_triton_inference",
+        "nvidia_dgx_enterprise_stack"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/tool-router-reference",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_tensorrt_llm",
+        "nvidia_vllm_cuda",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/rag-service-reference",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_tensorrt_llm",
+        "nvidia_vllm_cuda",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/parse-service-reference",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_nim_llm",
+        "nvidia_dgx_enterprise_stack"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/nv-ingest-doc-splitter",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/ocr-service-reference",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/nv-ingest-structured-extract",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/llama-3.1-nemotron-extract",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/ingest-gateway",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/preprocess-service-reference",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/postprocess-service-reference",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "nvidia/result-publisher",
+      "model_kind": "service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "custom/onprem-doc-parser",
+      "model_kind": "custom_service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_nim_llm",
+        "nvidia_dgx_enterprise_stack"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "custom/onprem-extractor",
+      "model_kind": "custom_service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "custom/onprem-ingest",
+      "model_kind": "custom_service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "custom/onprem-ocr",
+      "model_kind": "custom_service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "custom/onprem-postprocess",
+      "model_kind": "custom_service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "custom/onprem-preprocess",
+      "model_kind": "custom_service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "custom/onprem-publisher",
+      "model_kind": "custom_service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_triton_inference",
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "custom/onprem-rag-service",
+      "model_kind": "custom_service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_tensorrt_llm",
+        "nvidia_vllm_cuda",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    },
+    {
+      "id": "custom/onprem-tool-router",
+      "model_kind": "custom_service",
+      "validation_level": "advisory",
+      "supported_stack_ids": [
+        "nvidia_tensorrt_llm",
+        "nvidia_vllm_cuda",
+        "nvidia_nim_llm"
+      ],
+      "on_prem_primary": true
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+# Scenario 3: Medium batch — 20 medium jobs
+scenario_name: "medium_batch_20x2048_1024"
+hardware_profile: "h200_8gpu"
+weight_precision: "int8"
+kv_cache_precision: "fp16"
+tensor_parallel_degree: 8
+runtime_overhead_ratio: 0.10
+max_vram_utilization_target: 0.95
+safety_headroom_ratio: 0.05
+
+workload_type: "fixed_batch"
+workload:
+  prompt_tokens: 2048
+  max_output_tokens: 1024
+  num_parallel_jobs: 20
+
+monte_carlo_enabled: false

@@ -1,0 +1,67 @@
+{
+  "schema_version": "0.1",
+  "generated_at": "2026-04-11",
+  "records": [
+    {
+      "id": "bare_metal_container",
+      "mode": "bare_metal",
+      "is_virtualized": false,
+      "gpu_partitioning": "none",
+      "scheduler_notes": "Best baseline for throughput and latency measurements.",
+      "throughput_adjustment_hint": 1.0,
+      "source_urls": []
+    },
+    {
+      "id": "k8s_bare_metal",
+      "mode": "kubernetes_on_bare_metal",
+      "is_virtualized": false,
+      "gpu_partitioning": "none",
+      "scheduler_notes": "Good default for production serving with orchestration overhead outside the critical GPU path.",
+      "throughput_adjustment_hint": 0.98,
+      "source_urls": []
+    },
+    {
+      "id": "vm_passthrough_gpu",
+      "mode": "virtual_machine_passthrough",
+      "is_virtualized": true,
+      "gpu_partitioning": "dedicated_full_gpu",
+      "scheduler_notes": "Useful when you want near-bare-metal isolation with whole GPU assignment.",
+      "throughput_adjustment_hint": 0.97,
+      "source_urls": []
+    },
+    {
+      "id": "vmware_vgpu_time_sliced",
+      "mode": "virtual_machine_vgpu",
+      "is_virtualized": true,
+      "gpu_partitioning": "time_sliced",
+      "scheduler_notes": "Best for bursty/shared environments; active VM can use the full GPU while idle neighbors yield capacity.",
+      "throughput_adjustment_hint": 0.75,
+      "source_urls": [
+        "https://www.vmware.com/techpapers/2022/vgpu-vs-mig-perf.html"
+      ]
+    },
+    {
+      "id": "vmware_vgpu_mig",
+      "mode": "virtual_machine_vgpu",
+      "is_virtualized": true,
+      "gpu_partitioning": "mig_backed",
+      "scheduler_notes": "Best for predictable QoS and strong isolation under concurrent steady multi-tenant load.",
+      "throughput_adjustment_hint": 0.65,
+      "source_urls": [
+        "https://www.vmware.com/techpapers/2022/vgpu-vs-mig-perf.html",
+        "https://docs.nvidia.com/datacenter/tesla/mig-user-guide/"
+      ]
+    },
+    {
+      "id": "bare_metal_mig_partitioned",
+      "mode": "bare_metal",
+      "is_virtualized": false,
+      "gpu_partitioning": "mig",
+      "scheduler_notes": "Model as dedicated slice capacity rather than full-GPU serving; use when many small serving endpoints share one card.",
+      "throughput_adjustment_hint": 0.6,
+      "source_urls": [
+        "https://docs.nvidia.com/datacenter/tesla/mig-user-guide/"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,435 @@
+{
+  "schema_version": "1.0",
+  "records": [
+    {
+      "template_id": "lib_retrieval_rerank_generation",
+      "display_name": "Retrieval + Rerank + Generation",
+      "template_family": "retrieval_rerank_generation",
+      "runtime_preset_hint": "vllm",
+      "batching_mode": "continuous_query_batching",
+      "description": "Parameterized RAG-like pattern with retrieval, rerank, and generation stages.",
+      "parameter_definitions": [
+        {
+          "name": "request_rate_per_sec",
+          "label": "Request rate / sec",
+          "type": "number",
+          "default": 2.5,
+          "min": 0.05
+        },
+        {
+          "name": "avg_context_docs",
+          "label": "Average context documents",
+          "type": "integer",
+          "default": 8,
+          "min": 1
+        },
+        {
+          "name": "avg_prompt_tokens",
+          "label": "Average prompt tokens",
+          "type": "integer",
+          "default": 2400,
+          "min": 128
+        },
+        {
+          "name": "avg_output_tokens",
+          "label": "Average output tokens",
+          "type": "integer",
+          "default": 420,
+          "min": 32
+        },
+        {
+          "name": "rerank_top_k",
+          "label": "Rerank top-k",
+          "type": "integer",
+          "default": 24,
+          "min": 1
+        },
+        {
+          "name": "guardrail_enabled",
+          "label": "Guardrail",
+          "type": "boolean",
+          "default": true
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "retrieve",
+          "resource_profile": "gpu_embedding_batchable",
+          "role_id": "embedding_role"
+        },
+        {
+          "stage_id": "rerank",
+          "resource_profile": "gpu_rerank_batchable",
+          "role_id": "reranker_role"
+        },
+        {
+          "stage_id": "generate",
+          "resource_profile": "gpu_llm_prefill_decode",
+          "role_id": "llm_role"
+        },
+        {
+          "stage_id": "optional_guardrail",
+          "resource_profile": "gpu_or_cpu_guardrail",
+          "role_id": "guardrail_role",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "template_id": "lib_multi_stage_agentic_workflow",
+      "display_name": "Multi-stage Agentic Workflow",
+      "template_family": "multi_stage_agentic_workflow",
+      "runtime_preset_hint": "tensorrt_llm",
+      "batching_mode": "asynchronous_agentic",
+      "description": "Multi-stage agentic workflow with planning, tooling, and synthesis stages.",
+      "parameter_definitions": [
+        {
+          "name": "concurrent_runs",
+          "label": "Concurrent runs",
+          "type": "integer",
+          "default": 4,
+          "min": 1
+        },
+        {
+          "name": "avg_steps_per_run",
+          "label": "Average steps / run",
+          "type": "integer",
+          "default": 6,
+          "min": 1
+        },
+        {
+          "name": "avg_tool_calls_per_run",
+          "label": "Tool call / run",
+          "type": "integer",
+          "default": 3,
+          "min": 0
+        },
+        {
+          "name": "avg_docs_per_step",
+          "label": "Documents / step",
+          "type": "integer",
+          "default": 4,
+          "min": 0
+        },
+        {
+          "name": "report_length_tokens",
+          "label": "Report length (tokens)",
+          "type": "integer",
+          "default": 2200,
+          "min": 128
+        },
+        {
+          "name": "human_gate_enabled",
+          "label": "Human gate",
+          "type": "boolean",
+          "default": false
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "orchestrate",
+          "resource_profile": "cpu_gpu_mixed",
+          "role_id": "planner_role"
+        },
+        {
+          "stage_id": "plan",
+          "resource_profile": "gpu_llm_interactive",
+          "role_id": "planner_role"
+        },
+        {
+          "stage_id": "tool_research",
+          "resource_profile": "external_tooling_latency_bound",
+          "role_id": "tool_role"
+        },
+        {
+          "stage_id": "deep_reasoning",
+          "resource_profile": "gpu_llm_long_context",
+          "role_id": "reasoning_role"
+        },
+        {
+          "stage_id": "optional_rag",
+          "resource_profile": "componentized_rag_optional",
+          "role_id": "rag_role",
+          "optional": true
+        },
+        {
+          "stage_id": "synthesize_report",
+          "resource_profile": "gpu_llm_prefill_decode",
+          "role_id": "writer_role"
+        },
+        {
+          "stage_id": "optional_review",
+          "resource_profile": "gpu_or_cpu_guardrail",
+          "role_id": "review_role",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "template_id": "lib_batch_document_pipeline",
+      "display_name": "Batch Document Pipeline",
+      "template_family": "batch_document_pipeline",
+      "runtime_preset_hint": "triton",
+      "batching_mode": "batch_document_processing",
+      "description": "Batch-style document parse / OCR / extract / summarize pipeline.",
+      "parameter_definitions": [
+        {
+          "name": "docs_per_hour",
+          "label": "Documents / hour",
+          "type": "integer",
+          "default": 120,
+          "min": 1
+        },
+        {
+          "name": "avg_pages_per_doc",
+          "label": "Average pages",
+          "type": "integer",
+          "default": 18,
+          "min": 1
+        },
+        {
+          "name": "image_heavy_share",
+          "label": "Image-heavy share",
+          "type": "number",
+          "default": 0.35,
+          "min": 0,
+          "max": 1,
+          "step": 0.01
+        },
+        {
+          "name": "table_heavy_share",
+          "label": "Table-heavy share",
+          "type": "number",
+          "default": 0.25,
+          "min": 0,
+          "max": 1,
+          "step": 0.01
+        },
+        {
+          "name": "batch_window_sec",
+          "label": "Batch window (sec)",
+          "type": "integer",
+          "default": 60,
+          "min": 1
+        },
+        {
+          "name": "retry_rate",
+          "label": "Retry rate",
+          "type": "number",
+          "default": 0.05,
+          "min": 0,
+          "max": 1,
+          "step": 0.01
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "parse",
+          "resource_profile": "io_cpu_decode",
+          "role_id": "parse_role"
+        },
+        {
+          "stage_id": "ocr_layout",
+          "resource_profile": "gpu_parse_bursty",
+          "role_id": "ocr_role"
+        },
+        {
+          "stage_id": "extract",
+          "resource_profile": "cpu_decode_gpu_preprocess",
+          "role_id": "extract_role"
+        },
+        {
+          "stage_id": "embed_index",
+          "resource_profile": "gpu_embedding_batchable",
+          "role_id": "embedding_role"
+        },
+        {
+          "stage_id": "summarize_classify",
+          "resource_profile": "gpu_llm_interactive",
+          "role_id": "llm_role"
+        },
+        {
+          "stage_id": "publish",
+          "resource_profile": "cpu_gpu_mixed",
+          "role_id": "publish_role"
+        }
+      ]
+    },
+    {
+      "template_id": "lib_streaming_queue_heavy_inference",
+      "display_name": "Streaming / Queue-heavy Inference",
+      "template_family": "streaming_queue_heavy_inference",
+      "runtime_preset_hint": "triton",
+      "batching_mode": "streaming_dynamic_batching",
+      "description": "Queue-budget-sensitive streaming inference pattern with burst and inflight parameters.",
+      "parameter_definitions": [
+        {
+          "name": "streams",
+          "label": "Active streams",
+          "type": "integer",
+          "default": 24,
+          "min": 1
+        },
+        {
+          "name": "frames_per_sec",
+          "label": "Frame/chunk per sec",
+          "type": "number",
+          "default": 10,
+          "min": 0.1
+        },
+        {
+          "name": "burst_multiplier_p95",
+          "label": "Burst multiplier p95",
+          "type": "number",
+          "default": 1.8,
+          "min": 1.0
+        },
+        {
+          "name": "queue_budget_ms",
+          "label": "Queue budget ms",
+          "type": "integer",
+          "default": 120,
+          "min": 1
+        },
+        {
+          "name": "strict_ordering",
+          "label": "Strict ordering",
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "name": "max_inflight",
+          "label": "Max inflight",
+          "type": "integer",
+          "default": 64,
+          "min": 1
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "ingest_stream",
+          "resource_profile": "cpu_decode_gpu_preprocess",
+          "role_id": "ingest_role"
+        },
+        {
+          "stage_id": "preprocess",
+          "resource_profile": "gpu_vision_realtime",
+          "role_id": "preprocess_role"
+        },
+        {
+          "stage_id": "infer",
+          "resource_profile": "gpu_llm_bursty",
+          "role_id": "infer_role"
+        },
+        {
+          "stage_id": "postprocess",
+          "resource_profile": "cpu_gpu_mixed",
+          "role_id": "postprocess_role"
+        },
+        {
+          "stage_id": "optional_publish",
+          "resource_profile": "gpu_or_cpu_guardrail",
+          "role_id": "publish_role",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "template_id": "lib_hybrid_multimodal_pipeline",
+      "display_name": "Hybrid Multimodal Pipeline",
+      "template_family": "hybrid_multimodal_pipeline",
+      "runtime_preset_hint": "vllm",
+      "batching_mode": "multimodal_continuous_batching",
+      "description": "Text + image + document + video clip workload with VLM and LLM stages.",
+      "parameter_definitions": [
+        {
+          "name": "request_rate_per_sec",
+          "label": "Request rate / sec",
+          "type": "number",
+          "default": 1.4,
+          "min": 0.01
+        },
+        {
+          "name": "image_share",
+          "label": "Image share",
+          "type": "number",
+          "default": 0.35,
+          "min": 0,
+          "max": 1,
+          "step": 0.01
+        },
+        {
+          "name": "document_share",
+          "label": "Document share",
+          "type": "number",
+          "default": 0.4,
+          "min": 0,
+          "max": 1,
+          "step": 0.01
+        },
+        {
+          "name": "video_clip_share",
+          "label": "Video clip share",
+          "type": "number",
+          "default": 0.15,
+          "min": 0,
+          "max": 1,
+          "step": 0.01
+        },
+        {
+          "name": "avg_context_docs",
+          "label": "Context docs",
+          "type": "integer",
+          "default": 6,
+          "min": 1
+        },
+        {
+          "name": "avg_output_tokens",
+          "label": "Output tokens",
+          "type": "integer",
+          "default": 560,
+          "min": 32
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "ingest",
+          "resource_profile": "cpu_decode_gpu_preprocess",
+          "role_id": "ingest_role"
+        },
+        {
+          "stage_id": "optional_parse",
+          "resource_profile": "gpu_parse_bursty",
+          "role_id": "parse_role",
+          "optional": true
+        },
+        {
+          "stage_id": "multimodal_embed",
+          "resource_profile": "gpu_embedding_batchable",
+          "role_id": "embedding_role"
+        },
+        {
+          "stage_id": "retrieve",
+          "resource_profile": "gpu_or_cpu_retrieval_optional",
+          "role_id": "retrieval_role"
+        },
+        {
+          "stage_id": "vlm_analyze",
+          "resource_profile": "gpu_vlm_batchable",
+          "role_id": "vlm_role"
+        },
+        {
+          "stage_id": "llm_generate",
+          "resource_profile": "gpu_llm_prefill_decode",
+          "role_id": "llm_role"
+        },
+        {
+          "stage_id": "optional_rerank",
+          "resource_profile": "gpu_rerank_batchable",
+          "role_id": "reranker_role",
+          "optional": true
+        }
+      ]
+    }
+  ]
+}

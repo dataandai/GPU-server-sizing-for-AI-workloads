@@ -1,0 +1,40 @@
+# Example catalog + Hugging Face scenario schema
+scenario_name: "hf_qwen_on_dgx_b200"
+
+model_source: "huggingface"
+model_id: "Qwen/Qwen3-235B-A22B"
+hardware_catalog_id: "nvidia_dgx_b200_8gpu"
+software_stack_id: "nvidia_vllm_cuda"
+deployment_profile_id: "bare_metal_container"
+
+weight_precision: "int8"
+kv_cache_precision: "fp8"
+tensor_parallel_degree: 8
+runtime_overhead_ratio: 0.10
+max_vram_utilization_target: 0.95
+safety_headroom_ratio: 0.05
+
+workload_type: "human_in_the_loop"
+workload:
+  system_prompt_tokens:
+    type: "lognormal"
+    mu: 7.6
+    sigma: 0.4
+  num_concurrent_sessions: 6
+  min_rounds: 8
+  max_rounds: 30
+  user_message_tokens:
+    type: "lognormal"
+    mu: 5.5
+    sigma: 0.8
+  assistant_response_tokens:
+    type: "lognormal"
+    mu: 6.0
+    sigma: 0.6
+  tool_call_probability: 0.6
+  enable_hard_context_cap: true
+  hard_context_cap: 32768
+
+monte_carlo_enabled: true
+monte_carlo_iterations: 10000
+random_seed: 42

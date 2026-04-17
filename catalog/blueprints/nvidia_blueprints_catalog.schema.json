@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/nvidia_blueprints_catalog.schema.json",
+  "title": "NVIDIA Blueprint Catalog Record",
+  "type": "object",
+  "required": [
+    "blueprint_id",
+    "name",
+    "vendor",
+    "source",
+    "category",
+    "supports_large_server_deployment",
+    "reference_deployments",
+    "pipeline_roles",
+    "supports_model_substitution",
+    "substitution_policy",
+    "simulation_tags",
+    "source_urls"
+  ],
+  "properties": {
+    "blueprint_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "vendor": {
+      "type": "string",
+      "const": "nvidia"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "build_blueprint",
+        "docs_blueprint",
+        "enterprise_reference_architecture"
+      ]
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "video_understanding",
+        "video_analytics",
+        "multimodal_rag",
+        "agentic_research"
+      ]
+    },
+    "short_description": {
+      "type": "string"
+    },
+    "supports_large_server_deployment": {
+      "type": "boolean"
+    },
+    "reference_deployments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "deployment_id",
+          "hardware_label",
+          "workload_input",
+          "performance"
+        ],
+        "properties": {
+          "deployment_id": {
+            "type": "string"
+          },
+          "hardware_label": {
+            "type": "string"
+          },
+          "hardware_class": {
+            "type": "string"
+          },
+          "gpu_topology": {
+            "type": "string"
+          },
+          "workload_input": {
+            "type": "object"
+          },
+          "performance": {
+            "type": "object"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pipeline_roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "role_id",
+          "role_type",
+          "replaceable",
+          "default_model_reference",
+          "allowed_model_kinds"
+        ],
+        "properties": {
+          "role_id": {
+            "type": "string"
+          },
+          "role_type": {
+            "type": "string"
+          },
+          "replaceable": {
+            "type": "boolean"
+          },
+          "default_model_reference": {
+            "type": "string"
+          },
+          "allowed_model_kinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "language_sensitive": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "supports_model_substitution": {
+      "type": "boolean"
+    },
+    "substitution_policy": {
+      "type": "object",
+      "required": [
+        "role_based",
+        "hf_supported",
+        "language_override_supported"
+      ],
+      "properties": {
+        "role_based": {
+          "type": "boolean"
+        },
+        "hf_supported": {
+          "type": "boolean"
+        },
+        "language_override_supported": {
+          "type": "boolean"
+        },
+        "required_capabilities_by_role": {
+          "type": "object"
+        },
+        "risk_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "simulation_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "known_limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

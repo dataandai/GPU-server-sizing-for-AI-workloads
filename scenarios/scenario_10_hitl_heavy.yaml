@@ -1,0 +1,47 @@
+# Scenario 10: HITL Heavy — 5 sessions, heavy activity
+scenario_name: "hitl_heavy_5sessions"
+hardware_profile: "h200_8gpu"
+weight_precision: "int8"
+kv_cache_precision: "fp16"
+tensor_parallel_degree: 8
+runtime_overhead_ratio: 0.10
+max_vram_utilization_target: 0.95
+safety_headroom_ratio: 0.05
+
+workload_type: "human_in_the_loop"
+workload:
+  system_prompt_tokens:
+    type: "lognormal"
+    mu: 8.0       # ~3000 tokens median
+    sigma: 0.4
+  num_concurrent_sessions: 5
+  min_rounds: 10
+  max_rounds: 30
+  rounds_distribution:
+    type: "lognormal"
+    mu: 2.8       # ~16 rounds median
+    sigma: 0.3
+  user_message_tokens:
+    type: "lognormal"
+    mu: 6.0       # ~400 tokens median
+    sigma: 0.6
+  assistant_response_tokens:
+    type: "lognormal"
+    mu: 6.5       # ~660 tokens median
+    sigma: 0.5
+  tool_call_probability: 0.8
+  num_tool_calls_per_round:
+    type: "poisson"
+    lam: 3.0
+    min_clip: 1
+  tool_output_tokens:
+    type: "lognormal"
+    mu: 7.2       # ~1300 tokens median
+    sigma: 0.8
+  enable_hard_context_cap: true
+  hard_context_cap: 32768
+
+monte_carlo_enabled: true
+monte_carlo_iterations: 1000
+random_seed: 42
+percentile_outputs: [50, 90, 95, 99]

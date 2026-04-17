@@ -1,0 +1,114 @@
+schema_version: '1.0'
+name: Test workload sim
+workload_definition:
+  workload_id: test_pipeline
+  workload_class: retrieval_augmented
+  input_profile:
+    arrival_pattern:
+      mode: poisson
+      mean_arrival_rate_per_sec: 2.0
+    work_item:
+      unit_type: request
+      size_distribution:
+        distribution: lognormal
+        p50: 800
+        p95: 2400
+      complexity_distribution:
+        distribution: normal
+        mean: 1.0
+        stddev: 0.2
+      language_mix:
+      - language: hu
+        share: 0.8
+  pipeline:
+    topology: linear
+    stages:
+    - stage_id: rerank
+      stage_type: rerank
+      language_sensitive: true
+      model_binding:
+        role_id: reranker_role
+        default_model_id: nvidia/llama-3.2-nv-rerankqa-1b-v2
+        override_model_id: BAAI/bge-reranker-v2-m3
+        model_source: huggingface
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 0.25
+        service_time_model:
+          mode: linear
+          base_ms: 6
+          ms_per_input_unit: 0.004
+      batching_profile:
+        batching_mode: dynamic
+        max_batch_size: 16
+        batch_timeout_ms: 8
+        allow_mixed_lengths: true
+    - stage_id: generate
+      stage_type: generator
+      language_sensitive: true
+      model_binding:
+        role_id: llm_role
+        default_model_id: nvidia/llama-3.3-nemotron-super-49b-v1
+        override_model_id: mistralai/Mistral-Small-3.1-24B-Instruct-2503
+        model_source: huggingface
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 1.0
+        service_time_model:
+          mode: reference_scaled
+          reference_profile_id: rag_blueprint_llm_stage
+      batching_profile:
+        batching_mode: continuous
+        max_batch_size: 32
+        batch_timeout_ms: 10
+        max_batched_tokens: 16384
+        allow_mixed_lengths: true
+      failure_policy:
+        drop_on_overload: true
+  sla_policy:
+    latency_target_ms_p95: 1800
+    throughput_target_per_sec: 1.5
+    max_queue_wait_ms: 500
+runtime_profile:
+  runtime_id: vllm_latency_balanced
+  runtime_family: vllm
+  scheduler_model:
+    mode: vllm_continuous_batching
+    chunked_prefill: true
+    decode_priority: true
+    max_num_batched_tokens: 16384
+    prefix_cache_enabled: true
+    prefix_cache_hit_rate: 0.25
+  runtime_penalties:
+    small_batch_efficiency_penalty: 1.05
+    mixed_length_batch_penalty: 1.03
+deployment_profile:
+  deployment_id: bare_metal_h200_4gpu
+  execution_mode: bare_metal
+  hardware_binding:
+    hardware_catalog_id: nvidia_dgx_h200_8gpu
+    gpu_count: 4
+    tp_size: 4
+    software_stack_id: nvidia_vllm_cuda
+  partitioning:
+    mode: none
+    isolation_level: hard
+  overhead_model:
+    throughput_penalty_factor: 1.0
+    latency_jitter_stddev_ms: 2
+  availability:
+    reserved_capacity_percent: 20
+    max_safe_gpu_utilization: 0.8
+simulation_profile:
+  monte_carlo_trials: 20
+  warmup_sec: 5
+  time_horizon_sec: 120
+  time_step_ms: 10
+  random_variables:
+  - name: arrival_burst
+    applies_to: input
+    distribution: lognormal
+    parameters:
+      mean: 0.0
+      sigma: 0.15
+    target_path: workload_definition.input_profile.arrival_pattern.mean_arrival_rate_per_sec

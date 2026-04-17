@@ -1,0 +1,1676 @@
+[
+  {
+    "blueprint_id": "nvidia_vss_video_summarization",
+    "name": "NVIDIA VSS Video Summarization Workflow",
+    "vendor": "nvidia",
+    "source": "docs_blueprint",
+    "category": "video_understanding",
+    "short_description": "Long-video summarization and event extraction pipeline with VIOS, VLM and LLM orchestration.",
+    "supports_large_server_deployment": true,
+    "reference_deployments": [
+      {
+        "deployment_id": "vss_health_eval_h100_pcie",
+        "hardware_label": "8x NVIDIA H100 PCIe (example profiling run)",
+        "hardware_class": "8gpu_server",
+        "gpu_topology": "8x PCIe GPUs; example split 4x LLM + 4x shared VLM/embedding/reranker from older VSS performance docs",
+        "workload_input": {
+          "video_duration_seconds": 180,
+          "chunk_size_seconds": 30,
+          "num_chunks": 6,
+          "mode": "summarization"
+        },
+        "performance": {
+          "e2e_latency_seconds_example": 20.33,
+          "vlm_pipeline_latency_seconds_example": 10.46,
+          "context_rag_latency_seconds_example": 9.29,
+          "decode_latency_seconds_example": 8.94,
+          "vlm_latency_seconds_example": 8.42
+        },
+        "notes": "Numbers are from VSS health-eval example metrics and should be treated as a calibration baseline, not a universal promise."
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "video_io_role",
+        "role_type": "video_io_storage",
+        "replaceable": false,
+        "default_model_reference": "VIOS",
+        "allowed_model_kinds": [
+          "service"
+        ],
+        "language_sensitive": false,
+        "notes": "Video ingestion and storage layer."
+      },
+      {
+        "role_id": "vlm_role",
+        "role_type": "vision_language_model",
+        "replaceable": true,
+        "default_model_reference": "default VLM in VSS deployment",
+        "allowed_model_kinds": [
+          "huggingface_vlm",
+          "nim_vlm",
+          "api_vlm"
+        ],
+        "language_sensitive": true,
+        "notes": "Can be replaced if the substitute supports chunked long-video interpretation."
+      },
+      {
+        "role_id": "llm_role",
+        "role_type": "language_model",
+        "replaceable": true,
+        "default_model_reference": "Nemotron LLM (NIM)",
+        "allowed_model_kinds": [
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Primary reasoning and summary generation role; Hungarian-friendly models should be allowed here."
+      },
+      {
+        "role_id": "retrieval_role",
+        "role_type": "context_rag",
+        "replaceable": true,
+        "default_model_reference": "Context-aware RAG stack",
+        "allowed_model_kinds": [
+          "rag_stack",
+          "embedding_model",
+          "reranker_model"
+        ],
+        "language_sensitive": true,
+        "notes": "May be disabled or swapped depending on workflow."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": true,
+      "language_override_supported": true,
+      "required_capabilities_by_role": {
+        "vlm_role": [
+          "video_or_frame_reasoning",
+          "sufficient_context_window_or_chunking"
+        ],
+        "llm_role": [
+          "tool_orchestrated_summary",
+          "multilingual_or_target_language_support"
+        ],
+        "retrieval_role": [
+          "embedding_compatibility",
+          "reranking_if_enabled"
+        ]
+      },
+      "risk_notes": [
+        "Changing VLM can shift token volume and chunk latency significantly.",
+        "Changing LLM affects summary quality, latency and language coverage.",
+        "For Hungarian output, replace the default LLM with a Hungarian-capable model or an LLM known to handle Hungarian well."
+      ]
+    },
+    "simulation_tags": [
+      "24x7",
+      "batchable",
+      "long_video",
+      "multimodal",
+      "agentic_optional"
+    ],
+    "known_limitations": [
+      "Shared GPU mode validation is limited on some GPUs and model combinations.",
+      "Chunk size and video duration heavily affect latency and token usage."
+    ],
+    "source_urls": [
+      "https://docs.nvidia.com/vss/3.1.0/agent-workflow-lvs.html",
+      "https://docs.nvidia.com/vss/2.4.0/content/vss_observability.html",
+      "https://docs.nvidia.com/vss/2.4.1/content/optimal_topology.html",
+      "https://docs.nvidia.com/vss/3.1.0/prerequisites.html",
+      "https://build.nvidia.com/nvidia/video-search-and-summarization/blueprintcard"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_vss_warehouse_2d",
+    "name": "NVIDIA VSS Warehouse 2D Vision AI Profile",
+    "vendor": "nvidia",
+    "source": "docs_blueprint",
+    "category": "video_analytics",
+    "short_description": "Single-camera warehouse analytics pipeline with RT-DETR, tracking and behavior analytics.",
+    "supports_large_server_deployment": true,
+    "reference_deployments": [
+      {
+        "deployment_id": "rtx6000pro_3x30fps",
+        "hardware_label": "RTX6000pro + AMD EPYC 9124 16-Core",
+        "hardware_class": "1gpu_or_edge_server",
+        "gpu_topology": "single RTX6000pro",
+        "workload_input": {
+          "num_streams": 3,
+          "fps": 30,
+          "detector_model": "RT-DETR"
+        },
+        "performance": {
+          "video_pipeline_p50_ms": 44,
+          "behavior_pipeline_p50_ms": 33,
+          "e2e_p50_ms": 77
+        }
+      },
+      {
+        "deployment_id": "dgx_spark_3x30fps",
+        "hardware_label": "NVIDIA DGX Spark + ARM Cortex-X925/A725 20-Core",
+        "hardware_class": "reference_appliance",
+        "gpu_topology": "DGX Spark integrated",
+        "workload_input": {
+          "num_streams": 3,
+          "fps": 30,
+          "detector_model": "RT-DETR"
+        },
+        "performance": {
+          "video_pipeline_p50_ms": 50,
+          "behavior_pipeline_p50_ms": 32,
+          "e2e_p50_ms": 82
+        }
+      },
+      {
+        "deployment_id": "igx_thor_3x30fps",
+        "hardware_label": "NVIDIA IGX Thor + ARM 14-Core",
+        "hardware_class": "industrial_edge_appliance",
+        "gpu_topology": "IGX Thor integrated",
+        "workload_input": {
+          "num_streams": 3,
+          "fps": 30,
+          "detector_model": "RT-DETR"
+        },
+        "performance": {
+          "video_pipeline_p50_ms": 89,
+          "behavior_pipeline_p50_ms": 36,
+          "e2e_p50_ms": 125
+        }
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "detector_role",
+        "role_type": "vision_detector",
+        "replaceable": true,
+        "default_model_reference": "RT-DETR",
+        "allowed_model_kinds": [
+          "huggingface_vision_detector",
+          "tao_export",
+          "nim_cv"
+        ],
+        "language_sensitive": false,
+        "notes": "Primary object detection stage."
+      },
+      {
+        "role_id": "tracking_role",
+        "role_type": "tracking_analytics",
+        "replaceable": false,
+        "default_model_reference": "behavior analytics pipeline",
+        "allowed_model_kinds": [
+          "service"
+        ],
+        "language_sensitive": false,
+        "notes": "Tracking and rule-based analytics microservices."
+      },
+      {
+        "role_id": "event_reasoning_role",
+        "role_type": "optional_llm",
+        "replaceable": true,
+        "default_model_reference": "none",
+        "allowed_model_kinds": [
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Optional narrative/event explanation layer for localized outputs."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": true,
+      "language_override_supported": true,
+      "required_capabilities_by_role": {
+        "detector_role": [
+          "warehouse_or_equivalent_detection_domain",
+          "real_time_throughput"
+        ],
+        "event_reasoning_role": [
+          "multilingual_generation_if_enabled"
+        ]
+      },
+      "risk_notes": [
+        "Detector swaps change stream capacity directly.",
+        "Hungarian requirements typically matter only for optional alert text or explanation stages, not the detector."
+      ]
+    },
+    "simulation_tags": [
+      "24x7",
+      "realtime",
+      "streaming",
+      "video_detection",
+      "batch_microbatch"
+    ],
+    "known_limitations": [
+      "Latency varies with object count, ROIs, tripwires and machine load.",
+      "Changing hardware or stream count requires coordinated config tuning."
+    ],
+    "source_urls": [
+      "https://docs.nvidia.com/vss/latest/warehouse-docs/2D-profile.html",
+      "https://docs.nvidia.com/vss/latest/models/rt-detr.html",
+      "https://docs.nvidia.com/vss/3.1.0/prerequisites.html"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_vss_warehouse_2d_agents",
+    "name": "NVIDIA VSS Warehouse 2D Vision AI with Agents Profile",
+    "vendor": "nvidia",
+    "source": "docs_blueprint",
+    "category": "video_analytics",
+    "short_description": "Warehouse 2D profile with RT-DETR plus agentic UI, chat and optional LLM/VLM layers.",
+    "supports_large_server_deployment": true,
+    "reference_deployments": [
+      {
+        "deployment_id": "dgx_spark_4x30fps_agents",
+        "hardware_label": "NVIDIA DGX Spark + ARM Cortex-X925/A725 20-Core",
+        "hardware_class": "reference_appliance",
+        "gpu_topology": "DGX Spark integrated",
+        "workload_input": {
+          "num_streams": 4,
+          "fps": 30,
+          "detector_model": "RT-DETR"
+        },
+        "performance": {
+          "video_pipeline_p50_ms": 56,
+          "behavior_pipeline_p50_ms": 24,
+          "e2e_p50_ms": 80
+        }
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "detector_role",
+        "role_type": "vision_detector",
+        "replaceable": true,
+        "default_model_reference": "RT-DETR",
+        "allowed_model_kinds": [
+          "huggingface_vision_detector",
+          "tao_export",
+          "nim_cv"
+        ],
+        "language_sensitive": false,
+        "notes": "Real-time detector."
+      },
+      {
+        "role_id": "vlm_role",
+        "role_type": "vision_language_model",
+        "replaceable": true,
+        "default_model_reference": "default VLM NIM",
+        "allowed_model_kinds": [
+          "huggingface_vlm",
+          "nim_vlm",
+          "api_vlm"
+        ],
+        "language_sensitive": true,
+        "notes": "Used for richer incident understanding and multimodal incident analysis."
+      },
+      {
+        "role_id": "llm_role",
+        "role_type": "language_model",
+        "replaceable": true,
+        "default_model_reference": "default LLM NIM",
+        "allowed_model_kinds": [
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Chat, alert summarization and operator-facing explanations."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": true,
+      "language_override_supported": true,
+      "required_capabilities_by_role": {
+        "vlm_role": [
+          "image_or_clip_reasoning"
+        ],
+        "llm_role": [
+          "target_language_generation",
+          "tool_use_if_agent_features_enabled"
+        ]
+      },
+      "risk_notes": [
+        "Shared-GPU validation is limited for non-default LLM/VLM combinations on some GPUs.",
+        "For Hungarian operator UIs, the llm_role should be replaced explicitly."
+      ]
+    },
+    "simulation_tags": [
+      "24x7",
+      "realtime",
+      "agentic_ui",
+      "video_analytics",
+      "multimodal"
+    ],
+    "known_limitations": [
+      "On H100 and RTX PRO 6000 Blackwell, only default NIMs were tested in shared GPU mode.",
+      "On some platforms local NIMs are not supported and remote NIMs are required."
+    ],
+    "source_urls": [
+      "https://docs.nvidia.com/vss/latest/warehouse-docs/2D-profile-with-agents.html",
+      "https://docs.nvidia.com/vss/latest/warehouse-docs/Known-Limitations.html",
+      "https://docs.nvidia.com/vss/3.1.0/prerequisites.html"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_vss_warehouse_3d",
+    "name": "NVIDIA VSS Warehouse 3D Vision AI Profile",
+    "vendor": "nvidia",
+    "source": "docs_blueprint",
+    "category": "video_analytics",
+    "short_description": "Multi-camera 3D warehouse analytics with Sparse4D and behavior analytics.",
+    "supports_large_server_deployment": true,
+    "reference_deployments": [
+      {
+        "deployment_id": "rtx6000pro_4x30fps_sparse4d",
+        "hardware_label": "RTX6000pro + AMD EPYC 9124 16-Core",
+        "hardware_class": "1gpu_or_edge_server",
+        "gpu_topology": "single RTX6000pro",
+        "workload_input": {
+          "num_streams": 4,
+          "fps": 30,
+          "detector_model": "Sparse4D"
+        },
+        "performance": {
+          "video_pipeline_p50_ms": 48,
+          "behavior_pipeline_p50_ms": 27,
+          "e2e_p50_ms": 75
+        }
+      },
+      {
+        "deployment_id": "dgx_spark_4x15fps_sparse4d",
+        "hardware_label": "NVIDIA DGX Spark + ARM Cortex-X925/A725 20-Core",
+        "hardware_class": "reference_appliance",
+        "gpu_topology": "DGX Spark integrated",
+        "workload_input": {
+          "num_streams": 4,
+          "fps": 15,
+          "detector_model": "Sparse4D"
+        },
+        "performance": {
+          "video_pipeline_p50_ms": 91,
+          "behavior_pipeline_p50_ms": 23,
+          "e2e_p50_ms": 114
+        }
+      },
+      {
+        "deployment_id": "igx_thor_4x15fps_sparse4d",
+        "hardware_label": "NVIDIA IGX Thor + ARM 14-Core",
+        "hardware_class": "industrial_edge_appliance",
+        "gpu_topology": "IGX Thor integrated",
+        "workload_input": {
+          "num_streams": 4,
+          "fps": 15,
+          "detector_model": "Sparse4D"
+        },
+        "performance": {
+          "video_pipeline_p50_ms": 106,
+          "behavior_pipeline_p50_ms": 23,
+          "e2e_p50_ms": 129
+        }
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "multicam_perception_role",
+        "role_type": "multi_camera_3d_perception",
+        "replaceable": true,
+        "default_model_reference": "Sparse4D",
+        "allowed_model_kinds": [
+          "huggingface_multicam_model",
+          "tao_export",
+          "custom_onnx"
+        ],
+        "language_sensitive": false,
+        "notes": "Primary 3D perception model."
+      },
+      {
+        "role_id": "tracking_role",
+        "role_type": "tracking_analytics",
+        "replaceable": false,
+        "default_model_reference": "behavior analytics pipeline",
+        "allowed_model_kinds": [
+          "service"
+        ],
+        "language_sensitive": false,
+        "notes": "Analytics over tracks and events."
+      },
+      {
+        "role_id": "reporting_role",
+        "role_type": "optional_llm",
+        "replaceable": true,
+        "default_model_reference": "none",
+        "allowed_model_kinds": [
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Optional incident reporting or Hungarian-language summary stage."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": true,
+      "language_override_supported": true,
+      "required_capabilities_by_role": {
+        "multicam_perception_role": [
+          "supports_multi_camera_geometry_or_equivalent"
+        ],
+        "reporting_role": [
+          "multilingual_generation_if_enabled"
+        ]
+      },
+      "risk_notes": [
+        "3D perception substitutions can alter camera-count scaling and calibration assumptions.",
+        "This blueprint is more sensitive to scene geometry and calibration quality than 2D."
+      ]
+    },
+    "simulation_tags": [
+      "24x7",
+      "realtime",
+      "multi_camera",
+      "3d_perception",
+      "warehouse"
+    ],
+    "known_limitations": [
+      "Latency varies with object count, ROIs, tripwires and machine load.",
+      "Calibration and synchronization are operational constraints."
+    ],
+    "source_urls": [
+      "https://docs.nvidia.com/vss/latest/warehouse-docs/3D-profile.html",
+      "https://docs.nvidia.com/vss/3.1.0/prerequisites.html"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_rag_blueprint",
+    "name": "NVIDIA RAG Blueprint",
+    "vendor": "nvidia",
+    "source": "docs_blueprint",
+    "category": "multimodal_rag",
+    "short_description": "Modular self-hosted enterprise RAG pipeline with swappable LLM, embedding, ranking, VLM and parsing services.",
+    "supports_large_server_deployment": true,
+    "reference_deployments": [
+      {
+        "deployment_id": "rag_self_hosted_default_gpu_map",
+        "hardware_label": "Self-hosted multi-GPU deployment",
+        "hardware_class": "multi_gpu_server",
+        "gpu_topology": "Default docs GPU mapping: GPU0 shared by embedding/ranking/ocr/vectorstore; GPU1 LLM; GPU5 optional VLM",
+        "workload_input": {
+          "query_mode": "text_rag_or_multimodal_rag",
+          "deployment": "self_hosted"
+        },
+        "performance": {
+          "storage_free_disk_gb_required": 200,
+          "first_time_deploy_minutes_min": 15,
+          "first_time_deploy_minutes_max": 30
+        },
+        "notes": "These are deployment characteristics rather than p50 latency benchmarks."
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "llm_role",
+        "role_type": "language_model",
+        "replaceable": true,
+        "default_model_reference": "nim-llm-ms",
+        "allowed_model_kinds": [
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Main answer-generation model."
+      },
+      {
+        "role_id": "embedding_role",
+        "role_type": "text_embedding_model",
+        "replaceable": true,
+        "default_model_reference": "nemotron-embedding-ms",
+        "allowed_model_kinds": [
+          "huggingface_embedding",
+          "nim_embedding",
+          "api_embedding"
+        ],
+        "language_sensitive": true,
+        "notes": "Swap for multilingual/Hungarian-friendly retrieval as needed."
+      },
+      {
+        "role_id": "reranker_role",
+        "role_type": "reranker_model",
+        "replaceable": true,
+        "default_model_reference": "nemotron-ranking-ms",
+        "allowed_model_kinds": [
+          "huggingface_reranker",
+          "nim_reranker",
+          "api_reranker"
+        ],
+        "language_sensitive": true,
+        "notes": "Strongly impacts retrieval quality in Hungarian."
+      },
+      {
+        "role_id": "vlm_role",
+        "role_type": "vision_language_model",
+        "replaceable": true,
+        "default_model_reference": "nemo-vlm-microservice",
+        "allowed_model_kinds": [
+          "huggingface_vlm",
+          "nim_vlm",
+          "api_vlm"
+        ],
+        "language_sensitive": true,
+        "notes": "Optional multimodal query role."
+      },
+      {
+        "role_id": "parse_role",
+        "role_type": "document_parse_stack",
+        "replaceable": true,
+        "default_model_reference": "Nemotron Parse + OCR/page/table/graphics stack",
+        "allowed_model_kinds": [
+          "parse_stack",
+          "ocr_model",
+          "layout_model"
+        ],
+        "language_sensitive": true,
+        "notes": "Document ingestion stack can be customized for PDFs and images."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": true,
+      "language_override_supported": true,
+      "required_capabilities_by_role": {
+        "embedding_role": [
+          "target_language_embedding_quality"
+        ],
+        "reranker_role": [
+          "target_language_reranking_quality"
+        ],
+        "llm_role": [
+          "target_language_generation",
+          "chosen_context_window"
+        ],
+        "parse_role": [
+          "document_layout_or_ocr_support_if_used"
+        ]
+      },
+      "risk_notes": [
+        "Retrieval quality can drop sharply if embedding and reranker are not strong on Hungarian.",
+        "Component placement and shared-GPU defaults affect capacity; a substitute model may require a different GPU map."
+      ]
+    },
+    "simulation_tags": [
+      "rag",
+      "batch_ingest",
+      "interactive_query",
+      "multimodal_optional",
+      "componentized"
+    ],
+    "known_limitations": [
+      "Self-hosted deployments require significant disk for model downloads and cache.",
+      "Multiple services share a GPU by default, so substitutions can force a remap."
+    ],
+    "source_urls": [
+      "https://docs.nvidia.com/rag/latest/readme.html",
+      "https://docs.nvidia.com/rag/latest/service-port-gpu-reference.html",
+      "https://docs.nvidia.com/rag/latest/accuracy_perf.html"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_aiq_research_agent",
+    "name": "NVIDIA AI-Q Research Agent Blueprint",
+    "vendor": "nvidia",
+    "source": "enterprise_reference_architecture",
+    "category": "agentic_research",
+    "short_description": "Long-running, graph-based research agent blueprint with optional RAG subsystem and cluster sizing guidance.",
+    "supports_large_server_deployment": true,
+    "reference_deployments": [
+      {
+        "deployment_id": "era_2_8_5_200_rtx6000bse",
+        "hardware_label": "Enterprise RA 2-8-5-200 on RTX PRO 6000 BSE",
+        "hardware_class": "cluster_pattern",
+        "gpu_topology": "Enterprise Reference Architecture cluster pattern 2-8-5-200",
+        "workload_input": {
+          "use_case": "deep_research_agent",
+          "human_in_the_loop_used_in_perf_tests": false
+        },
+        "performance": {
+          "validated_on_cluster_pattern": "2-8-5-200"
+        },
+        "notes": "Reference architecture provides sizing and scaling guidance; workload-level throughput must still be calibrated."
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "orchestrator_llm_role",
+        "role_type": "language_model",
+        "replaceable": true,
+        "default_model_reference": "Meta Llama 70B NIM or other configured agent LLM",
+        "allowed_model_kinds": [
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Intent routing, orchestration and answer generation."
+      },
+      {
+        "role_id": "shallow_research_role",
+        "role_type": "agent_worker",
+        "replaceable": true,
+        "default_model_reference": "Configured shallow research agent",
+        "allowed_model_kinds": [
+          "agent_profile",
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Fast bounded research path."
+      },
+      {
+        "role_id": "deep_research_role",
+        "role_type": "agent_worker",
+        "replaceable": true,
+        "default_model_reference": "Configured deep research agent",
+        "allowed_model_kinds": [
+          "agent_profile",
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Multi-step iterative research path."
+      },
+      {
+        "role_id": "rag_role",
+        "role_type": "rag_stack",
+        "replaceable": true,
+        "default_model_reference": "NVIDIA RAG Blueprint (optional)",
+        "allowed_model_kinds": [
+          "rag_stack",
+          "embedding_model",
+          "reranker_model",
+          "llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Optional retrieval subsystem."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": true,
+      "language_override_supported": true,
+      "required_capabilities_by_role": {
+        "orchestrator_llm_role": [
+          "tool_use_or_agent_control",
+          "target_language_generation"
+        ],
+        "deep_research_role": [
+          "long_context_or_iterative_reasoning",
+          "citations_or_report_generation"
+        ],
+        "rag_role": [
+          "target_language_retrieval_quality_if_enabled"
+        ]
+      },
+      "risk_notes": [
+        "Replacing agent LLMs changes token economics, concurrency and research depth behavior.",
+        "If Hungarian is a requirement, both the agent LLM and any attached RAG components should be swapped deliberately."
+      ]
+    },
+    "simulation_tags": [
+      "agentic",
+      "long_running",
+      "interactive",
+      "report_generation",
+      "cluster_scale"
+    ],
+    "known_limitations": [
+      "Published tests in the reference architecture excluded human-in-the-loop.",
+      "Sizing guidance is cluster-oriented and should be translated to node-level simulations carefully."
+    ],
+    "source_urls": [
+      "https://build.nvidia.com/nvidia/aiq",
+      "https://docs.nvidia.com/enterprise-reference-architectures/ai-q-research-agent-blueprint.pdf",
+      "https://docs.nvidia.com/enterprise-reference-architectures/index.html"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_pdf_to_podcast",
+    "name": "NVIDIA PDF to Podcast Blueprint",
+    "vendor": "nvidia",
+    "source": "build_nvidia_blueprint",
+    "category": "audio_content_generation",
+    "short_description": "Multistage PDF-to-markdown, script-generation and text-to-speech pipeline for turning documents into spoken audio content.",
+    "supports_large_server_deployment": true,
+    "reference_deployments": [
+      {
+        "deployment_id": "pdf_to_podcast_self_hosted",
+        "hardware_label": "Self-hosted multi-service deployment",
+        "hardware_class": "multi_gpu_server",
+        "gpu_topology": "LLM + parsing + optional speech/TTS services on shared or split GPUs depending on runtime profile",
+        "workload_input": {
+          "input_type": "pdf_documents",
+          "output_type": "podcast_audio",
+          "deployment": "self_hosted_or_hybrid"
+        },
+        "performance": {
+          "pipeline_type": "document_to_audio_generation"
+        },
+        "notes": "Throughput depends strongly on document length, parser choice, TTS voice quality, and whether stages are serialized or pipelined."
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "parse_role",
+        "role_type": "document_parse_stack",
+        "replaceable": true,
+        "default_model_reference": "PDF to Markdown + OCR/layout stack",
+        "allowed_model_kinds": [
+          "parse_stack",
+          "ocr_model",
+          "layout_model"
+        ],
+        "language_sensitive": true,
+        "notes": "Extracts structured document content from PDF before generation."
+      },
+      {
+        "role_id": "script_llm_role",
+        "role_type": "language_model",
+        "replaceable": true,
+        "default_model_reference": "Llama-family instruction LLM via NIM or HF",
+        "allowed_model_kinds": [
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Converts extracted content into monologue/dialogue style audio script."
+      },
+      {
+        "role_id": "tts_role",
+        "role_type": "speech_synthesis_model",
+        "replaceable": true,
+        "default_model_reference": "Text-to-Speech service",
+        "allowed_model_kinds": [
+          "nim_tts",
+          "api_tts",
+          "tts_model"
+        ],
+        "language_sensitive": true,
+        "notes": "Synthesizes final audio waveform from generated script."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": true,
+      "language_override_supported": true,
+      "required_capabilities_by_role": {
+        "parse_role": [
+          "pdf_layout_and_ocr_support"
+        ],
+        "script_llm_role": [
+          "target_language_generation",
+          "long_document_summarization"
+        ],
+        "tts_role": [
+          "target_language_tts_voice_support"
+        ]
+      },
+      "risk_notes": [
+        "TTS quality and latency vary significantly by voice model and language.",
+        "Long PDFs can shift the bottleneck from LLM decode to document parsing or audio synthesis."
+      ]
+    },
+    "simulation_tags": [
+      "pdf_ingest",
+      "audio_generation",
+      "tts",
+      "document_pipeline",
+      "batch_optional"
+    ],
+    "known_limitations": [
+      "End-to-end time scales with PDF length and target audio duration.",
+      "Audio quality and cost vary significantly if external TTS is used."
+    ],
+    "source_urls": [
+      "https://build.nvidia.com/nvidia/pdf-to-podcast",
+      "https://github.com/NVIDIA-AI-Blueprints/pdf-to-podcast"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_retail_shopping_assistant",
+    "name": "NVIDIA Retail Shopping Assistant Blueprint",
+    "vendor": "nvidia",
+    "source": "build_nvidia_blueprint",
+    "category": "domain_rag_assistant",
+    "short_description": "Retail-focused multimodal shopping assistant with retrieval, image-aware product grounding, and safety guardrails.",
+    "supports_large_server_deployment": true,
+    "reference_deployments": [
+      {
+        "deployment_id": "retail_assistant_4xh100",
+        "hardware_label": "Recommended self-hosted profile",
+        "hardware_class": "4gpu_server",
+        "gpu_topology": "4x H100 class recommendation for LLM + embeddings + NVCLIP + vector DB acceleration",
+        "workload_input": {
+          "query_mode": "interactive_product_assistant",
+          "deployment": "self_hosted"
+        },
+        "performance": {
+          "recommended_gpu_count": 4
+        },
+        "notes": "NVIDIA build page recommends a 4 H100 class self-hosted profile for the default stack."
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "assistant_llm_role",
+        "role_type": "language_model",
+        "replaceable": true,
+        "default_model_reference": "Llama 3.1 70B Instruct NIM",
+        "allowed_model_kinds": [
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Generates grounded shopping responses and recommendations."
+      },
+      {
+        "role_id": "embedding_role",
+        "role_type": "text_embedding_model",
+        "replaceable": true,
+        "default_model_reference": "NVIDIA Retrieval QA E5 Embedding v5",
+        "allowed_model_kinds": [
+          "huggingface_embedding",
+          "nim_embedding",
+          "api_embedding"
+        ],
+        "language_sensitive": true,
+        "notes": "Primary text retrieval embedding role."
+      },
+      {
+        "role_id": "image_embedding_role",
+        "role_type": "vision_embedding_model",
+        "replaceable": true,
+        "default_model_reference": "NVCLIP",
+        "allowed_model_kinds": [
+          "nim_vlm",
+          "vision_embedding_model",
+          "api_vlm"
+        ],
+        "language_sensitive": false,
+        "notes": "Product image grounding and multimodal retrieval."
+      },
+      {
+        "role_id": "guardrail_role",
+        "role_type": "safety_model",
+        "replaceable": true,
+        "default_model_reference": "NemoGuard topic/content control",
+        "allowed_model_kinds": [
+          "guardrail_model",
+          "nim_guardrail",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Keeps answers safe and on-brand."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": true,
+      "language_override_supported": true,
+      "required_capabilities_by_role": {
+        "assistant_llm_role": [
+          "target_language_generation",
+          "instruction_following"
+        ],
+        "embedding_role": [
+          "catalog_retrieval_quality"
+        ],
+        "image_embedding_role": [
+          "image_text_alignment"
+        ],
+        "guardrail_role": [
+          "target_language_safety_filtering"
+        ]
+      },
+      "risk_notes": [
+        "Replacing the guardrail stack can materially change production-readiness.",
+        "Multilingual retail catalogs may require stronger non-English embedding/reranking than the default English-centric stack."
+      ]
+    },
+    "simulation_tags": [
+      "rag",
+      "retail",
+      "multimodal_catalog",
+      "guardrails",
+      "interactive_query"
+    ],
+    "known_limitations": [
+      "Reference design is retail-specific and assumes a product catalog plus imagery.",
+      "Capacity estimates should separate retrieval, safety, and generation bottlenecks."
+    ],
+    "source_urls": [
+      "https://build.nvidia.com/nvidia/retail-shopping-assistant"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_biomedical_aiq_research_agent",
+    "name": "NVIDIA Biomedical AI-Q Research Agent Blueprint",
+    "vendor": "nvidia",
+    "source": "build_nvidia_blueprint",
+    "category": "agentic_biomedical_research",
+    "short_description": "Domain-specialized AI-Q research agent for biomedical discovery with multimodal retrieval, external tools, and report generation.",
+    "supports_large_server_deployment": true,
+    "reference_deployments": [
+      {
+        "deployment_id": "biomedical_agent_local_full_stack",
+        "hardware_label": "All-services local deployment",
+        "hardware_class": "multi_gpu_server",
+        "gpu_topology": "Separate GPUs for multimodal ingestion, reasoning, and instruct/report generation models",
+        "workload_input": {
+          "use_case": "biomedical_research_agent",
+          "deployment": "docker_compose"
+        },
+        "performance": {
+          "disk_gb_min": 435
+        },
+        "notes": "Build page specifies heavy local requirements and multiple service classes."
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "reasoning_role",
+        "role_type": "language_model",
+        "replaceable": true,
+        "default_model_reference": "Llama Nemotron reasoning model",
+        "allowed_model_kinds": [
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Primary deep reasoning and synthesis role."
+      },
+      {
+        "role_id": "report_llm_role",
+        "role_type": "language_model",
+        "replaceable": true,
+        "default_model_reference": "Instruction model for final report generation",
+        "allowed_model_kinds": [
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Generates structured final outputs for users."
+      },
+      {
+        "role_id": "biomedical_rag_role",
+        "role_type": "rag_stack",
+        "replaceable": true,
+        "default_model_reference": "NeMo Retriever + multimodal extraction stack",
+        "allowed_model_kinds": [
+          "rag_stack",
+          "parse_stack",
+          "nim_embedding",
+          "nim_reranker"
+        ],
+        "language_sensitive": true,
+        "notes": "Retrieval over scientific documents, tables, and graphics."
+      },
+      {
+        "role_id": "tool_agent_role",
+        "role_type": "tool_orchestrator",
+        "replaceable": true,
+        "default_model_reference": "External science tools / APIs",
+        "allowed_model_kinds": [
+          "tool_router",
+          "workflow_engine",
+          "api_tooling"
+        ],
+        "language_sensitive": false,
+        "notes": "Coordinates access to biomedical tools and knowledge APIs."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": true,
+      "language_override_supported": true,
+      "required_capabilities_by_role": {
+        "reasoning_role": [
+          "deep_reasoning",
+          "long_context"
+        ],
+        "report_llm_role": [
+          "domain_summarization"
+        ],
+        "biomedical_rag_role": [
+          "multimodal_document_retrieval"
+        ],
+        "tool_agent_role": [
+          "tool_calling_and_workflow_control"
+        ]
+      },
+      "risk_notes": [
+        "This blueprint is substantially heavier than generic AI-Q and should be simulated as a multi-stage agent workload, not a simple QPS RAG app.",
+        "Tool latency and external API fan-out can dominate end-to-end response time."
+      ]
+    },
+    "simulation_tags": [
+      "agentic",
+      "biomedical",
+      "tool_use",
+      "multimodal_rag",
+      "long_running_jobs"
+    ],
+    "known_limitations": [
+      "Very infrastructure-heavy compared with standard enterprise RAG.",
+      "Quality depends on both retrieval stack and external scientific tool integration."
+    ],
+    "source_urls": [
+      "https://build.nvidia.com/nvidia/biomedical-aiq-research-agent"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_realtime_voice_call_processing",
+    "name": "NVIDIA Real-Time Voice Call Processing",
+    "vendor": "nvidia",
+    "source": "build_nvidia_blueprint",
+    "category": "speech_call_center_streaming",
+    "short_description": "Real-time phone and voice-stream processing pipeline with streaming ASR, diarization, optional translation, and optional live agent assist.",
+    "supports_large_server_deployment": false,
+    "reference_deployments": [
+      {
+        "deployment_id": "voice_call_processing_streaming",
+        "hardware_label": "Streaming speech inference deployment",
+        "hardware_class": "1_to_4_gpu_server",
+        "gpu_topology": "ASR and speech analytics can run on shared GPUs; agent-assist or TTS may be isolated on separate GPUs for tighter p95 latency.",
+        "workload_input": {
+          "input_type": "live_phone_audio",
+          "output_type": "transcript_events_or_agent_assist",
+          "deployment": "self_hosted_or_hybrid"
+        },
+        "performance": {
+          "pipeline_type": "realtime_speech_processing"
+        },
+        "notes": "Sizing is driven by concurrent calls, chunk size, diarization, translation, and whether live agent-assist generation is enabled."
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "asr_role",
+        "role_type": "streaming_asr_model",
+        "replaceable": true,
+        "default_model_reference": "NVIDIA Nemotron / Riva streaming ASR",
+        "allowed_model_kinds": [
+          "nim_asr",
+          "asr_model",
+          "api_asr"
+        ],
+        "language_sensitive": true,
+        "notes": "Converts live call audio into streaming text segments."
+      },
+      {
+        "role_id": "diarization_role",
+        "role_type": "speaker_diarization_model",
+        "replaceable": true,
+        "default_model_reference": "Speaker diarization model",
+        "allowed_model_kinds": [
+          "diarization_model",
+          "speech_classifier"
+        ],
+        "language_sensitive": false,
+        "notes": "Separates speakers and improves call analytics fidelity."
+      },
+      {
+        "role_id": "translation_role",
+        "role_type": "speech_or_text_translation_model",
+        "replaceable": true,
+        "default_model_reference": "Real-time translation service",
+        "allowed_model_kinds": [
+          "nim_translation",
+          "seq2seq_model",
+          "api_translation"
+        ],
+        "language_sensitive": true,
+        "notes": "Optional live translation for multilingual call handling."
+      },
+      {
+        "role_id": "agent_assist_role",
+        "role_type": "assistant_model",
+        "replaceable": true,
+        "default_model_reference": "Low-latency agent assist LLM",
+        "allowed_model_kinds": [
+          "huggingface_llm",
+          "nim_llm",
+          "api_llm"
+        ],
+        "language_sensitive": true,
+        "notes": "Optional real-time assist for contact-center or operator workflows."
+      },
+      {
+        "role_id": "tts_role",
+        "role_type": "speech_synthesis_model",
+        "replaceable": true,
+        "default_model_reference": "TTS response model",
+        "allowed_model_kinds": [
+          "nim_tts",
+          "api_tts",
+          "tts_model"
+        ],
+        "language_sensitive": true,
+        "notes": "Optional synthesized response or voice bot output."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": true,
+      "language_override_supported": true,
+      "required_capabilities_by_role": {
+        "asr_role": [
+          "streaming_asr",
+          "target_language_support"
+        ],
+        "diarization_role": [
+          "speaker_separation"
+        ],
+        "translation_role": [
+          "realtime_translation"
+        ],
+        "agent_assist_role": [
+          "low_latency_generation"
+        ],
+        "tts_role": [
+          "low_latency_tts"
+        ]
+      },
+      "risk_notes": [
+        "Real-time speech workloads are dominated by concurrency and per-chunk latency, not only by request QPS.",
+        "Translation and agent-assist materially increase p95 latency and GPU reservation needs."
+      ]
+    },
+    "simulation_tags": [
+      "speech",
+      "streaming",
+      "asr",
+      "diarization",
+      "call_center",
+      "realtime"
+    ],
+    "known_limitations": [
+      "Chunk size and concurrency strongly affect latency.",
+      "Agent-assist and TTS should be modeled as optional pipeline branches, not always-on costs."
+    ],
+    "source_urls": [
+      "https://build.nvidia.com/nvidia/nemotron-voice-agent",
+      "https://developer.nvidia.com/riva",
+      "https://developer.nvidia.com/blog/how-to-build-a-voice-agent-with-rag-and-safety-guardrails/"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_route_optimization",
+    "name": "NVIDIA Route Optimization with cuOpt",
+    "vendor": "nvidia",
+    "source": "nvidia_ai_workflow",
+    "category": "decision_optimization",
+    "short_description": "Dynamic route and dispatch optimization workload based on NVIDIA cuOpt for vehicle routing, replanning, and constraint-heavy optimization.",
+    "supports_large_server_deployment": false,
+    "reference_deployments": [
+      {
+        "deployment_id": "cuopt_route_optimization",
+        "hardware_label": "Interactive solver service deployment",
+        "hardware_class": "1_to_4_gpu_server",
+        "gpu_topology": "Single or few-GPU solver nodes depending on optimization batch size and SLA targets.",
+        "workload_input": {
+          "input_type": "routing_jobs",
+          "output_type": "optimized_routes",
+          "deployment": "self_hosted_or_api"
+        },
+        "performance": {
+          "pipeline_type": "decision_optimization"
+        },
+        "notes": "Sizing is driven by stops, vehicles, constraints, and replanning frequency rather than token throughput."
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "route_preprocess_role",
+        "role_type": "problem_builder",
+        "replaceable": true,
+        "default_model_reference": "Route problem builder / preprocessing logic",
+        "allowed_model_kinds": [
+          "workflow_engine",
+          "preprocess_stack"
+        ],
+        "language_sensitive": false,
+        "notes": "Normalizes jobs, vehicles, and constraints into a solver-ready form."
+      },
+      {
+        "role_id": "optimization_solver_role",
+        "role_type": "decision_optimization_solver",
+        "replaceable": true,
+        "default_model_reference": "NVIDIA cuOpt solver",
+        "allowed_model_kinds": [
+          "optimizer_service",
+          "api_optimizer"
+        ],
+        "language_sensitive": false,
+        "notes": "Core solver for VRP, dispatch, and dynamic replanning."
+      },
+      {
+        "role_id": "dispatch_publish_role",
+        "role_type": "dispatch_publisher",
+        "replaceable": false,
+        "default_model_reference": "Dispatch/ERP/TMS integration layer",
+        "allowed_model_kinds": [
+          "workflow_engine",
+          "api_tooling"
+        ],
+        "language_sensitive": false,
+        "notes": "Publishes optimized routes to downstream systems."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": false,
+      "language_override_supported": false,
+      "required_capabilities_by_role": {
+        "optimization_solver_role": [
+          "vrp_or_lp_solver",
+          "constraint_optimization"
+        ],
+        "route_preprocess_role": [
+          "problem_normalization"
+        ]
+      },
+      "risk_notes": [
+        "Optimization workloads are dominated by constraint count, stop count, and solve SLA, not LLM token rates.",
+        "Dynamic replanning should be modeled as burst amplification on top of baseline solve arrivals."
+      ]
+    },
+    "simulation_tags": [
+      "optimization",
+      "route_planning",
+      "dispatch",
+      "cuopt",
+      "replanning"
+    ],
+    "known_limitations": [
+      "External travel-time matrix or map-service latency can dominate end-to-end wall time.",
+      "Solver performance can shift sharply with constraint cardinality."
+    ],
+    "source_urls": [
+      "https://build.nvidia.com/nvidia/nvidia-cuopt/modelcard",
+      "https://www.nvidia.com/en-us/ai-data-science/ai-workflows/route-optimization/",
+      "https://www.nvidia.com/en-us/ai-data-science/products/cuopt/"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_predictive_maintenance_forecasting",
+    "name": "NVIDIA Predictive Maintenance & Forecasting (Reference Pattern)",
+    "vendor": "nvidia",
+    "source": "nvidia_reference_pattern",
+    "category": "predictive_analytics",
+    "short_description": "Reference workload for sensor-driven predictive maintenance, short-horizon forecasting and anomaly alerting on industrial or infrastructure telemetry.",
+    "supports_large_server_deployment": false,
+    "reference_deployments": [
+      {
+        "deployment_id": "predictive_maintenance_streaming",
+        "hardware_label": "Streaming telemetry inference deployment",
+        "hardware_class": "1_to_4_gpu_server",
+        "gpu_topology": "One or few GPUs handle forecasting and anomaly scoring while CPU handles sensor ingest and alert fan-out.",
+        "workload_input": {
+          "input_type": "telemetry_windows",
+          "output_type": "risk_scores_and_alerts",
+          "deployment": "self_hosted_or_hybrid"
+        },
+        "performance": {
+          "pipeline_type": "predictive_forecasting"
+        },
+        "notes": "Sizing is driven by monitored assets, telemetry density, inference refresh interval and anomaly branch enablement rather than token throughput."
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "sensor_ingest_role",
+        "role_type": "telemetry_ingest_service",
+        "replaceable": false,
+        "default_model_reference": "Sensor aggregation and windowing service",
+        "allowed_model_kinds": [
+          "stream_processor",
+          "feature_pipeline"
+        ],
+        "language_sensitive": false,
+        "notes": "Builds normalized telemetry windows per asset or system component."
+      },
+      {
+        "role_id": "forecast_model_role",
+        "role_type": "timeseries_forecast_model",
+        "replaceable": true,
+        "default_model_reference": "Forecast model for load, failure or degradation trends",
+        "allowed_model_kinds": [
+          "forecast_model",
+          "tabular_model",
+          "triton_model"
+        ],
+        "language_sensitive": false,
+        "notes": "Produces short-horizon forecasts or degradation predictions from sliding telemetry windows."
+      },
+      {
+        "role_id": "anomaly_model_role",
+        "role_type": "anomaly_detection_model",
+        "replaceable": true,
+        "default_model_reference": "Anomaly detector or health classifier",
+        "allowed_model_kinds": [
+          "anomaly_model",
+          "classifier_model",
+          "triton_model"
+        ],
+        "language_sensitive": false,
+        "notes": "Optional anomaly branch for alert scoring and incident prioritization."
+      },
+      {
+        "role_id": "alert_publish_role",
+        "role_type": "alerting_integration",
+        "replaceable": false,
+        "default_model_reference": "Alert / CMMS / ticket integration layer",
+        "allowed_model_kinds": [
+          "workflow_engine",
+          "integration_service"
+        ],
+        "language_sensitive": false,
+        "notes": "Publishes forecast breaches and anomaly alerts to downstream systems."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": false,
+      "language_override_supported": false,
+      "required_capabilities_by_role": {
+        "forecast_model_role": [
+          "timeseries_forecasting"
+        ],
+        "anomaly_model_role": [
+          "anomaly_detection"
+        ]
+      },
+      "risk_notes": [
+        "Prediction quality depends on telemetry quality and feature windows, not only on GPU size.",
+        "Alerting branches should be modeled as optional overhead rather than always-on inference cost."
+      ]
+    },
+    "simulation_tags": [
+      "predictive_maintenance",
+      "forecasting",
+      "telemetry",
+      "timeseries",
+      "anomaly_detection"
+    ],
+    "known_limitations": [
+      "Historical feature engineering quality is not inferred automatically from the selected runtime.",
+      "Per-asset signal seasonality and retraining cadence are outside the online inference sizing scope."
+    ],
+    "source_urls": [
+      "https://build.nvidia.com/nvidia/omniverse-dsx-blueprint-for-ai-factories/blueprintcard",
+      "https://build.nvidia.com/h2o/flood-intelligence",
+      "https://developer.nvidia.com/triton-inference-server"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_recommendation_ranking_reference",
+    "name": "NVIDIA Recommendation & Ranking (Reference Pattern)",
+    "vendor": "nvidia",
+    "source": "nvidia_reference_pattern",
+    "category": "recommendation_ranking",
+    "short_description": "Low-latency retrieval, reranking and optional multimodal grounding pipeline for recommendations, search ranking and offer personalization.",
+    "supports_large_server_deployment": false,
+    "reference_deployments": [
+      {
+        "deployment_id": "recommendation_ranking_service",
+        "hardware_label": "Interactive recommendation service deployment",
+        "hardware_class": "1_to_4_gpu_server",
+        "gpu_topology": "Embedding/ranking models can share GPUs, while optional multimodal grounding may be isolated on a separate GPU for tighter latency.",
+        "workload_input": {
+          "input_type": "recommendation_or_search_requests",
+          "output_type": "ranked_candidates",
+          "deployment": "self_hosted_or_hybrid"
+        },
+        "performance": {
+          "pipeline_type": "ranking_and_recommendation"
+        },
+        "notes": "Sizing is driven by request rate, candidate pool size, reranking depth, personalization joins and optional image grounding."
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "candidate_retrieval_role",
+        "role_type": "candidate_retrieval_model",
+        "replaceable": true,
+        "default_model_reference": "Embedding or retrieval model",
+        "allowed_model_kinds": [
+          "embedding_model",
+          "retrieval_model",
+          "triton_model"
+        ],
+        "language_sensitive": true,
+        "notes": "Builds the first-stage candidate set from query, user context and catalog metadata."
+      },
+      {
+        "role_id": "ranking_model_role",
+        "role_type": "reranking_model",
+        "replaceable": true,
+        "default_model_reference": "Cross-encoder or reranker",
+        "allowed_model_kinds": [
+          "reranker_model",
+          "classifier_model",
+          "triton_model"
+        ],
+        "language_sensitive": true,
+        "notes": "Optional ranking stage to improve final ordering quality over the initial candidate pool."
+      },
+      {
+        "role_id": "image_embedding_role",
+        "role_type": "multimodal_grounding_model",
+        "replaceable": true,
+        "default_model_reference": "Image embedding / grounding model",
+        "allowed_model_kinds": [
+          "vlm_model",
+          "vision_embedding_model",
+          "triton_model"
+        ],
+        "language_sensitive": false,
+        "notes": "Optional multimodal grounding for image-aware or catalog-rich recommendation experiences."
+      },
+      {
+        "role_id": "blending_rules_role",
+        "role_type": "business_rules_or_blender",
+        "replaceable": false,
+        "default_model_reference": "Business rules and blending service",
+        "allowed_model_kinds": [
+          "workflow_engine",
+          "ranking_blender"
+        ],
+        "language_sensitive": false,
+        "notes": "Applies personalization, policy constraints and merchandising rules to final ranked results."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": true,
+      "language_override_supported": true,
+      "required_capabilities_by_role": {
+        "candidate_retrieval_role": [
+          "semantic_retrieval"
+        ],
+        "ranking_model_role": [
+          "cross_encoder_reranking"
+        ]
+      },
+      "risk_notes": [
+        "Request cost scales with candidate pool size and reranking depth faster than with raw QPS alone.",
+        "Multilingual catalogs may need stronger retrieval/ranking models than English-only defaults."
+      ]
+    },
+    "simulation_tags": [
+      "recommendation",
+      "ranking",
+      "reranking",
+      "personalization",
+      "retrieval"
+    ],
+    "known_limitations": [
+      "Offline relevance quality and click-through lift are outside the runtime sizing model.",
+      "Catalog cache hit rates and vector-store latency should still be validated separately in production design."
+    ],
+    "source_urls": [
+      "https://build.nvidia.com/nvidia/retail-shopping-assistant",
+      "https://build.nvidia.com/nvidia/llama-3_2-nv-rerankqa-1b-v2/modelcard",
+      "https://build.nvidia.com/nvidia/llama-nemotron-rerank-vl-1b-v2"
+    ]
+  },
+  {
+    "blueprint_id": "nvidia_financial_fraud_detection",
+    "name": "NVIDIA Financial Fraud Detection",
+    "vendor": "nvidia",
+    "source": "build_nvidia_blueprint",
+    "category": "fraud_anomaly_detection",
+    "short_description": "Real-time transaction scoring pipeline with graph risk enrichment, fraud classification and downstream case publishing.",
+    "supports_large_server_deployment": false,
+    "reference_deployments": [
+      {
+        "deployment_id": "financial_fraud_detection_realtime",
+        "hardware_label": "Real-time fraud scoring deployment",
+        "hardware_class": "1_to_4_gpu_server",
+        "gpu_topology": "Graph scoring and classifier inference can share one or more GPUs depending on event rate and blocking SLA.",
+        "workload_input": {
+          "input_type": "transaction_events",
+          "output_type": "risk_scores_and_cases",
+          "deployment": "self_hosted_or_hybrid"
+        },
+        "performance": {
+          "pipeline_type": "fraud_detection"
+        },
+        "notes": "Sizing is driven by event throughput, entity graph fan-out, blocking SLA, explainability overhead and graph feature usage."
+      }
+    ],
+    "pipeline_roles": [
+      {
+        "role_id": "transaction_feature_role",
+        "role_type": "transaction_feature_pipeline",
+        "replaceable": false,
+        "default_model_reference": "Feature engineering and policy normalization service",
+        "allowed_model_kinds": [
+          "stream_processor",
+          "feature_pipeline"
+        ],
+        "language_sensitive": false,
+        "notes": "Builds normalized feature vectors and rule inputs from live transactions."
+      },
+      {
+        "role_id": "graph_risk_role",
+        "role_type": "graph_risk_model",
+        "replaceable": true,
+        "default_model_reference": "GNN / graph risk scorer",
+        "allowed_model_kinds": [
+          "graph_model",
+          "classifier_model",
+          "triton_model"
+        ],
+        "language_sensitive": false,
+        "notes": "Optional entity-graph scoring branch for higher accuracy and lower false positives."
+      },
+      {
+        "role_id": "fraud_classifier_role",
+        "role_type": "fraud_classifier_model",
+        "replaceable": true,
+        "default_model_reference": "Fraud classifier or transaction model",
+        "allowed_model_kinds": [
+          "classifier_model",
+          "tabular_model",
+          "triton_model"
+        ],
+        "language_sensitive": false,
+        "notes": "Primary fraud decisioning model for approve / review / block style outputs."
+      },
+      {
+        "role_id": "case_explain_role",
+        "role_type": "explainability_service",
+        "replaceable": false,
+        "default_model_reference": "Explainability / reason-code service",
+        "allowed_model_kinds": [
+          "workflow_engine",
+          "explainability_service"
+        ],
+        "language_sensitive": false,
+        "notes": "Produces analyst-facing reason codes or case context when enabled."
+      },
+      {
+        "role_id": "case_publish_role",
+        "role_type": "case_management_integration",
+        "replaceable": false,
+        "default_model_reference": "Case management / alert integration layer",
+        "allowed_model_kinds": [
+          "workflow_engine",
+          "integration_service"
+        ],
+        "language_sensitive": false,
+        "notes": "Publishes decisions or review cases to downstream systems."
+      }
+    ],
+    "supports_model_substitution": true,
+    "substitution_policy": {
+      "role_based": true,
+      "hf_supported": false,
+      "language_override_supported": false,
+      "required_capabilities_by_role": {
+        "graph_risk_role": [
+          "graph_scoring"
+        ],
+        "fraud_classifier_role": [
+          "fraud_classification"
+        ]
+      },
+      "risk_notes": [
+        "Lower false-positive targets often increase per-event compute and explainability overhead.",
+        "Entity expansion and graph features can dominate latency more than raw transaction QPS."
+      ]
+    },
+    "simulation_tags": [
+      "fraud_detection",
+      "anomaly_detection",
+      "graph_inference",
+      "transactions",
+      "realtime"
+    ],
+    "known_limitations": [
+      "Case-management throughput and analyst review queues are not modeled as full downstream systems.",
+      "Training-data drift and threshold retuning are outside the online inference simulation scope."
+    ],
+    "source_urls": [
+      "https://build.nvidia.com/nvidia/financial-fraud-detection",
+      "https://build.nvidia.com/nvidia/build-your-own-transaction-foundation-model"
+    ]
+  }
+]

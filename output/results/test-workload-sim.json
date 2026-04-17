@@ -1,0 +1,184 @@
+[
+  {
+    "result_type": "workload_simulation",
+    "scenario_name": "Test workload sim",
+    "workload_id": "test_pipeline",
+    "workload_class": "retrieval_augmented",
+    "workload_family": "retrieval_augmented",
+    "source_blueprint_id": null,
+    "source_template_id": null,
+    "runtime_family": "vllm",
+    "runtime_mode": "vllm_continuous_batching",
+    "execution_mode": "bare_metal",
+    "hardware_catalog_id": "nvidia_dgx_h200_8gpu",
+    "software_stack_id": "nvidia_vllm_cuda",
+    "planning_profile": "baseline",
+    "gpu_count": 4,
+    "mig_profile": null,
+    "monte_carlo_trials": 20,
+    "time_horizon_sec": 120,
+    "configured_arrival_rate_per_sec": 2.0,
+    "reserved_capacity_fraction": 0.2,
+    "total_arrivals_mean": 117.9,
+    "completed_mean": 117.9,
+    "dropped_mean": 0.0,
+    "throughput_per_sec_mean": 1.0252,
+    "throughput_per_sec_p50": 0.9957,
+    "throughput_per_sec_p95": 1.263,
+    "latency_p50_ms": 44.58,
+    "latency_p95_ms": 62.24,
+    "latency_p99_ms": 84.81,
+    "queue_wait_p95_ms": 18.0,
+    "queue_wait_p99_ms": 18.78,
+    "drop_rate_mean": 0.0,
+    "drop_rate_p95": 0.0,
+    "sla_hit_rate_mean": 1.0,
+    "sla_hit_rate_p95": 1.0,
+    "gpu_util_mean": 0.0261,
+    "gpu_util_p95": 0.0327,
+    "cpu_util_mean": 0.0,
+    "cpu_util_p95": 0.0,
+    "peak_inflight_p95": 3.0,
+    "steady_state_capacity_per_sec": 0.9957,
+    "safe_capacity_24x7_per_sec": 0.681,
+    "recommended_max_arrival_rate_per_sec": 0.681,
+    "capacity_gap_per_sec": -1.319,
+    "capacity_headroom_ratio": 0.9673,
+    "procurement_band": "UPSIZE_REQUIRED",
+    "recommended_action": "Nagyobb hardver vagy t\u00f6bb GPU sz\u00fcks\u00e9ges a c\u00e9lterhel\u00e9shez.",
+    "target_fit": false,
+    "bottleneck_stage": "generate",
+    "bottleneck_breakdown": {
+      "generate": 1.0
+    },
+    "stage_performance": {
+      "rerank": {
+        "pressure_score_mean": 8.0,
+        "pressure_score_p95": 8.0,
+        "gpu_busy_ms_mean": 1459.8107293427547,
+        "gpu_busy_ms_p95": 1849.2899438766144,
+        "cpu_busy_core_ms_mean": 0.0,
+        "cpu_busy_core_ms_p95": 0.0,
+        "queue_wait_p95_ms_mean": 8.0,
+        "queue_wait_p95_ms_p95": 8.0,
+        "queue_wait_p99_ms_mean": 8.0,
+        "queue_wait_p99_ms_p95": 8.0,
+        "drop_share_mean": 0.0,
+        "drop_share_p95": 0.0,
+        "completion_share_mean": 1.0,
+        "completion_share_p95": 1.0,
+        "gpu_busy_share_mean": 0.004055029803729875,
+        "gpu_busy_share_p95": 0.005136916510768374,
+        "cpu_busy_share_mean": 0.0,
+        "cpu_busy_share_p95": 0.0,
+        "item_count_mean": 122.85,
+        "item_count_p95": 152.1,
+        "worker_count_mean": 3.0,
+        "worker_count_p95": 3.0,
+        "dropped_mean": 0.0,
+        "dropped_p95": 0.0,
+        "completed_mean": 122.85,
+        "completed_p95": 152.1
+      },
+      "generate": {
+        "pressure_score_mean": 10.0,
+        "pressure_score_p95": 10.0,
+        "gpu_busy_ms_mean": 7928.493006622137,
+        "gpu_busy_ms_p95": 9911.792798486546,
+        "cpu_busy_core_ms_mean": 0.0,
+        "cpu_busy_core_ms_p95": 0.0,
+        "queue_wait_p95_ms_mean": 10.0,
+        "queue_wait_p95_ms_p95": 10.0,
+        "queue_wait_p99_ms_mean": 10.067096550700166,
+        "queue_wait_p99_ms_p95": 10.640757722226773,
+        "drop_share_mean": 0.0,
+        "drop_share_p95": 0.0,
+        "completion_share_mean": 1.0,
+        "completion_share_p95": 1.0,
+        "gpu_busy_share_mean": 0.022023591685061496,
+        "gpu_busy_share_p95": 0.027532757773573738,
+        "cpu_busy_share_mean": 0.0,
+        "cpu_busy_share_p95": 0.0,
+        "item_count_mean": 122.85,
+        "item_count_p95": 152.1,
+        "worker_count_mean": 1.0,
+        "worker_count_p95": 1.0,
+        "dropped_mean": 0.0,
+        "dropped_p95": 0.0,
+        "completed_mean": 122.85,
+        "completed_p95": 152.1
+      }
+    },
+    "template_inputs": {},
+    "detailed_metrics": {
+      "family_display_name": "Retrieval Augmented",
+      "primary_metrics": [
+        {
+          "label": "C\u00e9l terhel\u00e9s",
+          "value": 2.0,
+          "unit": "item/s"
+        },
+        {
+          "label": "24/7 safe kapacit\u00e1s",
+          "value": 0.681,
+          "unit": "item/s"
+        }
+      ],
+      "secondary_metrics": [
+        {
+          "label": "Workload family",
+          "value": "retrieval_augmented"
+        }
+      ],
+      "decision_notes": [
+        "Top pressure stage-ek: generate, rerank",
+        "Domin\u00e1ns bottleneck: generate."
+      ]
+    },
+    "model_bindings": {
+      "reranker_role": "BAAI/bge-reranker-v2-m3",
+      "llm_role": "mistralai/Mistral-Small-3.1-24B-Instruct-2503"
+    },
+    "language_scaling": {},
+    "requested_model_overrides": {},
+    "override_role_ids": [],
+    "calibration_trace": {
+      "stages": {
+        "rerank": {
+          "stage_id": "rerank",
+          "stage_type": "rerank",
+          "matched": false
+        },
+        "generate": {
+          "stage_id": "generate",
+          "stage_type": "generator",
+          "matched": false
+        }
+      },
+      "examples": {},
+      "summary": {
+        "stage_count": 2,
+        "matched_stage_count": 0,
+        "coverage_ratio": 0.0,
+        "matched_anchor_ids": [],
+        "coverage_status": "uncalibrated",
+        "customer_label": "Heurisztikus becsl\u00e9s",
+        "severity": "warning",
+        "estimate_only": true,
+        "summary_note": "Nincs benchmark anchor illeszt\u00e9s; az eredm\u00e9ny heurisztikus sizing-becsl\u00e9sk\u00e9nt \u00e9rtelmezend\u0151."
+      }
+    },
+    "model_compatibility": {},
+    "qualitative_risk_level": "LOW",
+    "notes": [
+      "Runtime: vllm/vllm_continuous_batching",
+      "Deployment: bare_metal",
+      "Hardware: nvidia_dgx_h200_8gpu (4 GPU worker domain)",
+      "Most frequent bottleneck stage: generate",
+      "Role bindings: llm_role=mistralai/Mistral-Small-3.1-24B-Instruct-2503, reranker_role=BAAI/bge-reranker-v2-m3",
+      "Calibration coverage: 0/2 stages matched to benchmark anchors.",
+      "Procurement band: UPSIZE_REQUIRED. Nagyobb hardver vagy t\u00f6bb GPU sz\u00fcks\u00e9ges a c\u00e9lterhel\u00e9shez.",
+      "Configured arrival rate: 2.00/s, safe 24/7 capacity: 0.68/s."
+    ]
+  }
+]

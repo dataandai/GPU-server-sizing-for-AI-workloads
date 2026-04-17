@@ -1,0 +1,347 @@
+{
+  "schema_version": "1.0",
+  "records": [
+    {
+      "anchor_id": "vss_vlm_chunk_analysis_h100",
+      "blueprint_id": "nvidia_vss_video_summarization",
+      "template_id": "bp_template_vss_video_summary",
+      "workload_family": "multimodal_video_summary",
+      "stage_id": "vlm_chunk_analysis",
+      "stage_type": "encoder",
+      "reference_profile_id": "default_vlm_stage",
+      "applies_if": {
+        "runtime_family": ["vllm", "tensorrt_llm"],
+        "execution_mode": ["bare_metal", "container_on_bare_metal", "bare_metal_mig"],
+        "gpu_vendor": "nvidia"
+      },
+      "reference_topology": {
+        "gpu_count": 8,
+        "gpu_role_allocation": {
+          "vlm_chunk_analysis": 2,
+          "rag_context": 2,
+          "summary_generation": 4
+        },
+        "reference_gpu_bandwidth_gbps": 3350,
+        "reference_model_params_b": 9.0
+      },
+      "baseline": {
+        "base_ms": 2200,
+        "ms_per_input_unit": 0.72,
+        "ms_per_output_unit": 0.0
+      },
+      "scaling": {
+        "gpu_allocation_exponent": 0.85,
+        "gpu_bandwidth_exponent": 0.65,
+        "model_params_exponent": 0.5,
+        "input_scale_power": 1.0,
+        "output_scale_power": 1.0,
+        "runtime_family_scalars": {"vllm": 1.0, "tensorrt_llm": 0.95},
+        "execution_mode_scalars": {"bare_metal": 1.0, "container_on_bare_metal": 1.01, "bare_metal_mig": 1.08}
+      },
+      "notes": "VSS chunk analysis anchor tuned for chunked multimodal summarization."
+    },
+    {
+      "anchor_id": "vss_rag_context_h100",
+      "blueprint_id": "nvidia_vss_video_summarization",
+      "template_id": "bp_template_vss_video_summary",
+      "workload_family": "multimodal_video_summary",
+      "stage_id": "rag_context",
+      "stage_type": "retrieval",
+      "applies_if": {
+        "runtime_family": ["vllm", "tensorrt_llm"],
+        "execution_mode": ["bare_metal", "container_on_bare_metal", "bare_metal_mig"],
+        "gpu_vendor": "nvidia"
+      },
+      "reference_topology": {
+        "gpu_count": 8,
+        "gpu_role_allocation": {
+          "vlm_chunk_analysis": 2,
+          "rag_context": 2,
+          "summary_generation": 4
+        },
+        "reference_gpu_bandwidth_gbps": 3350,
+        "reference_model_params_b": 7.0
+      },
+      "baseline": {
+        "base_ms": 210,
+        "ms_per_input_unit": 0.18,
+        "ms_per_output_unit": 0.05
+      },
+      "scaling": {
+        "gpu_allocation_exponent": 0.7,
+        "gpu_bandwidth_exponent": 0.3,
+        "model_params_exponent": 0.3,
+        "input_scale_power": 1.0,
+        "output_scale_power": 1.0,
+        "runtime_family_scalars": {"vllm": 1.0, "tensorrt_llm": 0.97},
+        "execution_mode_scalars": {"bare_metal": 1.0, "container_on_bare_metal": 1.01, "bare_metal_mig": 1.06}
+      },
+      "notes": "VSS context assembly / graph-RAG-adjacent anchor."
+    },
+    {
+      "anchor_id": "vss_summary_generation_h100",
+      "blueprint_id": "nvidia_vss_video_summarization",
+      "template_id": "bp_template_vss_video_summary",
+      "workload_family": "multimodal_video_summary",
+      "stage_id": "summary_generation",
+      "stage_type": "generator",
+      "reference_profile_id": "default_llm_stage",
+      "applies_if": {
+        "runtime_family": ["vllm", "tensorrt_llm"],
+        "execution_mode": ["bare_metal", "container_on_bare_metal", "bare_metal_mig"],
+        "gpu_vendor": "nvidia"
+      },
+      "reference_topology": {
+        "gpu_count": 8,
+        "gpu_role_allocation": {
+          "vlm_chunk_analysis": 2,
+          "rag_context": 2,
+          "summary_generation": 4
+        },
+        "reference_gpu_bandwidth_gbps": 3350,
+        "reference_model_params_b": 70.0
+      },
+      "baseline": {
+        "base_ms": 580,
+        "ms_per_input_unit": 0.016,
+        "ms_per_output_unit": 0.098
+      },
+      "scaling": {
+        "gpu_allocation_exponent": 0.92,
+        "gpu_bandwidth_exponent": 0.72,
+        "model_params_exponent": 0.88,
+        "input_scale_power": 1.0,
+        "output_scale_power": 1.0,
+        "runtime_family_scalars": {"vllm": 1.0, "tensorrt_llm": 0.9},
+        "execution_mode_scalars": {"bare_metal": 1.0, "container_on_bare_metal": 1.01, "bare_metal_mig": 1.1}
+      },
+      "notes": "VSS summarization generation anchor calibrated to 4-GPU LLM role allocation."
+    },
+    {
+      "anchor_id": "rag_retrieve_embed_default",
+      "blueprint_id": "nvidia_rag_blueprint",
+      "template_id": "bp_template_rag",
+      "workload_family": "enterprise_rag",
+      "stage_id": "retrieve_embed",
+      "stage_type": "retrieval",
+      "applies_if": {
+        "runtime_family": ["vllm", "tensorrt_llm", "triton"],
+        "gpu_vendor": "nvidia"
+      },
+      "reference_topology": {
+        "gpu_count": 8,
+        "gpu_role_allocation": {"retrieve_embed": 2, "rerank": 1, "generate_answer": 4, "optional_parse": 1, "optional_vlm": 1},
+        "reference_gpu_bandwidth_gbps": 3000,
+        "reference_model_params_b": 7.0
+      },
+      "baseline": {
+        "base_ms": 22,
+        "ms_per_input_unit": 0.006,
+        "ms_per_output_unit": 0.001
+      },
+      "scaling": {
+        "gpu_allocation_exponent": 0.72,
+        "gpu_bandwidth_exponent": 0.25,
+        "model_params_exponent": 0.2,
+        "input_scale_power": 1.0,
+        "output_scale_power": 1.0,
+        "runtime_family_scalars": {"vllm": 1.0, "tensorrt_llm": 0.98, "triton": 1.05}
+      },
+      "notes": "RAG retrieval / embed anchor based on service-to-GPU reference topology."
+    },
+    {
+      "anchor_id": "rag_rerank_default",
+      "blueprint_id": "nvidia_rag_blueprint",
+      "template_id": "bp_template_rag",
+      "workload_family": "enterprise_rag",
+      "stage_id": "rerank",
+      "stage_type": "rerank",
+      "applies_if": {
+        "runtime_family": ["vllm", "tensorrt_llm", "triton"],
+        "gpu_vendor": "nvidia"
+      },
+      "reference_topology": {
+        "gpu_count": 8,
+        "gpu_role_allocation": {"retrieve_embed": 2, "rerank": 1, "generate_answer": 4, "optional_parse": 1, "optional_vlm": 1},
+        "reference_gpu_bandwidth_gbps": 3000,
+        "reference_model_params_b": 8.0
+      },
+      "baseline": {
+        "base_ms": 32,
+        "ms_per_input_unit": 0.008,
+        "ms_per_output_unit": 0.0015
+      },
+      "scaling": {
+        "gpu_allocation_exponent": 0.84,
+        "gpu_bandwidth_exponent": 0.28,
+        "model_params_exponent": 0.25,
+        "input_scale_power": 1.0,
+        "output_scale_power": 1.0,
+        "runtime_family_scalars": {"vllm": 1.0, "tensorrt_llm": 0.97, "triton": 1.04}
+      },
+      "notes": "RAG reranker anchor tuned for context reranker stage."
+    },
+    {
+      "anchor_id": "rag_generate_answer_default",
+      "blueprint_id": "nvidia_rag_blueprint",
+      "template_id": "bp_template_rag",
+      "workload_family": "enterprise_rag",
+      "stage_id": "generate_answer",
+      "stage_type": "generator",
+      "reference_profile_id": "rag_blueprint_llm_stage",
+      "applies_if": {
+        "runtime_family": ["vllm", "tensorrt_llm", "triton"],
+        "gpu_vendor": "nvidia"
+      },
+      "reference_topology": {
+        "gpu_count": 8,
+        "gpu_role_allocation": {"retrieve_embed": 2, "rerank": 1, "generate_answer": 4, "optional_parse": 1, "optional_vlm": 1},
+        "reference_gpu_bandwidth_gbps": 3000,
+        "reference_model_params_b": 49.0
+      },
+      "baseline": {
+        "base_ms": 140,
+        "ms_per_input_unit": 0.0038,
+        "ms_per_output_unit": 0.024
+      },
+      "scaling": {
+        "gpu_allocation_exponent": 0.92,
+        "gpu_bandwidth_exponent": 0.7,
+        "model_params_exponent": 0.84,
+        "input_scale_power": 1.0,
+        "output_scale_power": 1.0,
+        "runtime_family_scalars": {"vllm": 1.0, "tensorrt_llm": 0.9, "triton": 1.08}
+      },
+      "notes": "RAG generator anchor aligned to pipeline TTFT and generation telemetry."
+    },
+    {
+      "anchor_id": "aiq_orchestration_default",
+      "blueprint_id": "nvidia_aiq_research_agent",
+      "template_id": "bp_template_aiq",
+      "workload_family": "agentic_research",
+      "stage_id": "orchestration",
+      "stage_type": "aggregation",
+      "applies_if": {
+        "runtime_family": ["vllm", "tensorrt_llm", "triton"],
+        "gpu_vendor": "nvidia"
+      },
+      "reference_topology": {
+        "gpu_count": 8,
+        "gpu_role_allocation": {"orchestration": 1, "shallow_research": 2, "deep_research": 5, "optional_rag": 2},
+        "reference_gpu_bandwidth_gbps": 1800,
+        "reference_model_params_b": 8.0
+      },
+      "baseline": {
+        "base_ms": 180,
+        "ms_per_input_unit": 0.01,
+        "ms_per_output_unit": 0.004
+      },
+      "scaling": {
+        "gpu_allocation_exponent": 0.4,
+        "gpu_bandwidth_exponent": 0.2,
+        "model_params_exponent": 0.2,
+        "input_scale_power": 1.0,
+        "output_scale_power": 1.0,
+        "runtime_family_scalars": {"vllm": 1.0, "tensorrt_llm": 0.97, "triton": 1.03}
+      },
+      "notes": "AI-Q orchestration anchor for planning and synthesis overhead."
+    },
+    {
+      "anchor_id": "aiq_shallow_research_default",
+      "blueprint_id": "nvidia_aiq_research_agent",
+      "template_id": "bp_template_aiq",
+      "workload_family": "agentic_research",
+      "stage_id": "shallow_research",
+      "stage_type": "tool_call",
+      "applies_if": {
+        "runtime_family": ["vllm", "tensorrt_llm", "triton"],
+        "gpu_vendor": "nvidia"
+      },
+      "reference_topology": {
+        "gpu_count": 8,
+        "gpu_role_allocation": {"orchestration": 1, "shallow_research": 2, "deep_research": 5, "optional_rag": 2},
+        "reference_gpu_bandwidth_gbps": 1800,
+        "reference_model_params_b": 14.0
+      },
+      "baseline": {
+        "base_ms": 320,
+        "ms_per_input_unit": 0.012,
+        "ms_per_output_unit": 0.006
+      },
+      "scaling": {
+        "gpu_allocation_exponent": 0.58,
+        "gpu_bandwidth_exponent": 0.25,
+        "model_params_exponent": 0.4,
+        "input_scale_power": 1.0,
+        "output_scale_power": 1.0,
+        "runtime_family_scalars": {"vllm": 1.0, "tensorrt_llm": 0.95, "triton": 1.05}
+      },
+      "notes": "AI-Q shallow research anchor with tool / web phase bias."
+    },
+    {
+      "anchor_id": "aiq_deep_research_default",
+      "blueprint_id": "nvidia_aiq_research_agent",
+      "template_id": "bp_template_aiq",
+      "workload_family": "agentic_research",
+      "stage_id": "deep_research",
+      "stage_type": "generator",
+      "reference_profile_id": "default_llm_stage",
+      "applies_if": {
+        "runtime_family": ["vllm", "tensorrt_llm", "triton"],
+        "gpu_vendor": "nvidia"
+      },
+      "reference_topology": {
+        "gpu_count": 8,
+        "gpu_role_allocation": {"orchestration": 1, "shallow_research": 2, "deep_research": 5, "optional_rag": 2},
+        "reference_gpu_bandwidth_gbps": 1800,
+        "reference_model_params_b": 70.0
+      },
+      "baseline": {
+        "base_ms": 420,
+        "ms_per_input_unit": 0.006,
+        "ms_per_output_unit": 0.032
+      },
+      "scaling": {
+        "gpu_allocation_exponent": 0.96,
+        "gpu_bandwidth_exponent": 0.74,
+        "model_params_exponent": 0.86,
+        "input_scale_power": 1.0,
+        "output_scale_power": 1.0,
+        "runtime_family_scalars": {"vllm": 1.0, "tensorrt_llm": 0.89, "triton": 1.08}
+      },
+      "notes": "AI-Q deep reasoning anchor for long-running agentic research generation."
+    },
+    {
+      "anchor_id": "aiq_optional_rag_default",
+      "blueprint_id": "nvidia_aiq_research_agent",
+      "template_id": "bp_template_aiq",
+      "workload_family": "agentic_research",
+      "stage_id": "optional_rag",
+      "stage_type": "retrieval",
+      "applies_if": {
+        "runtime_family": ["vllm", "tensorrt_llm", "triton"],
+        "gpu_vendor": "nvidia"
+      },
+      "reference_topology": {
+        "gpu_count": 8,
+        "gpu_role_allocation": {"orchestration": 1, "shallow_research": 2, "deep_research": 5, "optional_rag": 2},
+        "reference_gpu_bandwidth_gbps": 1800,
+        "reference_model_params_b": 8.0
+      },
+      "baseline": {
+        "base_ms": 95,
+        "ms_per_input_unit": 0.004,
+        "ms_per_output_unit": 0.001
+      },
+      "scaling": {
+        "gpu_allocation_exponent": 0.68,
+        "gpu_bandwidth_exponent": 0.24,
+        "model_params_exponent": 0.22,
+        "input_scale_power": 1.0,
+        "output_scale_power": 1.0,
+        "runtime_family_scalars": {"vllm": 1.0, "tensorrt_llm": 0.96, "triton": 1.05}
+      },
+      "notes": "AI-Q optional RAG enrichment anchor."
+    }
+  ]
+}

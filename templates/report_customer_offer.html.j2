@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ report.scenario_name }} - Customer sizing report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 28px; color: #0f172a; }
+    h1, h2, h3 { margin: 0 0 8px; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 18px; margin-top: 28px; padding-bottom: 6px; border-bottom: 1px solid #cbd5e1; }
+    .subtitle { color: #475569; margin-bottom: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .card { border: 1px solid #cbd5e1; border-radius: 10px; padding: 14px; background: #f8fafc; }
+    .metric { font-size: 13px; color: #475569; }
+    .metric strong { display: block; font-size: 22px; color: #0f172a; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; font-size: 12px; vertical-align: top; }
+    th { background: #e2e8f0; }
+    .pill { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 11px; border: 1px solid #94a3b8; }
+    ul { margin: 8px 0 0 18px; }
+    code { background: #e2e8f0; padding: 2px 4px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>{{ report.scenario_name }}</h1>
+  <div class="subtitle">{{ report.executive_summary.headline }}</div>
+  <p>{{ report.executive_summary.subheadline }}</p>
+
+  <div class="grid">
+    {% for metric in report.executive_summary.top_metrics %}
+    <div class="card metric">{{ metric.label }}<strong>{{ metric.value }}</strong></div>
+    {% endfor %}
+  </div>
+
+  <h2>Workload summary</h2>
+  <div class="grid">
+    <div class="card">
+      <div><strong>Workload ID</strong>: {{ report.workload_summary.workload_id }}</div>
+      <div><strong>Class</strong>: {{ report.workload_summary.workload_class }}</div>
+      <div><strong>Family</strong>: {{ report.workload_summary.workload_family }}</div>
+      <div><strong>Arrival rate</strong>: {{ '%.3f'|format(report.workload_summary.configured_arrival_rate_per_sec or 0.0) }} req/s</div>
+      <div><strong>Planning profile</strong>: {{ report.workload_summary.planning_profile }}</div>
+      {% if report.workload_summary.override_role_ids %}<div><strong>Override roles</strong>: {{ report.workload_summary.override_role_ids|join(', ') }}</div>{% endif %}
+    </div>
+    <div class="card">
+      <div><strong>Model bindings</strong></div>
+      <ul>
+        {% for role, model in report.workload_summary.model_bindings.items() %}
+        <li><code>{{ role }}</code>: {{ model }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <h2>Hardware recommendation</h2>
+  <table>
+    <tr><th>Hardware</th><td>{{ report.recommended_configuration.hardware_display_name }}</td></tr>
+    <tr><th>GPU count</th><td>{{ report.recommended_configuration.gpu_count }}</td></tr>
+    <tr><th>Runtime</th><td>{{ report.recommended_configuration.runtime_family }} / {{ report.recommended_configuration.runtime_mode }}</td></tr>
+    <tr><th>Software stack</th><td>{{ report.recommended_configuration.software_stack }}</td></tr>
+    <tr><th>Deployment</th><td>{{ report.recommended_configuration.execution_mode }}{% if report.recommended_configuration.mig_profile %} / {{ report.recommended_configuration.mig_profile }}{% endif %}</td></tr>
+  </table>
+
+  <h2>Calibration status</h2>
+  <table>
+    <tr><th>Status</th><td>{{ report.calibration_summary.customer_label }}</td></tr>
+    <tr><th>Coverage</th><td>{{ report.calibration_summary.matched_stage_count }}/{{ report.calibration_summary.stage_count }} stage ({{ '%.1f'|format(report.calibration_summary.coverage_ratio * 100) }}%)</td></tr>
+    <tr><th>Estimate only</th><td>{{ "yes" if report.calibration_summary.estimate_only else "no" }}</td></tr>
+    <tr><th>Note</th><td>{{ report.calibration_summary.summary_note }}</td></tr>
+  </table>
+
+  <h2>24/7 safe capacity</h2>
+  <table>
+    <tr><th>Configured arrival</th><td>{{ '%.3f'|format(report.capacity_summary.configured_arrival_rate_per_sec) }} req/s</td></tr>
+    <tr><th>Steady-state capacity</th><td>{{ '%.3f'|format(report.capacity_summary.steady_state_capacity_per_sec) }} req/s</td></tr>
+    <tr><th>Safe 24/7 capacity</th><td>{{ '%.3f'|format(report.capacity_summary.safe_capacity_24x7_per_sec) }} req/s</td></tr>
+    <tr><th>Headroom ratio</th><td>{{ '%.2f'|format(report.capacity_summary.capacity_headroom_ratio) }}</td></tr>
+    <tr><th>Capacity gap</th><td>{{ '%+.3f'|format(report.capacity_summary.capacity_gap_per_sec) }} req/s</td></tr>
+  </table>
+
+  <h2>Model compatibility</h2>
+  <div class="card">
+    <div><strong>Overall status:</strong> {{ report.model_compatibility.overall_status }}</div>
+    <div><strong>OK / Warning / Error:</strong> {{ report.model_compatibility.status_counts.ok or 0 }} / {{ report.model_compatibility.status_counts.warning or 0 }} / {{ report.model_compatibility.status_counts.error or 0 }}</div>
+    {% if report.model_compatibility.blocking_roles %}<div><strong>Blocking roles:</strong> {{ report.model_compatibility.blocking_roles|join(', ') }}</div>{% endif %}
+    {% if report.model_compatibility.notes %}
+    <ul>
+      {% for note in report.model_compatibility.notes %}<li>{{ note }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+    {% if report.model_compatibility.serving_plan.recommendation_lines %}
+    <div style="margin-top:10px"><strong>Serving recommendation</strong></div>
+    <ul>
+      {% for line in report.model_compatibility.serving_plan.recommendation_lines %}<li>{{ line }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+    {% if report.model_compatibility.serving_notes %}
+    <div style="margin-top:10px"><strong>Engine notes</strong></div>
+    <ul>
+      {% for line in report.model_compatibility.serving_notes %}<li>{{ line }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% if report.model_compatibility.checks %}
+  <table>
+    <thead><tr><th>Role</th><th>Model</th><th>Serving</th><th>KV / Batch</th></tr></thead>
+    <tbody>
+      {% for role, check in report.model_compatibility.checks.items() %}
+      <tr>
+        <td>{{ role }}</td>
+        <td>{{ check.model_id }}</td>
+        <td>{{ check.serving_recommendation.summary_line if check.serving_recommendation else '-' }}</td>
+        <td>
+          {% if check.serving_recommendation %}
+            ctx={{ check.serving_recommendation.recommended_context_window_tokens }};
+            batch={{ check.serving_recommendation.recommended_max_batch_size }};
+            kv={{ '%.1f'|format(check.serving_recommendation.kv_cache_estimate.kv_cache_gb_total or 0.0) }} GB
+          {% else %}-{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <h2>Bottleneck</h2>
+  <div class="card">
+    <div><strong>Primary bottleneck stage:</strong> {{ report.bottleneck_analysis.bottleneck_stage or '-' }}</div>
+    <table>
+      <thead><tr><th>Stage</th><th>Share</th></tr></thead>
+      <tbody>
+        {% for stage, share in report.bottleneck_analysis.breakdown.items() %}
+        <tr><td>{{ stage }}</td><td>{{ '%.1f'|format(share * 100) }}%</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Baseline vs override vs safe profile</h2>
+  <table>
+    <thead><tr><th>Scenario</th><th>Planning</th><th>Safe capacity</th><th>Latency p95</th><th>GPU util p95</th><th>Band</th></tr></thead>
+    <tbody>
+      {% for row in report.comparison_views %}
+      <tr>
+        <td>{{ row.scenario_name }}</td>
+        <td>{{ row.planning_profile }}{% if row.override_active %} <span class="pill">override</span>{% endif %}</td>
+        <td>{{ '%.3f'|format(row.safe_capacity_24x7_per_sec or 0.0) }}</td>
+        <td>{{ '%.0f'|format(row.latency_p95_ms or 0.0) }} ms</td>
+        <td>{{ '%.1f'|format((row.gpu_util_p95 or 0.0) * 100) }}%</td>
+        <td>{{ row.procurement_band }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Language-specific model override impact</h2>
+  <table>
+    <tr><th>Baseline vs override latency delta</th><td>{{ report.override_impact.baseline_vs_override.latency_p95_delta_ms }}</td></tr>
+    <tr><th>Baseline vs override safe capacity delta</th><td>{{ report.override_impact.baseline_vs_override.safe_capacity_delta_per_sec }}</td></tr>
+    <tr><th>Baseline vs safe latency delta</th><td>{{ report.override_impact.baseline_vs_safe.latency_p95_delta_ms }}</td></tr>
+    <tr><th>Baseline vs safe capacity delta</th><td>{{ report.override_impact.baseline_vs_safe.safe_capacity_delta_per_sec }}</td></tr>
+  </table>
+
+  <h2>Assumptions & limits</h2>
+  <ul>
+    {% for note in report.assumptions_and_limits.notes %}
+    <li>{{ note }}</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

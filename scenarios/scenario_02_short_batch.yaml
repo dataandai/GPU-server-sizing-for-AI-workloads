@@ -1,0 +1,17 @@
+# Scenario 2: Short batch — 50 short jobs
+scenario_name: "short_batch_50x256_128"
+hardware_profile: "h200_8gpu"
+weight_precision: "int8"
+kv_cache_precision: "fp16"
+tensor_parallel_degree: 8
+runtime_overhead_ratio: 0.10
+max_vram_utilization_target: 0.95
+safety_headroom_ratio: 0.05
+
+workload_type: "fixed_batch"
+workload:
+  prompt_tokens: 256
+  max_output_tokens: 128
+  num_parallel_jobs: 50
+
+monte_carlo_enabled: false

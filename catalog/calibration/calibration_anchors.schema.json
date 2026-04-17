@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Calibration anchors",
+  "type": "object",
+  "required": ["schema_version", "records"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["anchor_id", "stage_id", "baseline"],
+        "properties": {
+          "anchor_id": {"type": "string"},
+          "blueprint_id": {"type": "string"},
+          "template_id": {"type": "string"},
+          "workload_family": {"type": "string"},
+          "stage_id": {"type": "string"},
+          "stage_type": {"type": "string"},
+          "reference_profile_id": {"type": "string"},
+          "applies_if": {"type": "object"},
+          "reference_topology": {"type": "object"},
+          "baseline": {"type": "object"},
+          "scaling": {"type": "object"},
+          "notes": {"type": "string"}
+        }
+      }
+    }
+  }
+}

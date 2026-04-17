@@ -1,0 +1,416 @@
+schema_version: '1.0'
+name: ui_template_case
+description: 'Advanced workload template: Retrieval + Rerank + Generation'
+metadata:
+  source_template_id: lib_retrieval_rerank_generation
+  source_template_library_id: lib_retrieval_rerank_generation
+  template_source: workload_library
+  workload_family: retrieval_rerank_generation
+  template_display_name: Retrieval + Rerank + Generation
+  planning_profile: baseline
+  template_inputs:
+    request_rate_per_sec: 1.5
+    avg_context_docs: 6
+    avg_prompt_tokens: 1600
+    avg_output_tokens: 280
+    rerank_top_k: 16
+    guardrail_enabled: false
+  language_scaling:
+    dominant_language: hu
+    dominant_share: 0.8
+    prompt_multiplier: 1.28
+    generation_multiplier: 2.12
+    context_multiplier: 1.8
+  requested_model_overrides:
+    llm_role: mistralai/Mistral-Small-3.1-24B-Instruct-2503
+    reranker_role: BAAI/bge-reranker-v2-m3
+  override_role_ids:
+  - llm_role
+  - reranker_role
+  model_compatibility:
+    overall_status: warning
+    status_counts:
+      ok: 1
+      warning: 2
+      error: 0
+    blocking_roles: []
+    checks:
+      embedding_role:
+        role_id: embedding_role
+        model_id: nvidia/nv-embedqa-e5-v5
+        status: warning
+        hardware_catalog_id: nvidia_dgx_h200_8gpu
+        software_stack_id: nvidia_vllm_cuda
+        deployment_profile_id: bare_metal_container
+        gpu_memory_gb: 141.0
+        gpu_count: 8
+        estimated_model_profile:
+          model_kind: embedding
+          param_size_b: 0.6
+          estimated_min_vram_gb_per_gpu: 6
+          estimated_recommended_vram_gb_per_gpu: 8
+          recommended_min_gpu_count: 1
+          validation_level: catalog
+        serving_recommendation:
+          status: warning
+          engine_id: vllm
+          engine_label: vLLM continuous batching
+          recommended_weight_precision: bf16
+          recommended_kv_cache_precision: fp16
+          recommended_tensor_parallel_degree: 1
+          recommended_context_window_tokens: 1600
+          recommended_max_batch_size: 12
+          workload_characteristics:
+            template_family: retrieval_rerank_generation
+            prompt_tokens: 1600
+            output_tokens: 280
+            effective_concurrency: 3
+            effective_context_tokens: 1600
+            queue_budget_ms: 700
+          kv_cache_estimate:
+            kv_cache_gb_total: 0.0
+            kv_cache_gb_per_gpu: 0.0
+            fits_with_headroom: true
+            estimated_total_active_tokens: 0
+            estimated_kv_gb_per_1k_tokens_total: 0.0
+          warnings:
+          - Ez a szerepkör inkább service vagy encoder jellegű; Triton/NIM oldali
+            kiszolgálás gyakran egyszerűbb és kiszámíthatóbb.
+          errors: []
+          notes:
+          - Általános on-prem LLM serving útvonal; hosszú context és vegyes batch
+            esetén jó alap.
+          - 'Ajánlott engine: vLLM continuous batching, precision: BF16, KV cache:
+            FP16, TP: 1.'
+          summary_line: vLLM continuous batching · BF16 · TP=1 · ctx≈1600 · batch≈12
+        messages:
+        - Általános on-prem LLM serving útvonal; hosszú context és vegyes batch esetén
+          jó alap.
+        - A kiválasztott hardver/stack/deployment kombináció alapvetően illeszkedik
+          a szerepkörhöz.
+        warnings:
+        - Ez a szerepkör inkább service vagy encoder jellegű; Triton/NIM oldali kiszolgálás
+          gyakran egyszerűbb és kiszámíthatóbb.
+        errors: []
+        notes: []
+      reranker_role:
+        role_id: reranker_role
+        model_id: BAAI/bge-reranker-v2-m3
+        status: warning
+        hardware_catalog_id: nvidia_dgx_h200_8gpu
+        software_stack_id: nvidia_vllm_cuda
+        deployment_profile_id: bare_metal_container
+        gpu_memory_gb: 141.0
+        gpu_count: 8
+        estimated_model_profile:
+          model_kind: reranker
+          param_size_b: 0.6
+          estimated_min_vram_gb_per_gpu: 6
+          estimated_recommended_vram_gb_per_gpu: 8
+          recommended_min_gpu_count: 1
+          validation_level: catalog
+        serving_recommendation:
+          status: warning
+          engine_id: vllm
+          engine_label: vLLM continuous batching
+          recommended_weight_precision: bf16
+          recommended_kv_cache_precision: fp16
+          recommended_tensor_parallel_degree: 1
+          recommended_context_window_tokens: 1600
+          recommended_max_batch_size: 12
+          workload_characteristics:
+            template_family: retrieval_rerank_generation
+            prompt_tokens: 1600
+            output_tokens: 280
+            effective_concurrency: 3
+            effective_context_tokens: 1600
+            queue_budget_ms: 700
+          kv_cache_estimate:
+            kv_cache_gb_total: 0.0
+            kv_cache_gb_per_gpu: 0.0
+            fits_with_headroom: true
+            estimated_total_active_tokens: 0
+            estimated_kv_gb_per_1k_tokens_total: 0.0
+          warnings:
+          - Ez a szerepkör inkább service vagy encoder jellegű; Triton/NIM oldali
+            kiszolgálás gyakran egyszerűbb és kiszámíthatóbb.
+          errors: []
+          notes:
+          - Általános on-prem LLM serving útvonal; hosszú context és vegyes batch
+            esetén jó alap.
+          - 'Ajánlott engine: vLLM continuous batching, precision: BF16, KV cache:
+            FP16, TP: 1.'
+          summary_line: vLLM continuous batching · BF16 · TP=1 · ctx≈1600 · batch≈12
+        messages:
+        - Általános on-prem LLM serving útvonal; hosszú context és vegyes batch esetén
+          jó alap.
+        - A kiválasztott hardver/stack/deployment kombináció alapvetően illeszkedik
+          a szerepkörhöz.
+        warnings:
+        - Ez a szerepkör inkább service vagy encoder jellegű; Triton/NIM oldali kiszolgálás
+          gyakran egyszerűbb és kiszámíthatóbb.
+        errors: []
+        notes: []
+      llm_role:
+        role_id: llm_role
+        model_id: mistralai/Mistral-Small-3.1-24B-Instruct-2503
+        status: ok
+        hardware_catalog_id: nvidia_dgx_h200_8gpu
+        software_stack_id: nvidia_vllm_cuda
+        deployment_profile_id: bare_metal_container
+        gpu_memory_gb: 141.0
+        gpu_count: 8
+        estimated_model_profile:
+          model_kind: llm
+          param_size_b: 24
+          estimated_min_vram_gb_per_gpu: 34
+          estimated_recommended_vram_gb_per_gpu: 48
+          recommended_min_gpu_count: 1
+          validation_level: catalog
+        serving_recommendation:
+          status: ok
+          engine_id: vllm
+          engine_label: vLLM continuous batching
+          recommended_weight_precision: fp8
+          recommended_kv_cache_precision: fp8
+          recommended_tensor_parallel_degree: 1
+          recommended_context_window_tokens: 4096
+          recommended_max_batch_size: 48
+          workload_characteristics:
+            template_family: retrieval_rerank_generation
+            prompt_tokens: 1600
+            output_tokens: 280
+            effective_concurrency: 3
+            effective_context_tokens: 1740
+            queue_budget_ms: 700
+          kv_cache_estimate:
+            kv_cache_gb_total: 0.862
+            kv_cache_gb_per_gpu: 0.862
+            fits_with_headroom: true
+            estimated_total_active_tokens: 12288
+            estimated_kv_gb_per_1k_tokens_total: 0.0701
+            headroom_limit_gb_per_gpu: 126.9
+          warnings: []
+          errors: []
+          notes:
+          - Általános on-prem LLM serving útvonal; hosszú context és vegyes batch
+            esetén jó alap.
+          - 'Ajánlott engine: vLLM continuous batching, precision: FP8, KV cache:
+            FP8, TP: 1.'
+          - 'Becsült context cél: 4096 token, ajánlott max batch: 48, KV cache igény
+            ~0.9 GB összesen.'
+          summary_line: vLLM continuous batching · FP8 · TP=1 · ctx≈4096 · batch≈48
+        messages:
+        - Általános on-prem LLM serving útvonal; hosszú context és vegyes batch esetén
+          jó alap.
+        - A kiválasztott hardver/stack/deployment kombináció alapvetően illeszkedik
+          a szerepkörhöz.
+        warnings: []
+        errors: []
+        notes:
+        - Kompaktabb on-prem alternatíva 24B osztályban.
+    notes:
+    - 'embedding_role: Ez a szerepkör inkább service vagy encoder jellegű; Triton/NIM
+      oldali kiszolgálás gyakran egyszerűbb és kiszámíthatóbb.'
+    - 'reranker_role: Ez a szerepkör inkább service vagy encoder jellegű; Triton/NIM
+      oldali kiszolgálás gyakran egyszerűbb és kiszámíthatóbb.'
+    - 'llm_role: Általános on-prem LLM serving útvonal; hosszú context és vegyes batch
+      esetén jó alap.'
+    serving_notes:
+    - Általános on-prem LLM serving útvonal; hosszú context és vegyes batch esetén
+      jó alap.
+    - 'Ajánlott engine: vLLM continuous batching, precision: BF16, KV cache: FP16,
+      TP: 1.'
+    - 'Ajánlott engine: vLLM continuous batching, precision: FP8, KV cache: FP8, TP:
+      1.'
+    - 'Becsült context cél: 4096 token, ajánlott max batch: 48, KV cache igény ~0.9
+      GB összesen.'
+    serving_plan:
+      preferred_engine: vllm
+      recommendation_lines:
+      - 'embedding_role: vLLM continuous batching · BF16 · TP=1 · ctx≈1600 · batch≈12'
+      - 'reranker_role: vLLM continuous batching · BF16 · TP=1 · ctx≈1600 · batch≈12'
+      - 'llm_role: vLLM continuous batching · FP8 · TP=1 · ctx≈4096 · batch≈48'
+  validation_warnings:
+  - 'embedding_role: Ez a szerepkör inkább service vagy encoder jellegű; Triton/NIM
+    oldali kiszolgálás gyakran egyszerűbb és kiszámíthatóbb.'
+  - 'reranker_role: Ez a szerepkör inkább service vagy encoder jellegű; Triton/NIM
+    oldali kiszolgálás gyakran egyszerűbb és kiszámíthatóbb.'
+  - 'llm_role: Általános on-prem LLM serving útvonal; hosszú context és vegyes batch
+    esetén jó alap.'
+workload_definition:
+  workload_id: lib_retrieval_rerank_generation
+  workload_class: retrieval_augmented
+  input_profile:
+    arrival_pattern:
+      mode: bursty_poisson
+      mean_arrival_rate_per_sec: 1.5
+      burst_multiplier_p95: 1.8
+      business_cycle:
+        enabled: true
+        daily_peak_multiplier: 1.4
+        weekly_peak_multiplier: 1.1
+    work_item:
+      unit_type: request
+      modalities:
+      - text
+      size_distribution:
+        distribution: lognormal
+        p50: 2880.0
+        p95: 5472.0
+      complexity_distribution:
+        distribution: triangular
+        mean: 1.85
+        stddev: 0.22
+        p95: 2.497
+      language_mix:
+      - language: hu
+        share: 0.8
+      - language: en
+        share: 0.19999999999999996
+  pipeline:
+    topology: linear
+    stages:
+    - stage_id: retrieve
+      display_name: Retrieve
+      stage_type: embedding
+      language_sensitive: true
+      model_binding:
+        role_id: embedding_role
+        default_model_id: nvidia/nv-embedqa-e5-v5
+        override_model_id: intfloat/multilingual-e5-large
+        model_source: huggingface
+        requires_manual_validation: true
+        selected_model_id: intfloat/multilingual-e5-large
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 0.12
+        service_time_model:
+          mode: linear
+          base_ms: 5
+          ms_per_input_unit: 0.003
+      batching_profile:
+        batching_mode: dynamic
+        max_batch_size: 32
+        batch_timeout_ms: 8
+        allow_mixed_lengths: true
+    - stage_id: rerank
+      display_name: Rerank
+      stage_type: rerank
+      language_sensitive: true
+      model_binding:
+        role_id: reranker_role
+        default_model_id: nvidia/llama-3.2-nv-rerankqa-1b-v2
+        override_model_id: BAAI/bge-reranker-v2-m3
+        model_source: huggingface
+        requires_manual_validation: true
+        selected_model_id: BAAI/bge-reranker-v2-m3
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 0.22
+        service_time_model:
+          mode: linear
+          base_ms: 10
+          ms_per_input_unit: 0.002
+      batching_profile:
+        batching_mode: dynamic
+        max_batch_size: 16
+        batch_timeout_ms: 10
+        allow_mixed_lengths: true
+    - stage_id: generate
+      display_name: Generate
+      stage_type: generator
+      language_sensitive: true
+      model_binding:
+        role_id: llm_role
+        default_model_id: Qwen/Qwen2.5-32B-Instruct
+        override_model_id: mistralai/Mistral-Small-3.1-24B-Instruct-2503
+        model_source: huggingface
+        requires_manual_validation: true
+        selected_model_id: mistralai/Mistral-Small-3.1-24B-Instruct-2503
+      resource_profile:
+        primary_device: gpu
+        gpu_memory_gb_per_work_item: 1.8
+        service_time_model:
+          mode: reference_scaled
+          reference_profile_id: default_llm_stage
+      batching_profile:
+        batching_mode: continuous
+        max_batch_size: 64
+        batch_timeout_ms: 15
+        max_batched_tokens: 32768
+        allow_mixed_lengths: true
+      failure_policy:
+        retry_on_failure: false
+        drop_on_overload: true
+  sla_policy:
+    latency_target_ms_p95: 2352.32
+    throughput_target_per_sec: 1.275
+    deadline_per_item_ms: 4500
+    availability_target: 0.999
+    max_drop_rate: 0.01
+    max_queue_wait_ms: 700
+runtime_profile:
+  runtime_family: vllm
+  scheduler_model:
+    mode: vllm_continuous_batching
+    chunked_prefill: true
+    decode_priority: true
+    max_num_batched_tokens: 32768
+    max_num_seqs: 64
+    prefix_cache_enabled: true
+    prefix_cache_hit_rate: 0.25
+    preemption_penalty_ms: 12
+    speculative_decode_enabled: false
+  runtime_penalties:
+    small_batch_efficiency_penalty: 1.08
+    mixed_length_batch_penalty: 1.06
+    queue_timeout_penalty: 1.03
+  runtime_id: vllm_lib_retrieval_rerank_generation
+deployment_profile:
+  deployment_id: bare_metal_container
+  execution_mode: container_on_bare_metal
+  hardware_binding:
+    hardware_catalog_id: nvidia_dgx_h200_8gpu
+    gpu_count: 8
+    tp_size: 8
+    software_stack_id: nvidia_vllm_cuda
+  partitioning:
+    mode: none
+    mig_profile: null
+    virtual_gpus_per_device: null
+    isolation_level: hard
+  overhead_model:
+    static_latency_overhead_ms: 0.0
+    throughput_penalty_factor: 1.0
+    latency_jitter_stddev_ms: 4.0
+  availability:
+    reserved_capacity_fraction: 0.08
+    reserved_capacity_percent: 8.0
+    n_plus_one_enabled: false
+    max_safe_gpu_utilization: 0.82
+  operational_policy:
+    planning_profile: baseline
+    reserved_capacity_fraction: 0.08
+    target_max_gpu_utilization: 0.82
+    target_max_cpu_utilization: 0.8
+    n_plus_one_enabled: false
+simulation_profile:
+  monte_carlo_trials: 40
+  warmup_sec: 30
+  time_horizon_sec: 300
+  time_step_ms: 10
+  random_variables:
+  - name: arrival_noise
+    applies_to: input
+    distribution: lognormal
+    parameters:
+      mean: 0
+      sigma: 0.2
+    target_path: workload_definition.input_profile.arrival_pattern.mean_arrival_rate_per_sec
+  - name: size_noise
+    applies_to: input
+    distribution: lognormal
+    parameters:
+      sigma: 0.25
+    target_path: workload_definition.input_profile.work_item.size_distribution

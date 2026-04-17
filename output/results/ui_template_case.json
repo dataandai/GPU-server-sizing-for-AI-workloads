@@ -1,0 +1,450 @@
+[
+  {
+    "result_type": "workload_simulation",
+    "scenario_name": "ui_template_case",
+    "workload_id": "lib_retrieval_rerank_generation",
+    "workload_class": "retrieval_augmented",
+    "workload_family": "retrieval_rerank_generation",
+    "source_blueprint_id": null,
+    "source_template_id": "lib_retrieval_rerank_generation",
+    "runtime_family": "vllm",
+    "runtime_mode": "vllm_continuous_batching",
+    "execution_mode": "container_on_bare_metal",
+    "hardware_catalog_id": "nvidia_dgx_h200_8gpu",
+    "software_stack_id": "nvidia_vllm_cuda",
+    "planning_profile": "baseline",
+    "gpu_count": 8,
+    "mig_profile": null,
+    "monte_carlo_trials": 40,
+    "time_horizon_sec": 300,
+    "configured_arrival_rate_per_sec": 1.5,
+    "reserved_capacity_fraction": 0.08,
+    "total_arrivals_mean": 359.12,
+    "completed_mean": 359.12,
+    "dropped_mean": 0.0,
+    "throughput_per_sec_mean": 1.3301,
+    "throughput_per_sec_p50": 1.2463,
+    "throughput_per_sec_p95": 2.6237,
+    "latency_p50_ms": 126.93,
+    "latency_p95_ms": 230.13,
+    "latency_p99_ms": 343.43,
+    "queue_wait_p95_ms": 37.82,
+    "queue_wait_p99_ms": 75.37,
+    "drop_rate_mean": 0.0,
+    "drop_rate_p95": 0.0,
+    "sla_hit_rate_mean": 1.0,
+    "sla_hit_rate_p95": 1.0,
+    "gpu_util_mean": 0.0731,
+    "gpu_util_p95": 0.1491,
+    "cpu_util_mean": 0.0,
+    "cpu_util_p95": 0.0,
+    "peak_inflight_p95": 4.05,
+    "steady_state_capacity_per_sec": 1.2463,
+    "safe_capacity_24x7_per_sec": 0.9803,
+    "recommended_max_arrival_rate_per_sec": 0.9803,
+    "capacity_gap_per_sec": -0.5197,
+    "capacity_headroom_ratio": 0.8509,
+    "procurement_band": "UPSIZE_REQUIRED",
+    "recommended_action": "Nagyobb hardver vagy t\u00f6bb GPU sz\u00fcks\u00e9ges a c\u00e9lterhel\u00e9shez.",
+    "target_fit": false,
+    "bottleneck_stage": "generate",
+    "bottleneck_breakdown": {
+      "generate": 1.0
+    },
+    "stage_performance": {
+      "retrieve": {
+        "pressure_score_mean": 8.0,
+        "pressure_score_p95": 8.0,
+        "gpu_busy_ms_mean": 11981.955075758626,
+        "gpu_busy_ms_p95": 25317.38815085719,
+        "cpu_busy_core_ms_mean": 0.0,
+        "cpu_busy_core_ms_p95": 0.0,
+        "queue_wait_p95_ms_mean": 8.0,
+        "queue_wait_p95_ms_p95": 8.0,
+        "queue_wait_p99_ms_mean": 8.0,
+        "queue_wait_p99_ms_p95": 8.0,
+        "drop_share_mean": 0.0,
+        "drop_share_p95": 0.0,
+        "completion_share_mean": 1.0,
+        "completion_share_p95": 1.0,
+        "gpu_busy_share_mean": 0.0057056928932183925,
+        "gpu_busy_share_p95": 0.012055899119455805,
+        "cpu_busy_share_mean": 0.0,
+        "cpu_busy_share_p95": 0.0,
+        "item_count_mean": 401.775,
+        "item_count_p95": 786.15,
+        "worker_count_mean": 7.0,
+        "worker_count_p95": 7.0,
+        "dropped_mean": 0.0,
+        "dropped_p95": 0.0,
+        "completed_mean": 401.775,
+        "completed_p95": 786.15
+      },
+      "rerank": {
+        "pressure_score_mean": 10.0,
+        "pressure_score_p95": 10.0,
+        "gpu_busy_ms_mean": 10833.24244831948,
+        "gpu_busy_ms_p95": 22209.35753679698,
+        "cpu_busy_core_ms_mean": 0.0,
+        "cpu_busy_core_ms_p95": 0.0,
+        "queue_wait_p95_ms_mean": 10.0,
+        "queue_wait_p95_ms_p95": 10.0,
+        "queue_wait_p99_ms_mean": 10.0,
+        "queue_wait_p99_ms_p95": 10.0,
+        "drop_share_mean": 0.0,
+        "drop_share_p95": 0.0,
+        "completion_share_mean": 1.0,
+        "completion_share_p95": 1.0,
+        "gpu_busy_share_mean": 0.005158686880152133,
+        "gpu_busy_share_p95": 0.010575884541331895,
+        "cpu_busy_share_mean": 0.0,
+        "cpu_busy_share_p95": 0.0,
+        "item_count_mean": 401.775,
+        "item_count_p95": 786.15,
+        "worker_count_mean": 7.0,
+        "worker_count_p95": 7.0,
+        "dropped_mean": 0.0,
+        "dropped_p95": 0.0,
+        "completed_mean": 401.775,
+        "completed_p95": 786.15
+      },
+      "generate": {
+        "pressure_score_mean": 15.91620450530765,
+        "pressure_score_p95": 20.193791403862832,
+        "gpu_busy_ms_mean": 130674.68001019373,
+        "gpu_busy_ms_p95": 265512.58328027127,
+        "cpu_busy_core_ms_mean": 0.0,
+        "cpu_busy_core_ms_p95": 0.0,
+        "queue_wait_p95_ms_mean": 15.91620450530765,
+        "queue_wait_p95_ms_p95": 20.193791403862832,
+        "queue_wait_p99_ms_mean": 31.36621345336971,
+        "queue_wait_p99_ms_p95": 51.0849744799595,
+        "drop_share_mean": 0.0,
+        "drop_share_p95": 0.0,
+        "completion_share_mean": 1.0,
+        "completion_share_p95": 1.0,
+        "gpu_busy_share_mean": 0.06222603810009225,
+        "gpu_busy_share_p95": 0.12643456346679585,
+        "cpu_busy_share_mean": 0.0,
+        "cpu_busy_share_p95": 0.0,
+        "item_count_mean": 401.775,
+        "item_count_p95": 786.15,
+        "worker_count_mean": 1.0,
+        "worker_count_p95": 1.0,
+        "dropped_mean": 0.0,
+        "dropped_p95": 0.0,
+        "completed_mean": 401.775,
+        "completed_p95": 786.15
+      }
+    },
+    "template_inputs": {
+      "request_rate_per_sec": 1.5,
+      "avg_context_docs": 6,
+      "avg_prompt_tokens": 1600,
+      "avg_output_tokens": 280,
+      "rerank_top_k": 16,
+      "guardrail_enabled": false
+    },
+    "detailed_metrics": {
+      "family_display_name": "Retrieval Rerank Generation",
+      "primary_metrics": [
+        {
+          "label": "C\u00e9l terhel\u00e9s",
+          "value": 1.5,
+          "unit": "item/s"
+        },
+        {
+          "label": "24/7 safe kapacit\u00e1s",
+          "value": 0.9803,
+          "unit": "item/s"
+        }
+      ],
+      "secondary_metrics": [
+        {
+          "label": "Workload family",
+          "value": "retrieval_rerank_generation"
+        }
+      ],
+      "decision_notes": [
+        "Top pressure stage-ek: generate, rerank, retrieve",
+        "Domin\u00e1ns bottleneck: generate."
+      ]
+    },
+    "model_bindings": {
+      "embedding_role": "intfloat/multilingual-e5-large",
+      "reranker_role": "BAAI/bge-reranker-v2-m3",
+      "llm_role": "mistralai/Mistral-Small-3.1-24B-Instruct-2503"
+    },
+    "language_scaling": {
+      "dominant_language": "hu",
+      "dominant_share": 0.8,
+      "prompt_multiplier": 1.28,
+      "generation_multiplier": 2.12,
+      "context_multiplier": 1.8
+    },
+    "requested_model_overrides": {
+      "llm_role": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+      "reranker_role": "BAAI/bge-reranker-v2-m3"
+    },
+    "override_role_ids": [
+      "llm_role",
+      "reranker_role"
+    ],
+    "calibration_trace": {
+      "stages": {
+        "retrieve": {
+          "stage_id": "retrieve",
+          "stage_type": "embedding",
+          "matched": false
+        },
+        "rerank": {
+          "stage_id": "rerank",
+          "stage_type": "rerank",
+          "matched": false
+        },
+        "generate": {
+          "stage_id": "generate",
+          "stage_type": "generator",
+          "matched": false
+        }
+      },
+      "examples": {},
+      "summary": {
+        "stage_count": 3,
+        "matched_stage_count": 0,
+        "coverage_ratio": 0.0,
+        "matched_anchor_ids": [],
+        "coverage_status": "uncalibrated",
+        "customer_label": "Heurisztikus becsl\u00e9s",
+        "severity": "warning",
+        "estimate_only": true,
+        "summary_note": "Nincs benchmark anchor illeszt\u00e9s; az eredm\u00e9ny heurisztikus sizing-becsl\u00e9sk\u00e9nt \u00e9rtelmezend\u0151."
+      }
+    },
+    "model_compatibility": {
+      "overall_status": "warning",
+      "status_counts": {
+        "ok": 1,
+        "warning": 2,
+        "error": 0
+      },
+      "blocking_roles": [],
+      "checks": {
+        "embedding_role": {
+          "role_id": "embedding_role",
+          "model_id": "nvidia/nv-embedqa-e5-v5",
+          "status": "warning",
+          "hardware_catalog_id": "nvidia_dgx_h200_8gpu",
+          "software_stack_id": "nvidia_vllm_cuda",
+          "deployment_profile_id": "bare_metal_container",
+          "gpu_memory_gb": 141.0,
+          "gpu_count": 8,
+          "estimated_model_profile": {
+            "model_kind": "embedding",
+            "param_size_b": 0.6,
+            "estimated_min_vram_gb_per_gpu": 6,
+            "estimated_recommended_vram_gb_per_gpu": 8,
+            "recommended_min_gpu_count": 1,
+            "validation_level": "catalog"
+          },
+          "serving_recommendation": {
+            "status": "warning",
+            "engine_id": "vllm",
+            "engine_label": "vLLM continuous batching",
+            "recommended_weight_precision": "bf16",
+            "recommended_kv_cache_precision": "fp16",
+            "recommended_tensor_parallel_degree": 1,
+            "recommended_context_window_tokens": 1600,
+            "recommended_max_batch_size": 12,
+            "workload_characteristics": {
+              "template_family": "retrieval_rerank_generation",
+              "prompt_tokens": 1600,
+              "output_tokens": 280,
+              "effective_concurrency": 3,
+              "effective_context_tokens": 1600,
+              "queue_budget_ms": 700
+            },
+            "kv_cache_estimate": {
+              "kv_cache_gb_total": 0.0,
+              "kv_cache_gb_per_gpu": 0.0,
+              "fits_with_headroom": true,
+              "estimated_total_active_tokens": 0,
+              "estimated_kv_gb_per_1k_tokens_total": 0.0
+            },
+            "warnings": [
+              "Ez a szerepk\u00f6r ink\u00e1bb service vagy encoder jelleg\u0171; Triton/NIM oldali kiszolg\u00e1l\u00e1s gyakran egyszer\u0171bb \u00e9s kisz\u00e1m\u00edthat\u00f3bb."
+            ],
+            "errors": [],
+            "notes": [
+              "\u00c1ltal\u00e1nos on-prem LLM serving \u00fatvonal; hossz\u00fa context \u00e9s vegyes batch eset\u00e9n j\u00f3 alap.",
+              "Aj\u00e1nlott engine: vLLM continuous batching, precision: BF16, KV cache: FP16, TP: 1."
+            ],
+            "summary_line": "vLLM continuous batching \u00b7 BF16 \u00b7 TP=1 \u00b7 ctx\u22481600 \u00b7 batch\u224812"
+          },
+          "messages": [
+            "\u00c1ltal\u00e1nos on-prem LLM serving \u00fatvonal; hossz\u00fa context \u00e9s vegyes batch eset\u00e9n j\u00f3 alap.",
+            "A kiv\u00e1lasztott hardver/stack/deployment kombin\u00e1ci\u00f3 alapvet\u0151en illeszkedik a szerepk\u00f6rh\u00f6z."
+          ],
+          "warnings": [
+            "Ez a szerepk\u00f6r ink\u00e1bb service vagy encoder jelleg\u0171; Triton/NIM oldali kiszolg\u00e1l\u00e1s gyakran egyszer\u0171bb \u00e9s kisz\u00e1m\u00edthat\u00f3bb."
+          ],
+          "errors": [],
+          "notes": []
+        },
+        "reranker_role": {
+          "role_id": "reranker_role",
+          "model_id": "BAAI/bge-reranker-v2-m3",
+          "status": "warning",
+          "hardware_catalog_id": "nvidia_dgx_h200_8gpu",
+          "software_stack_id": "nvidia_vllm_cuda",
+          "deployment_profile_id": "bare_metal_container",
+          "gpu_memory_gb": 141.0,
+          "gpu_count": 8,
+          "estimated_model_profile": {
+            "model_kind": "reranker",
+            "param_size_b": 0.6,
+            "estimated_min_vram_gb_per_gpu": 6,
+            "estimated_recommended_vram_gb_per_gpu": 8,
+            "recommended_min_gpu_count": 1,
+            "validation_level": "catalog"
+          },
+          "serving_recommendation": {
+            "status": "warning",
+            "engine_id": "vllm",
+            "engine_label": "vLLM continuous batching",
+            "recommended_weight_precision": "bf16",
+            "recommended_kv_cache_precision": "fp16",
+            "recommended_tensor_parallel_degree": 1,
+            "recommended_context_window_tokens": 1600,
+            "recommended_max_batch_size": 12,
+            "workload_characteristics": {
+              "template_family": "retrieval_rerank_generation",
+              "prompt_tokens": 1600,
+              "output_tokens": 280,
+              "effective_concurrency": 3,
+              "effective_context_tokens": 1600,
+              "queue_budget_ms": 700
+            },
+            "kv_cache_estimate": {
+              "kv_cache_gb_total": 0.0,
+              "kv_cache_gb_per_gpu": 0.0,
+              "fits_with_headroom": true,
+              "estimated_total_active_tokens": 0,
+              "estimated_kv_gb_per_1k_tokens_total": 0.0
+            },
+            "warnings": [
+              "Ez a szerepk\u00f6r ink\u00e1bb service vagy encoder jelleg\u0171; Triton/NIM oldali kiszolg\u00e1l\u00e1s gyakran egyszer\u0171bb \u00e9s kisz\u00e1m\u00edthat\u00f3bb."
+            ],
+            "errors": [],
+            "notes": [
+              "\u00c1ltal\u00e1nos on-prem LLM serving \u00fatvonal; hossz\u00fa context \u00e9s vegyes batch eset\u00e9n j\u00f3 alap.",
+              "Aj\u00e1nlott engine: vLLM continuous batching, precision: BF16, KV cache: FP16, TP: 1."
+            ],
+            "summary_line": "vLLM continuous batching \u00b7 BF16 \u00b7 TP=1 \u00b7 ctx\u22481600 \u00b7 batch\u224812"
+          },
+          "messages": [
+            "\u00c1ltal\u00e1nos on-prem LLM serving \u00fatvonal; hossz\u00fa context \u00e9s vegyes batch eset\u00e9n j\u00f3 alap.",
+            "A kiv\u00e1lasztott hardver/stack/deployment kombin\u00e1ci\u00f3 alapvet\u0151en illeszkedik a szerepk\u00f6rh\u00f6z."
+          ],
+          "warnings": [
+            "Ez a szerepk\u00f6r ink\u00e1bb service vagy encoder jelleg\u0171; Triton/NIM oldali kiszolg\u00e1l\u00e1s gyakran egyszer\u0171bb \u00e9s kisz\u00e1m\u00edthat\u00f3bb."
+          ],
+          "errors": [],
+          "notes": []
+        },
+        "llm_role": {
+          "role_id": "llm_role",
+          "model_id": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+          "status": "ok",
+          "hardware_catalog_id": "nvidia_dgx_h200_8gpu",
+          "software_stack_id": "nvidia_vllm_cuda",
+          "deployment_profile_id": "bare_metal_container",
+          "gpu_memory_gb": 141.0,
+          "gpu_count": 8,
+          "estimated_model_profile": {
+            "model_kind": "llm",
+            "param_size_b": 24,
+            "estimated_min_vram_gb_per_gpu": 34,
+            "estimated_recommended_vram_gb_per_gpu": 48,
+            "recommended_min_gpu_count": 1,
+            "validation_level": "catalog"
+          },
+          "serving_recommendation": {
+            "status": "ok",
+            "engine_id": "vllm",
+            "engine_label": "vLLM continuous batching",
+            "recommended_weight_precision": "fp8",
+            "recommended_kv_cache_precision": "fp8",
+            "recommended_tensor_parallel_degree": 1,
+            "recommended_context_window_tokens": 4096,
+            "recommended_max_batch_size": 48,
+            "workload_characteristics": {
+              "template_family": "retrieval_rerank_generation",
+              "prompt_tokens": 1600,
+              "output_tokens": 280,
+              "effective_concurrency": 3,
+              "effective_context_tokens": 1740,
+              "queue_budget_ms": 700
+            },
+            "kv_cache_estimate": {
+              "kv_cache_gb_total": 0.862,
+              "kv_cache_gb_per_gpu": 0.862,
+              "fits_with_headroom": true,
+              "estimated_total_active_tokens": 12288,
+              "estimated_kv_gb_per_1k_tokens_total": 0.0701,
+              "headroom_limit_gb_per_gpu": 126.9
+            },
+            "warnings": [],
+            "errors": [],
+            "notes": [
+              "\u00c1ltal\u00e1nos on-prem LLM serving \u00fatvonal; hossz\u00fa context \u00e9s vegyes batch eset\u00e9n j\u00f3 alap.",
+              "Aj\u00e1nlott engine: vLLM continuous batching, precision: FP8, KV cache: FP8, TP: 1.",
+              "Becs\u00fclt context c\u00e9l: 4096 token, aj\u00e1nlott max batch: 48, KV cache ig\u00e9ny ~0.9 GB \u00f6sszesen."
+            ],
+            "summary_line": "vLLM continuous batching \u00b7 FP8 \u00b7 TP=1 \u00b7 ctx\u22484096 \u00b7 batch\u224848"
+          },
+          "messages": [
+            "\u00c1ltal\u00e1nos on-prem LLM serving \u00fatvonal; hossz\u00fa context \u00e9s vegyes batch eset\u00e9n j\u00f3 alap.",
+            "A kiv\u00e1lasztott hardver/stack/deployment kombin\u00e1ci\u00f3 alapvet\u0151en illeszkedik a szerepk\u00f6rh\u00f6z."
+          ],
+          "warnings": [],
+          "errors": [],
+          "notes": [
+            "Kompaktabb on-prem alternat\u00edva 24B oszt\u00e1lyban."
+          ]
+        }
+      },
+      "notes": [
+        "embedding_role: Ez a szerepk\u00f6r ink\u00e1bb service vagy encoder jelleg\u0171; Triton/NIM oldali kiszolg\u00e1l\u00e1s gyakran egyszer\u0171bb \u00e9s kisz\u00e1m\u00edthat\u00f3bb.",
+        "reranker_role: Ez a szerepk\u00f6r ink\u00e1bb service vagy encoder jelleg\u0171; Triton/NIM oldali kiszolg\u00e1l\u00e1s gyakran egyszer\u0171bb \u00e9s kisz\u00e1m\u00edthat\u00f3bb.",
+        "llm_role: \u00c1ltal\u00e1nos on-prem LLM serving \u00fatvonal; hossz\u00fa context \u00e9s vegyes batch eset\u00e9n j\u00f3 alap."
+      ],
+      "serving_notes": [
+        "\u00c1ltal\u00e1nos on-prem LLM serving \u00fatvonal; hossz\u00fa context \u00e9s vegyes batch eset\u00e9n j\u00f3 alap.",
+        "Aj\u00e1nlott engine: vLLM continuous batching, precision: BF16, KV cache: FP16, TP: 1.",
+        "Aj\u00e1nlott engine: vLLM continuous batching, precision: FP8, KV cache: FP8, TP: 1.",
+        "Becs\u00fclt context c\u00e9l: 4096 token, aj\u00e1nlott max batch: 48, KV cache ig\u00e9ny ~0.9 GB \u00f6sszesen."
+      ],
+      "serving_plan": {
+        "preferred_engine": "vllm",
+        "recommendation_lines": [
+          "embedding_role: vLLM continuous batching \u00b7 BF16 \u00b7 TP=1 \u00b7 ctx\u22481600 \u00b7 batch\u224812",
+          "reranker_role: vLLM continuous batching \u00b7 BF16 \u00b7 TP=1 \u00b7 ctx\u22481600 \u00b7 batch\u224812",
+          "llm_role: vLLM continuous batching \u00b7 FP8 \u00b7 TP=1 \u00b7 ctx\u22484096 \u00b7 batch\u224848"
+        ]
+      }
+    },
+    "qualitative_risk_level": "LOW",
+    "notes": [
+      "Runtime: vllm/vllm_continuous_batching",
+      "Deployment: container_on_bare_metal",
+      "Hardware: nvidia_dgx_h200_8gpu (8 GPU worker domain)",
+      "Most frequent bottleneck stage: generate",
+      "Role bindings: embedding_role=intfloat/multilingual-e5-large, llm_role=mistralai/Mistral-Small-3.1-24B-Instruct-2503, reranker_role=BAAI/bge-reranker-v2-m3",
+      "Calibration coverage: 0/3 stages matched to benchmark anchors.",
+      "Model compatibility: warning (ok=1, warning=2, error=0).",
+      "Procurement band: UPSIZE_REQUIRED. Nagyobb hardver vagy t\u00f6bb GPU sz\u00fcks\u00e9ges a c\u00e9lterhel\u00e9shez.",
+      "Configured arrival rate: 1.50/s, safe 24/7 capacity: 0.98/s."
+    ]
+  }
+]

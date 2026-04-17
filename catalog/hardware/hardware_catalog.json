@@ -1,0 +1,663 @@
+{
+  "schema_version": "0.1",
+  "generated_at": "2026-04-11",
+  "records": [
+    {
+      "id": "dell_r770_2gpu_h200_nvl",
+      "vendor": "Dell",
+      "family": "PowerEdge R770",
+      "display_name": "Dell PowerEdge R770 — 2× H200 NVL",
+      "gpu_id": "nvidia_h200_nvl_141gb",
+      "gpu_count": 2,
+      "supported_gpu_counts_in_family": [
+        2
+      ],
+      "topology_class": "pcie5_plus_optional_2way_nvlink",
+      "server_class": "2u_enterprise",
+      "cpu_family": "Intel Xeon 6",
+      "max_system_ram_tb": null,
+      "cooling": [
+        "air",
+        "optional_dlc"
+      ],
+      "recommended_tp_values": [
+        1,
+        2
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal",
+        "vm_passthrough_gpu",
+        "vmware_vgpu_time_sliced",
+        "vmware_vgpu_mig"
+      ],
+      "notes": "Mainstream inference node. Good small/medium serving footprint.",
+      "source_urls": [
+        "https://www.delltechnologies.com/asset/en-my/products/servers/technical-support/poweredge-r770-technical-guide.pdf",
+        "https://infohub.delltechnologies.com/zh-cn/l/dell-ai-factory-with-nvdia-including-nvidia-gpus-and-spectrum-x-networking-platforms/compute-infrastructure-25/"
+      ]
+    },
+    {
+      "id": "dell_r770_2gpu_rtxpro6000",
+      "vendor": "Dell",
+      "family": "PowerEdge R770",
+      "display_name": "Dell PowerEdge R770 — 2× RTX PRO 6000 Blackwell SE",
+      "gpu_id": "nvidia_rtx_pro_6000_blackwell_se_96gb",
+      "gpu_count": 2,
+      "supported_gpu_counts_in_family": [
+        2
+      ],
+      "topology_class": "pcie5",
+      "server_class": "2u_enterprise",
+      "cpu_family": "Intel Xeon 6",
+      "max_system_ram_tb": null,
+      "cooling": [
+        "air",
+        "optional_dlc"
+      ],
+      "recommended_tp_values": [
+        1,
+        2
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal",
+        "vm_passthrough_gpu",
+        "vmware_vgpu_time_sliced",
+        "vmware_vgpu_mig"
+      ],
+      "notes": "Universal enterprise inference server; useful for mixed AI and VDI-ish studies too.",
+      "source_urls": [
+        "https://infohub.delltechnologies.com/en-sg/l/generative-ai-in-the-enterprise-with-nvidia-gpus-dell-networking-and-nvidia-software-stack/compute-infrastructure-21/",
+        "https://www.delltechnologies.com/asset/en-my/products/servers/technical-support/poweredge-r770-technical-guide.pdf"
+      ]
+    },
+    {
+      "id": "dell_xe8640_4gpu_h100_sxm",
+      "vendor": "Dell",
+      "family": "PowerEdge XE8640",
+      "display_name": "Dell PowerEdge XE8640 — 4× H100 SXM",
+      "gpu_id": "nvidia_h200_sxm5_141gb",
+      "gpu_count": 4,
+      "supported_gpu_counts_in_family": [
+        4
+      ],
+      "topology_class": "nvlink_4way",
+      "server_class": "4u_accelerated",
+      "cpu_family": "Intel Xeon",
+      "max_system_ram_tb": null,
+      "cooling": [
+        "air"
+      ],
+      "recommended_tp_values": [
+        2,
+        4
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal",
+        "vm_passthrough_gpu"
+      ],
+      "notes": "Current repo can still treat this as a 4-way high-bandwidth reference node even if the public XE8640 example is H100-centric.",
+      "source_urls": [
+        "https://www.delltechnologies.com/asset/es-mx/products/servers/technical-support/poweredge-xe8640-spec-sheet.pdf",
+        "https://infohub.delltechnologies.com/en-sg/p/unlocking-deep-learning-training-performance-on-dell-poweredge-xe8640-servers-with-four-nvidia-h100-gpus/"
+      ]
+    },
+    {
+      "id": "dell_xe7740_8gpu_h200_nvl",
+      "vendor": "Dell",
+      "family": "PowerEdge XE7740",
+      "display_name": "Dell PowerEdge XE7740 — up to 8× H200 NVL",
+      "gpu_id": "nvidia_h200_nvl_141gb",
+      "gpu_count": 8,
+      "supported_gpu_counts_in_family": [
+        8
+      ],
+      "topology_class": "pcie5",
+      "server_class": "4u_gpu_dense",
+      "cpu_family": "Intel Xeon 6",
+      "max_system_ram_tb": 4,
+      "cooling": [
+        "air"
+      ],
+      "recommended_tp_values": [
+        4,
+        8
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal",
+        "vm_passthrough_gpu",
+        "vmware_vgpu_time_sliced",
+        "vmware_vgpu_mig"
+      ],
+      "notes": "8-GPU PCIe dense server for enterprise inference.",
+      "source_urls": [
+        "https://www.delltechnologies.com/asset/en-nz/products/servers/technical-support/poweredge-xe7740-technical-guide.pdf",
+        "https://www.delltechnologies.com/asset/en-us/products/storage/technical-support/dell-ai-factory-with-nvidia-rtx-pro-6000-on-dell-poweredge-servers-datasheet.pdf"
+      ]
+    },
+    {
+      "id": "dell_xe7740_8gpu_rtxpro6000",
+      "vendor": "Dell",
+      "family": "PowerEdge XE7740",
+      "display_name": "Dell PowerEdge XE7740 — up to 8× RTX PRO 6000 Blackwell SE",
+      "gpu_id": "nvidia_rtx_pro_6000_blackwell_se_96gb",
+      "gpu_count": 8,
+      "supported_gpu_counts_in_family": [
+        8
+      ],
+      "topology_class": "pcie5",
+      "server_class": "4u_gpu_dense",
+      "cpu_family": "Intel Xeon 6",
+      "max_system_ram_tb": 4,
+      "cooling": [
+        "air"
+      ],
+      "recommended_tp_values": [
+        4,
+        8
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal",
+        "vm_passthrough_gpu",
+        "vmware_vgpu_time_sliced",
+        "vmware_vgpu_mig"
+      ],
+      "notes": "8-GPU PCIe Blackwell inference/graphics capable server.",
+      "source_urls": [
+        "https://www.delltechnologies.com/asset/en-us/products/storage/technical-support/dell-ai-factory-with-nvidia-rtx-pro-6000-on-dell-poweredge-servers-datasheet.pdf",
+        "https://www.delltechnologies.com/asset/en-nz/products/servers/technical-support/poweredge-xe7740-technical-guide.pdf"
+      ]
+    },
+    {
+      "id": "dell_xe9680_8gpu_h200_sxm",
+      "vendor": "Dell",
+      "family": "PowerEdge XE9680",
+      "display_name": "Dell PowerEdge XE9680 — 8× H200 SXM5",
+      "gpu_id": "nvidia_h200_sxm5_141gb",
+      "gpu_count": 8,
+      "supported_gpu_counts_in_family": [
+        8
+      ],
+      "topology_class": "nvswitch_8way",
+      "server_class": "6u_training_inference",
+      "cpu_family": "Intel Xeon",
+      "max_system_ram_tb": null,
+      "cooling": [
+        "air",
+        "dlc_variant"
+      ],
+      "recommended_tp_values": [
+        4,
+        8
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal"
+      ],
+      "notes": "High-bandwidth 8-GPU flagship Dell node.",
+      "source_urls": [
+        "https://www.delltechnologies.com/asset/en-in/products/servers/technical-support/poweredge-xe9680-spec-sheet.pdf",
+        "https://www.delltechnologies.com/asset/en-ca/products/servers/technical-support/poweredge-xe9680-technical-guide.pdf"
+      ]
+    },
+    {
+      "id": "dell_xe9680_8gpu_mi300x",
+      "vendor": "Dell",
+      "family": "PowerEdge XE9680",
+      "display_name": "Dell PowerEdge XE9680 — 8× AMD MI300X",
+      "gpu_id": "amd_mi300x_oam_192gb",
+      "gpu_count": 8,
+      "supported_gpu_counts_in_family": [
+        8
+      ],
+      "topology_class": "infinity_fabric_8way",
+      "server_class": "6u_training_inference",
+      "cpu_family": "Intel Xeon",
+      "max_system_ram_tb": null,
+      "cooling": [
+        "air",
+        "dlc_variant"
+      ],
+      "recommended_tp_values": [
+        4,
+        8
+      ],
+      "software_stack_ids": [
+        "amd_vllm_rocm"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal"
+      ],
+      "notes": "Optional AMD path for ROCm/vLLM.",
+      "source_urls": [
+        "https://www.delltechnologies.com/asset/en-in/products/servers/technical-support/poweredge-xe9680-spec-sheet.pdf"
+      ]
+    },
+    {
+      "id": "hpe_dl385_gen11_2gpu_rtxpro6000",
+      "vendor": "HPE",
+      "family": "ProLiant DL385 Gen11",
+      "display_name": "HPE DL385 Gen11 — 2× RTX PRO 6000",
+      "gpu_id": "nvidia_rtx_pro_6000_blackwell_se_96gb",
+      "gpu_count": 2,
+      "supported_gpu_counts_in_family": [
+        2
+      ],
+      "topology_class": "pcie5",
+      "server_class": "2u_enterprise",
+      "cpu_family": "AMD EPYC 9004/9005",
+      "max_system_ram_tb": null,
+      "cooling": [
+        "air"
+      ],
+      "recommended_tp_values": [
+        1,
+        2
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal",
+        "vm_passthrough_gpu",
+        "vmware_vgpu_time_sliced",
+        "vmware_vgpu_mig"
+      ],
+      "notes": "Compact AMD CPU based enterprise node.",
+      "source_urls": [
+        "https://www.hpe.com/emea_europe/en/compute/hpe-proliant-compute/dl385-gen11.html",
+        "https://www.hpe.com/psnow/doc/a50004300enw"
+      ]
+    },
+    {
+      "id": "hpe_dl380a_gen12_4gpu_h200",
+      "vendor": "HPE",
+      "family": "ProLiant DL380a Gen12",
+      "display_name": "HPE DL380a Gen12 — 4× H200/H100 NVL class",
+      "gpu_id": "nvidia_h200_nvl_141gb",
+      "gpu_count": 4,
+      "supported_gpu_counts_in_family": [
+        2,
+        4,
+        8
+      ],
+      "topology_class": "pcie5",
+      "server_class": "4u_gpu_scalable",
+      "cpu_family": "Intel Xeon 6",
+      "max_system_ram_tb": 8,
+      "cooling": [
+        "air",
+        "dlc"
+      ],
+      "recommended_tp_values": [
+        2,
+        4
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal",
+        "vm_passthrough_gpu"
+      ],
+      "notes": "Use same family for 4-way and 8-way HPE inference variants.",
+      "source_urls": [
+        "https://www.hpe.com/emea_europe/en/compute/hpe-proliant-compute/dl380a-gen12.html",
+        "https://www.hpe.com/psnow/doc/a00047453enw"
+      ]
+    },
+    {
+      "id": "hpe_dl380a_gen12_8gpu_rtxpro6000",
+      "vendor": "HPE",
+      "family": "ProLiant DL380a Gen12",
+      "display_name": "HPE DL380a Gen12 — 8× RTX PRO 6000 Blackwell SE",
+      "gpu_id": "nvidia_rtx_pro_6000_blackwell_se_96gb",
+      "gpu_count": 8,
+      "supported_gpu_counts_in_family": [
+        2,
+        4,
+        8
+      ],
+      "topology_class": "pcie5",
+      "server_class": "4u_gpu_scalable",
+      "cpu_family": "Intel Xeon 6",
+      "max_system_ram_tb": 8,
+      "cooling": [
+        "air",
+        "dlc"
+      ],
+      "recommended_tp_values": [
+        4,
+        8
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal",
+        "vm_passthrough_gpu"
+      ],
+      "notes": "8-way PCIe Blackwell inference node.",
+      "source_urls": [
+        "https://www.hpe.com/emea_europe/en/compute/hpe-proliant-compute/dl380a-gen12.html",
+        "https://www.hpe.com/psnow/doc/a00047453enw"
+      ]
+    },
+    {
+      "id": "supermicro_sys_322ga_nr_4gpu_h200_nvl",
+      "vendor": "Supermicro",
+      "family": "SYS-322GA-NR",
+      "display_name": "Supermicro SYS-322GA-NR — 4× H200 NVL",
+      "gpu_id": "nvidia_h200_nvl_141gb",
+      "gpu_count": 4,
+      "supported_gpu_counts_in_family": [
+        4
+      ],
+      "topology_class": "pcie5",
+      "server_class": "gpu_dense_enterprise",
+      "cpu_family": "Intel Xeon 6900 series",
+      "max_system_ram_tb": null,
+      "cooling": [
+        "air"
+      ],
+      "recommended_tp_values": [
+        2,
+        4
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal",
+        "vm_passthrough_gpu",
+        "vmware_vgpu_time_sliced",
+        "vmware_vgpu_mig"
+      ],
+      "notes": "4-way PCIe enterprise platform from Supermicro GPU list.",
+      "source_urls": [
+        "https://www.supermicro.com/en/support/resources/gpu"
+      ]
+    },
+    {
+      "id": "supermicro_sys_422gl_fnr2_8gpu_h200_nvl",
+      "vendor": "Supermicro",
+      "family": "SYS-422GL-FNR2",
+      "display_name": "Supermicro SYS-422GL-FNR2 — 8× H200 NVL",
+      "gpu_id": "nvidia_h200_nvl_141gb",
+      "gpu_count": 8,
+      "supported_gpu_counts_in_family": [
+        8
+      ],
+      "topology_class": "pcie5",
+      "server_class": "4u_gpu_dense",
+      "cpu_family": "Intel Xeon 6900",
+      "max_system_ram_tb": null,
+      "cooling": [
+        "air"
+      ],
+      "recommended_tp_values": [
+        4,
+        8
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal",
+        "vm_passthrough_gpu",
+        "vmware_vgpu_time_sliced",
+        "vmware_vgpu_mig"
+      ],
+      "notes": "8-way PCIe H200 NVL server.",
+      "source_urls": [
+        "https://www.supermicro.com/en/support/resources/gpu",
+        "https://www.supermicro.com/en/accelerators/nvidia/pcie-gpu"
+      ]
+    },
+    {
+      "id": "supermicro_sys_422gl_fnr2_8gpu_rtxpro6000",
+      "vendor": "Supermicro",
+      "family": "SYS-422GL-FNR2",
+      "display_name": "Supermicro SYS-422GL-FNR2 — 8× RTX PRO 6000 Blackwell SE",
+      "gpu_id": "nvidia_rtx_pro_6000_blackwell_se_96gb",
+      "gpu_count": 8,
+      "supported_gpu_counts_in_family": [
+        8
+      ],
+      "topology_class": "pcie5",
+      "server_class": "4u_gpu_dense",
+      "cpu_family": "Intel Xeon 6900",
+      "max_system_ram_tb": null,
+      "cooling": [
+        "air"
+      ],
+      "recommended_tp_values": [
+        4,
+        8
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal",
+        "vm_passthrough_gpu",
+        "vmware_vgpu_time_sliced",
+        "vmware_vgpu_mig"
+      ],
+      "notes": "8-way PCIe Blackwell enterprise server.",
+      "source_urls": [
+        "https://www.supermicro.com/en/support/resources/gpu",
+        "https://www.supermicro.com/en/accelerators/nvidia/pcie-gpu"
+      ]
+    },
+    {
+      "id": "nvidia_dgx_h200_8gpu",
+      "vendor": "NVIDIA",
+      "family": "DGX H200",
+      "display_name": "NVIDIA DGX H200 — 8× H200",
+      "gpu_id": "nvidia_h200_sxm5_141gb",
+      "gpu_count": 8,
+      "supported_gpu_counts_in_family": [
+        8
+      ],
+      "topology_class": "nvswitch_8way",
+      "server_class": "reference_ai_system",
+      "cpu_family": "Intel Xeon",
+      "max_system_ram_tb": null,
+      "cooling": [
+        "air"
+      ],
+      "recommended_tp_values": [
+        4,
+        8
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_dgx_enterprise_stack",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal"
+      ],
+      "notes": "Reference Hopper system for high-end inference baselines.",
+      "source_urls": [
+        "https://www.nvidia.com/en-us/data-center/h200/"
+      ]
+    },
+    {
+      "id": "nvidia_dgx_b200_8gpu",
+      "vendor": "NVIDIA",
+      "family": "DGX B200",
+      "display_name": "NVIDIA DGX B200 — 8× B200",
+      "gpu_id": "nvidia_b200_sxm_180gb",
+      "gpu_count": 8,
+      "supported_gpu_counts_in_family": [
+        8
+      ],
+      "topology_class": "nvswitch_8way",
+      "server_class": "reference_ai_system",
+      "cpu_family": "Intel Xeon 8570",
+      "max_system_ram_tb": 4,
+      "cooling": [
+        "air"
+      ],
+      "recommended_tp_values": [
+        4,
+        8
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_dgx_enterprise_stack",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal"
+      ],
+      "notes": "Blackwell reference system for next-gen inference baselines.",
+      "source_urls": [
+        "https://www.nvidia.com/en-us/data-center/dgx-b200/",
+        "https://docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html"
+      ]
+    },
+    {
+      "id": "nvidia_dgx_b300_8gpu",
+      "vendor": "NVIDIA",
+      "family": "DGX B300",
+      "display_name": "NVIDIA DGX B300 — 8× B300 Blackwell Ultra",
+      "gpu_id": "nvidia_b300_sxm_288gb",
+      "gpu_count": 8,
+      "supported_gpu_counts_in_family": [
+        8
+      ],
+      "topology_class": "nvswitch_8way",
+      "server_class": "reference_ai_system",
+      "cpu_family": "Intel Xeon 6776P",
+      "max_system_ram_tb": 4,
+      "cooling": [
+        "air_or_busbar_variant"
+      ],
+      "recommended_tp_values": [
+        4,
+        8
+      ],
+      "software_stack_ids": [
+        "nvidia_vllm_cuda",
+        "nvidia_tensorrt_llm",
+        "nvidia_nim_llm",
+        "nvidia_dgx_enterprise_stack",
+        "nvidia_riva_streaming",
+        "nvidia_cuopt_solver",
+        "nvidia_triton_inference"
+      ],
+      "deployment_profile_ids": [
+        "bare_metal_container",
+        "k8s_bare_metal"
+      ],
+      "notes": "Newest reasoning-oriented NVIDIA reference system. Track carefully because public docs present aggregate memory differently.",
+      "source_urls": [
+        "https://www.nvidia.com/en-us/data-center/dgx-b300/",
+        "https://docs.nvidia.com/dgx/dgxb300-user-guide/introduction-to-dgxb300.html",
+        "https://www.nvidia.com/en-us/data-center/hgx/"
+      ]
+    }
+  ]
+}

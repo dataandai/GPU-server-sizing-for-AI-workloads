@@ -1,0 +1,41 @@
+# Scenario 5: Agentic — 10 agents, ~8 tool calls, long tool output (Monte Carlo)
+scenario_name: "agents_10x8tools_long"
+hardware_profile: "h200_8gpu"
+weight_precision: "int8"
+kv_cache_precision: "fp16"
+tensor_parallel_degree: 8
+runtime_overhead_ratio: 0.10
+max_vram_utilization_target: 0.95
+safety_headroom_ratio: 0.05
+
+workload_type: "agentic"
+workload:
+  initial_prompt_tokens:
+    type: "lognormal"
+    mu: 7.5       # ~1800 tokens median
+    sigma: 0.4
+    min_clip: 200
+  max_turns_per_run: 15
+  tool_call_probability: 0.85
+  tool_result_tokens:
+    type: "lognormal"
+    mu: 7.5       # ~1800 tokens median (long tool outputs, e.g. code, search results)
+    sigma: 0.8
+    min_clip: 100
+    max_clip: 8000
+  assistant_response_tokens:
+    type: "lognormal"
+    mu: 6.0       # ~400 tokens median
+    sigma: 0.5
+    min_clip: 30
+  summarization_probability: 0.0
+  stop_probability_per_turn: 0.10
+  max_total_tokens_per_run: 32768
+  num_parallel_agents: 10
+  enable_max_context_cap: true
+  max_context_cap: 32768
+
+monte_carlo_enabled: true
+monte_carlo_iterations: 10000
+random_seed: 42
+percentile_outputs: [50, 90, 95, 99]

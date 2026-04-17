@@ -1,0 +1,44 @@
+# Scenario 7: Hybrid — fixed batch + agentic running concurrently (Monte Carlo)
+scenario_name: "hybrid_5batch_5agents"
+hardware_profile: "h200_8gpu"
+weight_precision: "int8"
+kv_cache_precision: "fp16"
+tensor_parallel_degree: 8
+runtime_overhead_ratio: 0.10
+max_vram_utilization_target: 0.95
+safety_headroom_ratio: 0.05
+
+workload_type: "hybrid"
+workload:
+  fixed_batch:
+    prompt_tokens: 1500
+    max_output_tokens: 800
+    num_parallel_jobs: 5
+  agentic:
+    initial_prompt_tokens:
+      type: "lognormal"
+      mu: 7.0
+      sigma: 0.3
+      min_clip: 100
+    max_turns_per_run: 10
+    tool_call_probability: 0.75
+    tool_result_tokens:
+      type: "lognormal"
+      mu: 6.5
+      sigma: 0.6
+      min_clip: 50
+    assistant_response_tokens:
+      type: "lognormal"
+      mu: 5.5
+      sigma: 0.5
+      min_clip: 20
+    stop_probability_per_turn: 0.15
+    max_total_tokens_per_run: 32768
+    num_parallel_agents: 5
+    enable_max_context_cap: true
+    max_context_cap: 32768
+
+monte_carlo_enabled: true
+monte_carlo_iterations: 10000
+random_seed: 42
+percentile_outputs: [50, 90, 95, 99]

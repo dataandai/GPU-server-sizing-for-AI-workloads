@@ -1,0 +1,7 @@
+[build]
+# Railway will auto-detect the root Dockerfile.
+
+[deploy]
+healthcheckPath = "/api/health"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

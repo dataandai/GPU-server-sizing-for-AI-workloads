@@ -1,0 +1,209 @@
+{
+  "schema_version": "0.1",
+  "generated_at": "2026-04-11",
+  "records": [
+    {
+      "id": "nvidia_h200_sxm5_141gb",
+      "vendor": "NVIDIA",
+      "family": "Hopper",
+      "model": "H200 SXM5",
+      "form_factor": "sxm5",
+      "memory_gb": 141,
+      "memory_type": "HBM3e",
+      "memory_bandwidth_gbps": 4800,
+      "interconnect_options": [
+        "nvlink_4",
+        "nvswitch"
+      ],
+      "mig_supported": true,
+      "mig_profiles": [
+        "1g.18gb",
+        "1g.35gb",
+        "2g.35gb",
+        "3g.71gb",
+        "4g.71gb",
+        "7g.141gb"
+      ],
+      "default_precision_targets": [
+        "fp16",
+        "bf16",
+        "fp8",
+        "int8",
+        "int4",
+        "nvfp4"
+      ],
+      "notes": "Use for HGX / DGX H200 class systems. Best fit for high-bandwidth TP serving.",
+      "source_urls": [
+        "https://www.nvidia.com/en-us/data-center/h200/",
+        "https://docs.nvidia.com/datacenter/tesla/mig-user-guide/"
+      ]
+    },
+    {
+      "id": "nvidia_h200_nvl_141gb",
+      "vendor": "NVIDIA",
+      "family": "Hopper",
+      "model": "H200 NVL",
+      "form_factor": "pcie",
+      "memory_gb": 141,
+      "memory_type": "HBM3e",
+      "memory_bandwidth_gbps": 4800,
+      "interconnect_options": [
+        "pcie5",
+        "nvlink_2way_optional"
+      ],
+      "mig_supported": true,
+      "mig_profiles": [
+        "1g.18gb",
+        "1g.35gb",
+        "2g.35gb",
+        "3g.71gb",
+        "4g.71gb",
+        "7g.141gb"
+      ],
+      "default_precision_targets": [
+        "fp16",
+        "bf16",
+        "fp8",
+        "int8",
+        "int4"
+      ],
+      "notes": "PCIe deployment option; useful in 2/4/8 GPU enterprise servers.",
+      "source_urls": [
+        "https://www.nvidia.com/en-us/data-center/h200/",
+        "https://www.delltechnologies.com/asset/nl-nl/products/servers/briefs-summaries/poweredge-server-gpu-matrix.pdf",
+        "https://www.hpe.com/psnow/doc/c04123180"
+      ]
+    },
+    {
+      "id": "nvidia_rtx_pro_6000_blackwell_se_96gb",
+      "vendor": "NVIDIA",
+      "family": "Blackwell",
+      "model": "RTX PRO 6000 Blackwell Server Edition",
+      "form_factor": "pcie",
+      "memory_gb": 96,
+      "memory_type": "GDDR7 ECC",
+      "memory_bandwidth_gbps": 1597,
+      "interconnect_options": [
+        "pcie5"
+      ],
+      "mig_supported": true,
+      "mig_profiles": [
+        "1/4_gpu_equivalent_via_mig"
+      ],
+      "max_mig_instances": 4,
+      "default_precision_targets": [
+        "fp16",
+        "bf16",
+        "fp8",
+        "int8",
+        "int4",
+        "nvfp4"
+      ],
+      "notes": "Enterprise inference and mixed AI/graphics capable; often found in mainstream 2U/4U servers.",
+      "source_urls": [
+        "https://www.nvidia.com/en-us/data-center/rtx-pro-6000-blackwell-server-edition/",
+        "https://docs.nvidia.com/datacenter/tesla/mig-user-guide/supported-gpus.html"
+      ]
+    },
+    {
+      "id": "nvidia_b200_sxm_180gb",
+      "vendor": "NVIDIA",
+      "family": "Blackwell",
+      "model": "B200 SXM",
+      "form_factor": "sxm",
+      "memory_gb": 180,
+      "memory_type": "HBM3e",
+      "memory_bandwidth_gbps": 8000,
+      "interconnect_options": [
+        "nvlink_5",
+        "nvswitch_5"
+      ],
+      "mig_supported": true,
+      "mig_profiles": [
+        "1g.23gb",
+        "1g.45gb",
+        "2g.45gb",
+        "3g.90gb",
+        "4g.90gb",
+        "7g.180gb"
+      ],
+      "default_precision_targets": [
+        "fp16",
+        "bf16",
+        "fp8",
+        "int8",
+        "int4",
+        "nvfp4"
+      ],
+      "notes": "Reference Blackwell training/inference GPU for DGX/HGX B200 class systems.",
+      "source_urls": [
+        "https://www.nvidia.com/en-us/data-center/dgx-b200/",
+        "https://docs.nvidia.com/datacenter/tesla/mig-user-guide/supported-mig-profiles.html",
+        "https://images.nvidia.com/aem-dam/Solutions/documents/HGX-B200-PCF-Summary.pdf"
+      ]
+    },
+    {
+      "id": "nvidia_b300_sxm_288gb",
+      "vendor": "NVIDIA",
+      "family": "Blackwell Ultra",
+      "model": "B300 Blackwell Ultra SXM",
+      "form_factor": "sxm",
+      "memory_gb": 288,
+      "memory_type": "HBM3e",
+      "memory_bandwidth_gbps": null,
+      "interconnect_options": [
+        "nvlink_5",
+        "nvswitch_5"
+      ],
+      "mig_supported": true,
+      "mig_profiles": [
+        "1g.34gb",
+        "1g.67gb",
+        "2g.67gb",
+        "3g.135gb",
+        "4g.135gb",
+        "7g.269gb"
+      ],
+      "default_precision_targets": [
+        "fp16",
+        "bf16",
+        "fp8",
+        "int8",
+        "int4",
+        "nvfp4"
+      ],
+      "notes": "Use as newest Blackwell Ultra reference class. Official pages disagree on aggregated memory presentation; store per-GPU memory directly.",
+      "source_urls": [
+        "https://www.nvidia.com/en-us/data-center/dgx-b300/",
+        "https://docs.nvidia.com/dgx/dgxb300-user-guide/introduction-to-dgxb300.html",
+        "https://docs.nvidia.com/datacenter/tesla/mig-user-guide/supported-mig-profiles.html"
+      ]
+    },
+    {
+      "id": "amd_mi300x_oam_192gb",
+      "vendor": "AMD",
+      "family": "CDNA3",
+      "model": "Instinct MI300X",
+      "form_factor": "oam",
+      "memory_gb": 192,
+      "memory_type": "HBM3",
+      "memory_bandwidth_gbps": 5325,
+      "interconnect_options": [
+        "infinity_fabric_oam"
+      ],
+      "mig_supported": false,
+      "mig_profiles": [],
+      "default_precision_targets": [
+        "fp16",
+        "bf16",
+        "fp8",
+        "int8"
+      ],
+      "notes": "Optional AMD reference for ROCm/vLLM path and Dell XE9680 AMD variant.",
+      "source_urls": [
+        "https://www.amd.com/en/products/accelerators/instinct/mi300/mi300x.html",
+        "https://www.amd.com/content/dam/amd/en/documents/instinct-tech-docs/data-sheets/amd-instinct-mi300x-data-sheet.pdf"
+      ]
+    }
+  ]
+}

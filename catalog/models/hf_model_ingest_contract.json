@@ -1,0 +1,113 @@
+{
+  "schema_version": "0.1",
+  "generated_at": "2026-04-11",
+  "dynamic_source": "huggingface_hub",
+  "retrieval_priority": [
+    "repo metadata via HfApi.model_info",
+    "config.json",
+    "README.md / model card",
+    "generation_config.json",
+    "tokenizer_config.json"
+  ],
+  "output_object": "ModelConfig",
+  "field_mapping": [
+    {
+      "target_field": "name",
+      "source": "modelId or config._name_or_path",
+      "required": true
+    },
+    {
+      "target_field": "hidden_size",
+      "source": "config.hidden_size",
+      "required": true
+    },
+    {
+      "target_field": "head_dim",
+      "source": "config.head_dim or hidden_size / num_attention_heads",
+      "required": true
+    },
+    {
+      "target_field": "num_hidden_layers",
+      "source": "config.num_hidden_layers or config.n_layer",
+      "required": true
+    },
+    {
+      "target_field": "num_attention_heads",
+      "source": "config.num_attention_heads or config.n_head",
+      "required": true
+    },
+    {
+      "target_field": "num_key_value_heads",
+      "source": "config.num_key_value_heads or config.multi_query_group_num or num_attention_heads",
+      "required": true
+    },
+    {
+      "target_field": "intermediate_size",
+      "source": "config.intermediate_size or config.ffn_dim",
+      "required": false
+    },
+    {
+      "target_field": "moe_intermediate_size",
+      "source": "config.moe_intermediate_size",
+      "required": false
+    },
+    {
+      "target_field": "num_experts",
+      "source": "config.num_experts or config.n_routed_experts",
+      "required": false
+    },
+    {
+      "target_field": "num_experts_per_tok",
+      "source": "config.num_experts_per_tok or config.num_experts_per_token",
+      "required": false
+    },
+    {
+      "target_field": "vocab_size",
+      "source": "config.vocab_size",
+      "required": true
+    },
+    {
+      "target_field": "max_position_embeddings",
+      "source": "config.max_position_embeddings or config.max_seq_len or generation_config.max_length",
+      "required": false
+    },
+    {
+      "target_field": "total_params_billions",
+      "source": "model card metadata or manual override",
+      "required": false
+    },
+    {
+      "target_field": "active_params_billions",
+      "source": "model card metadata or manual override",
+      "required": false
+    },
+    {
+      "target_field": "is_moe",
+      "source": "derived from num_experts > 0 or architecture hints",
+      "required": true
+    }
+  ],
+  "normalization_rules": [
+    "Prefer config.json over free-text model card claims when they conflict for architecture fields.",
+    "Store total and active params separately; do not infer active params from total params unless a model-family-specific rule exists.",
+    "Keep provenance per field: source_file, raw_key, raw_value, confidence.",
+    "If head_dim is missing, compute hidden_size / num_attention_heads only when divisible.",
+    "If max_position_embeddings is missing, keep null rather than inventing a context limit.",
+    "Preserve raw architecture names for family-specific handling later."
+  ],
+  "recommended_cache_fields": [
+    "model_id",
+    "sha",
+    "last_modified",
+    "downloads",
+    "pipeline_tag",
+    "library_name",
+    "tags",
+    "license",
+    "cardData"
+  ],
+  "source_urls": [
+    "https://huggingface.co/docs/huggingface_hub/package_reference/hf_api",
+    "https://huggingface.co/docs/hub/model-cards"
+  ]
+}

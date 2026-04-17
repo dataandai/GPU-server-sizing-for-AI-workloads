@@ -1,0 +1,164 @@
+{
+  "schema_version": "0.1",
+  "generated_at": "2026-04-11",
+  "records": [
+    {
+      "id": "nvidia_vllm_cuda",
+      "framework": "vLLM",
+      "vendor_focus": "NVIDIA",
+      "runtime_family": "cuda_pytorch",
+      "supports_moe": true,
+      "supports_continuous_batching": true,
+      "supports_prefix_caching": true,
+      "supports_chunked_prefill": true,
+      "supports_speculative_decoding": true,
+      "supports_mig": true,
+      "supports_time_sliced_vgpu": true,
+      "stack_components": [
+        "NVIDIA driver",
+        "CUDA",
+        "PyTorch CUDA",
+        "vLLM",
+        "NCCL"
+      ],
+      "notes": "Default open serving path on NVIDIA. Best general-purpose starting point for model experiments.",
+      "source_urls": [
+        "https://docs.vllm.ai/en/v0.12.0/getting_started/quickstart/",
+        "https://docs.vllm.ai/en/stable/configuration/optimization/"
+      ]
+    },
+    {
+      "id": "nvidia_tensorrt_llm",
+      "framework": "TensorRT-LLM",
+      "vendor_focus": "NVIDIA",
+      "runtime_family": "cuda_tensorrt",
+      "supports_moe": true,
+      "supports_continuous_batching": true,
+      "supports_prefix_caching": true,
+      "supports_chunked_prefill": true,
+      "supports_speculative_decoding": true,
+      "supports_mig": true,
+      "supports_time_sliced_vgpu": true,
+      "stack_components": [
+        "NVIDIA driver",
+        "CUDA",
+        "TensorRT",
+        "TensorRT-LLM",
+        "NCCL"
+      ],
+      "notes": "High-performance NVIDIA-specific serving path. Treat support matrix as source of truth for exact GPU/model compatibility.",
+      "source_urls": [
+        "https://docs.nvidia.com/tensorrt-llm/index.html",
+        "https://docs.nvidia.com/deeplearning/tensorrt/latest/getting-started/support-matrix.html"
+      ]
+    },
+    {
+      "id": "nvidia_nim_llm",
+      "framework": "NVIDIA NIM LLM",
+      "vendor_focus": "NVIDIA",
+      "runtime_family": "containerized_managed",
+      "supports_moe": true,
+      "supports_continuous_batching": true,
+      "supports_prefix_caching": true,
+      "supports_chunked_prefill": true,
+      "supports_speculative_decoding": true,
+      "supports_mig": true,
+      "supports_time_sliced_vgpu": true,
+      "stack_components": [
+        "NVIDIA AI Enterprise",
+        "NIM container",
+        "profile-based runtime"
+      ],
+      "notes": "Operationally simple path when the model and hardware SKU are in the NIM support matrix.",
+      "source_urls": [
+        "https://docs.nvidia.com/nim/large-language-models/latest/support-matrix.html",
+        "https://docs.nvidia.com/nim/large-language-models/latest/profiles.html"
+      ]
+    },
+    {
+      "id": "amd_vllm_rocm",
+      "framework": "vLLM",
+      "vendor_focus": "AMD",
+      "runtime_family": "rocm_pytorch",
+      "supports_moe": true,
+      "supports_continuous_batching": true,
+      "supports_prefix_caching": true,
+      "supports_chunked_prefill": true,
+      "supports_speculative_decoding": true,
+      "supports_mig": false,
+      "supports_time_sliced_vgpu": false,
+      "stack_components": [
+        "ROCm",
+        "PyTorch ROCm",
+        "vLLM",
+        "optimized ROCm Docker"
+      ],
+      "notes": "Default AMD serving path for MI300X class systems.",
+      "source_urls": [
+        "https://rocm.docs.amd.com/en/latest/how-to/rocm-for-ai/inference/benchmark-docker/vllm.html",
+        "https://rocm.docs.amd.com/en/docs-6.3.1/how-to/rocm-for-ai/inference/vllm-benchmark.html"
+      ]
+    },
+    {
+      "id": "nvidia_dgx_enterprise_stack",
+      "framework": "DGX Software Stack",
+      "vendor_focus": "NVIDIA",
+      "runtime_family": "reference_platform_stack",
+      "supports_moe": true,
+      "supports_continuous_batching": true,
+      "supports_prefix_caching": true,
+      "supports_chunked_prefill": true,
+      "supports_speculative_decoding": true,
+      "supports_mig": true,
+      "supports_time_sliced_vgpu": false,
+      "stack_components": [
+        "DGX OS",
+        "Docker Engine",
+        "NVIDIA Container Toolkit",
+        "NVIDIA AI Enterprise compatible stack"
+      ],
+      "notes": "Reference stack for DGX-class systems; use when you want a vendor reference environment in simulations.",
+      "source_urls": [
+        "https://docs.nvidia.com/dgx/dgx-os-7-user-guide/installing_on_ubuntu.html",
+        "https://docs.nvidia.com/ai-enterprise/release-8/latest/support/support-matrix-8/8.0.html"
+      ]
+    },
+    {
+      "id": "nvidia_riva_streaming",
+      "display_name": "NVIDIA Riva / Triton Streaming Speech",
+      "framework": "NVIDIA Riva / Triton",
+      "runtime_family": "riva_streaming_triton",
+      "vendor_focus": "NVIDIA",
+      "supports_moe": false,
+      "supports_mig": true,
+      "supports_time_sliced_vgpu": false,
+      "notes": "Low-latency streaming ASR/TTS and speech analytics workloads."
+    },
+    {
+      "id": "nvidia_cuopt_solver",
+      "display_name": "NVIDIA cuOpt Solver Service",
+      "framework": "NVIDIA cuOpt",
+      "runtime_family": "cuopt_solver_service",
+      "vendor_focus": "NVIDIA",
+      "supports_moe": false,
+      "supports_mig": false,
+      "supports_time_sliced_vgpu": false,
+      "notes": "GPU-accelerated route and decision optimization service workloads."
+    },
+    {
+      "id": "nvidia_triton_inference",
+      "display_name": "NVIDIA Triton Inference Service",
+      "framework": "NVIDIA Triton Inference Server",
+      "runtime_family": "triton_inference_service",
+      "vendor_focus": "NVIDIA",
+      "supports_moe": false,
+      "supports_mig": true,
+      "supports_time_sliced_vgpu": true,
+      "notes": "General low-latency/batched inference stack for ranking, forecasting, fraud scoring and other non-LLM model services.",
+      "source_urls": [
+        "https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/",
+        "https://developer.nvidia.com/triton-inference-server"
+      ]
+    }
+  ]
+}
