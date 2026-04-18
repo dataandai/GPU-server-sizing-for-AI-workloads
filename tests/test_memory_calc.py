@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import unittest
 import numpy as np
 from src.config import (
-    ModelConfig, WeightPrecision, KVCachePrecision,
+    AttentionArchitecture, ModelConfig, WeightPrecision, KVCachePrecision,
     DistributionSpec, DistributionType,
 )
 from src.model_params import QWEN3_235B_A22B
@@ -70,6 +70,38 @@ class TestKVCache(unittest.TestCase):
         b = calc_kv_bytes_per_token_per_layer(QWEN3_235B_A22B, KVCachePrecision.INT8)
         self.assertEqual(b, 1024)
         print(f"  KV per token per layer (INT8): {b} bytes")
+
+    def test_kv_architecture_factor_deepseek_mla(self):
+        model = ModelConfig(
+            name="deepseek-test",
+            total_params_billions=67.0,
+            active_params_billions=67.0,
+            hidden_size=7168,
+            head_dim=56,
+            num_hidden_layers=61,
+            num_attention_heads=128,
+            num_key_value_heads=128,
+            attention_architecture=AttentionArchitecture.DEEPSEEK_MLA,
+        )
+        b = calc_kv_bytes_per_token_per_layer(model, KVCachePrecision.FP16)
+        self.assertAlmostEqual(b, 2 * 128 * 56 * 2 * 0.067, places=6)
+        print(f"  DeepSeek MLA KV per token per layer factor check: {b:.2f} bytes")
+
+    def test_kv_architecture_factor_gqa(self):
+        model = ModelConfig(
+            name="gqa-test",
+            total_params_billions=70.0,
+            active_params_billions=70.0,
+            hidden_size=8192,
+            head_dim=128,
+            num_hidden_layers=80,
+            num_attention_heads=64,
+            num_key_value_heads=4,
+            attention_architecture=AttentionArchitecture.GQA,
+        )
+        b = calc_kv_bytes_per_token_per_layer(model, KVCachePrecision.FP16)
+        self.assertAlmostEqual(b, 2 * 4 * 128 * 2 * (4/64), places=6)
+        print(f"  GQA KV per token per layer factor check: {b:.2f} bytes")
 
     def test_kv_per_token_all_layers_fp16(self):
         """2048 × 94 = 192,512 bytes ≈ 188 KB."""

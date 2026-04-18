@@ -10,7 +10,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from .config import ModelConfig
+from .config import AttentionArchitecture, ModelConfig
 
 try:  # pragma: no cover - import presence depends on environment
     from huggingface_hub import HfApi, hf_hub_download
@@ -72,6 +72,17 @@ def model_config_from_mapping(data: dict[str, Any], default_name: str = "custom-
     )
     is_moe = bool(data.get("is_moe", inferred_is_moe))
 
+    attention_architecture_value = str(data.get("attention_architecture", "dense_mha") or "dense_mha").lower()
+    try:
+        attention_architecture = AttentionArchitecture(attention_architecture_value)
+    except ValueError:
+        # Accept some user-friendly aliases for backwards compatibility
+        normalized = attention_architecture_value.replace(" ", "_").replace("-", "_").upper()
+        if normalized in AttentionArchitecture.__members__:
+            attention_architecture = AttentionArchitecture[normalized]
+        else:
+            attention_architecture = AttentionArchitecture.DENSE_MHA
+
     total_params = data.get("total_params_billions")
     active_params = data.get("active_params_billions")
 
@@ -93,6 +104,11 @@ def model_config_from_mapping(data: dict[str, Any], default_name: str = "custom-
         vocab_size=int(data.get("vocab_size", 0) or 0),
         max_position_embeddings=int(data.get("max_position_embeddings", data.get("max_seq_len", 0) or 0)),
         is_moe=is_moe,
+        attention_architecture=attention_architecture,
+        attention_layer_ratio=_as_float(data.get("attention_layer_ratio")),
+        attention_layers=_as_int(data.get("attention_layers")),
+        sliding_window_size=_as_int(data.get("sliding_window_size")),
+        kv_cache_architecture_multiplier=_as_float(data.get("kv_cache_architecture_multiplier")),
     )
 
     if cfg.total_params_billions <= 0:
@@ -447,5 +463,23 @@ def _as_int(value: Any) -> int | None:
         return None
     try:
         return int(float(text))
+    except ValueError:
+        return None
+
+
+def _as_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return float(int(value))
+    if isinstance(value, (int, float)):
+        if isinstance(value, float) and math.isnan(value):
+            return None
+        return float(value)
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        return float(text)
     except ValueError:
         return None

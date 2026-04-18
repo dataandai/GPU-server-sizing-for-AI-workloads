@@ -12,7 +12,7 @@ Mathematical Model:
 """
 
 from __future__ import annotations
-from .config import ModelConfig, WeightPrecision, KVCachePrecision, HardwareProfile
+from .config import AttentionArchitecture, ModelConfig, WeightPrecision, KVCachePrecision, HardwareProfile
 
 
 # ─── Constants ────────────────────────────────────────────────────────────────
@@ -44,23 +44,59 @@ def calc_weight_memory_gb(model: ModelConfig, precision: WeightPrecision) -> flo
 
 # ─── KV Cache Memory ─────────────────────────────────────────────────────────
 
+def calc_kv_cache_architecture_factor(model: ModelConfig) -> float:
+    """Calculate the KV cache scaling factor based on the attention architecture."""
+    if model.kv_cache_architecture_multiplier is not None:
+        return model.kv_cache_architecture_multiplier
+
+    arch = model.attention_architecture
+    if arch == AttentionArchitecture.DENSE_MHA:
+        return 1.0
+    if arch == AttentionArchitecture.FFN_MOE:
+        return 1.0
+    if arch == AttentionArchitecture.GQA:
+        if model.num_attention_heads <= 0:
+            return 1.0
+        return model.num_key_value_heads / model.num_attention_heads
+    if arch == AttentionArchitecture.MQA:
+        if model.num_attention_heads <= 0:
+            return 1.0
+        return 1.0 / model.num_attention_heads
+    if arch == AttentionArchitecture.DEEPSEEK_MLA:
+        return 0.067
+    if arch == AttentionArchitecture.HYBRID_TRANSFORMER_MAMBA:
+        if model.attention_layers is not None and model.attention_layers > 0:
+            return model.attention_layers / max(1, model.num_hidden_layers)
+        if model.attention_layer_ratio is not None:
+            return model.attention_layer_ratio
+        return 0.50
+    if arch == AttentionArchitecture.SLIDING_WINDOW:
+        if model.sliding_window_size is not None and model.max_position_embeddings > 0:
+            return min(1.0, model.sliding_window_size / model.max_position_embeddings)
+        return 0.50
+    if arch == AttentionArchitecture.PURE_SSM_MAMBA:
+        return 0.01
+    return 1.0
+
+
 def calc_kv_bytes_per_token_per_layer(model: ModelConfig, kv_precision: KVCachePrecision) -> float:
     """
     Calculate KV cache bytes per token per layer.
 
-    Formula: 2 × num_kv_heads × head_dim × bytes_per_element
+    Formula: 2 × num_kv_heads × head_dim × bytes_per_element × architecture_factor
     The factor of 2 accounts for both Key and Value tensors.
 
     With GQA (num_kv_heads=4, head_dim=128):
       FP16: 2 × 4 × 128 × 2 = 2048 bytes
       INT8: 2 × 4 × 128 × 1 = 1024 bytes
     """
-    return (
+    base = (
         2  # K + V
         * model.num_key_value_heads
         * model.head_dim
         * kv_precision.bytes_per_element
     )
+    return base * calc_kv_cache_architecture_factor(model)
 
 
 def calc_kv_bytes_per_token(model: ModelConfig, kv_precision: KVCachePrecision) -> float:

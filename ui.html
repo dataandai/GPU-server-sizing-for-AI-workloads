@@ -136,6 +136,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
             <option value="builtin">Built-in base model</option>
             <option value="inline">Inline manual model config</option>
           </select>
+          <div class="inline-note">By default, selected models use a standard MHA KV cache assumption. Switch to inline manual config for exact KV cache results and custom attention architecture.</div>
         </div>
         <div class="form-group">
           <label>Target language</label>
@@ -201,6 +202,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
           <div class="form-group"><label>Vocab size</label><input type="number" id="in_vocab" value="128256"></div>
           <div class="form-group"><label>Max position embeddings</label><input type="number" id="in_max_pos" value="131072"></div>
           <div class="form-group"><label>MoE model?</label><select id="in_is_moe"><option value="false" selected>No</option><option value="true">Yes</option></select></div>
+          <div class="form-group"><label>Attention architecture</label><select id="in_attention_architecture"><option value="dense_mha" selected>Dense MHA</option><option value="ffn_moe">FFN-MoE</option><option value="gqa">GQA</option><option value="mqa">MQA</option><option value="deepseek_mla">DeepSeek MLA</option><option value="hybrid_transformer_mamba">Hybrid Transformer-Mamba</option><option value="sliding_window">Sliding-Window</option><option value="pure_ssm_mamba">Pure SSM/Mamba</option></select></div>
         </div>
       </div>
     </div>
@@ -2739,6 +2741,7 @@ function generateYAML(){
     addYamlLine(lines, 'vocab_size', val('in_vocab'), '  ');
     addYamlLine(lines, 'max_position_embeddings', val('in_max_pos'), '  ');
     addYamlLine(lines, 'is_moe', boolStr('in_is_moe'), '  ');
+    addYamlLine(lines, 'attention_architecture', q(val('in_attention_architecture')), '  ');
   }
 
   addYamlLine(lines, 'hardware_catalog_id', q(val('f_hardware_catalog_id')));

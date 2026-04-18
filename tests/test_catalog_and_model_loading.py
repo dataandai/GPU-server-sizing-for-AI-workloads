@@ -184,3 +184,17 @@ class TestHuggingFaceModelLoader(TestCase):
         self.assertEqual(cfg.num_experts_per_tok, 8)
         self.assertEqual(cfg.moe_intermediate_size, 2048)
 
+    def test_model_config_from_mapping_reads_attention_architecture(self):
+        cfg = model_loader.model_config_from_mapping({
+            "name": "custom-test",
+            "hidden_size": 8192,
+            "num_attention_heads": 64,
+            "num_hidden_layers": 80,
+            "num_key_value_heads": 8,
+            "attention_architecture": "deepseek_mla",
+            "total_params_billions": 70.0,
+            "active_params_billions": 70.0,
+        })
+        self.assertEqual(cfg.attention_architecture.value, "deepseek_mla")
+        self.assertEqual(cfg.num_key_value_heads, 8)
+

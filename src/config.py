@@ -47,6 +47,17 @@ class KVCachePrecision(Enum):
         return mapping[self.value]
 
 
+class AttentionArchitecture(Enum):
+    DENSE_MHA = "dense_mha"
+    FFN_MOE = "ffn_moe"
+    GQA = "gqa"
+    MQA = "mqa"
+    DEEPSEEK_MLA = "deepseek_mla"
+    HYBRID_TRANSFORMER_MAMBA = "hybrid_transformer_mamba"
+    SLIDING_WINDOW = "sliding_window"
+    PURE_SSM_MAMBA = "pure_ssm_mamba"
+
+
 class HardwareProfileName(Enum):
     H200_8GPU = "h200_8gpu"
     H200_4GPU = "h200_4gpu"
@@ -147,6 +158,11 @@ class ModelConfig:
     num_hidden_layers: int = 94
     num_attention_heads: int = 64     # Query heads
     num_key_value_heads: int = 4      # KV heads (GQA)
+    attention_architecture: AttentionArchitecture = AttentionArchitecture.DENSE_MHA
+    attention_layer_ratio: Optional[float] = None
+    attention_layers: Optional[int] = None
+    sliding_window_size: Optional[int] = None
+    kv_cache_architecture_multiplier: Optional[float] = None
     num_experts: int = 128
     num_experts_per_tok: int = 8
     moe_intermediate_size: int = 1536
