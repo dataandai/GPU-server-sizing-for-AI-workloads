@@ -1,0 +1,739 @@
+{
+  "schema_version": "1.0",
+  "records": [
+    {
+      "field_id": "scenario_name",
+      "aliases": [
+        "f_scenario_name",
+        "bp_scenario_name",
+        "tpl_scenario_name"
+      ],
+      "title_en": "Scenario name",
+      "definition_en": "The name of the current simulation run, which appears in the output file and the report. Helps you track different configurations and runs across sessions.",
+      "impact_en": "Changing this field helps organize and differentiate between multiple simulation runs.",
+      "interpretation_en": "Use a descriptive name that matches the model, language, and workload type (e.g., 'llama3-70b-hungarian-batch-v2').",
+      "caution_en": "Vague names make it difficult to track which configuration produced which results.",
+      "example_en": "Example: `llama3-70b-hungarian-batch-v2` — makes it immediately clear which model, language, and workload type this run refers to.",
+      "source_type": "other_doc",
+      "source_label": "Wikipedia — Scenario planning",
+      "source_url": "https://en.wikipedia.org/wiki/Scenario_planning"
+    },
+    {
+      "field_id": "model_source",
+      "aliases": [
+        "f_model_source"
+      ],
+      "title_en": "Model source",
+      "definition_en": "There are three ways to select a model: from the Hugging Face catalogue (dynamic download), a built-in base model, or manually specified model parameters (inline mode).",
+      "impact_en": "Affects how model parameters are loaded and whether architecture-specific optimizations are available.",
+      "interpretation_en": "Choose inline mode for precise KV cache calculations or custom attention architectures like DeepSeek MLA.",
+      "caution_en": "Auto-detected models use standard MHA assumptions; for specialized architectures, use inline manual config.",
+      "example_en": "Example: Choose `inline` if you are configuring a custom-tuned MoE model whose config is not yet published on Hugging Face.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Hugging Face Model Hub",
+      "source_url": "https://huggingface.co/models"
+    },
+    {
+      "field_id": "target_language",
+      "aliases": [
+        "f_target_language",
+        "bp_language_code",
+        "tpl_language_code"
+      ],
+      "title_en": "Target language",
+      "definition_en": "The linguistic profile of the simulated workload (Hungarian, English, German). The Hungarian setting applies a conservative token over-estimation.",
+      "impact_en": "Directly affects estimated token counts and memory requirements.",
+      "interpretation_en": "Hungarian typically requires 20-30% more tokens than English for equivalent text.",
+      "caution_en": "Mismatched language selection leads to unrealistic token estimates and capacity recommendations.",
+      "example_en": "Example: Setting `Hungarian` increases estimated token counts by ~20–30% compared to `English` for equivalent text.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Text tokenization patterns",
+      "source_url": "https://en.wikipedia.org/wiki/Language_code"
+    },
+    {
+      "field_id": "hf_model_id",
+      "aliases": [
+        "hf_model_id"
+      ],
+      "title_en": "Hugging Face model_id",
+      "definition_en": "The name of the model available on Hugging Face Hub (e.g., `meta-llama/Llama-3.1-70B-Instruct`). The system downloads the model configuration and parameters from the network.",
+      "impact_en": "Determines model architecture, layer count, hidden dimensions, and all KV cache calculations.",
+      "interpretation_en": "Always use the full qualified name (organization/model-name) from the Hub.",
+      "caution_en": "Invalid or private model IDs will cause loading failures.",
+      "example_en": "Example: `mistralai/Mistral-7B-Instruct-v0.3` — the system fetches its layer count, hidden size, and attention config automatically.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Hugging Face Hub Documentation",
+      "source_url": "https://huggingface.co/docs"
+    },
+    {
+      "field_id": "hf_revision",
+      "aliases": [
+        "hf_revision"
+      ],
+      "title_en": "Revision / tag",
+      "definition_en": "Optional commit hash or branch version for the model (e.g., `main` or a specific commit ID). If left empty, the default branch is used.",
+      "impact_en": "Allows fixing to a specific model snapshot for reproducibility.",
+      "interpretation_en": "Leave empty to use the latest version, or pin to a specific commit for consistency.",
+      "caution_en": "Committing to outdated revisions may miss bug fixes or performance improvements.",
+      "example_en": "Example: `a1b2c3d` pins the simulation to an exact snapshot, ensuring reproducibility even if the model is updated on Hub later.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Git version control",
+      "source_url": "https://git-scm.com/"
+    },
+    {
+      "field_id": "hf_local_only",
+      "aliases": [
+        "hf_local_only"
+      ],
+      "title_en": "Local cache only?",
+      "definition_en": "If enabled, the Hugging Face API only searches the local cache and does not download from the internet. Useful for offline mode or faster testing.",
+      "impact_en": "Prevents network calls, speeding up model loading but limiting to cached models only.",
+      "interpretation_en": "Enable in air-gapped environments or for faster repeated runs with cached models.",
+      "caution_en": "Non-cached models will fail to load if this is enabled.",
+      "example_en": "Example: Enable this in an air-gapped data-center environment where outbound internet access is restricted.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Network connectivity patterns",
+      "source_url": "https://huggingface.co/docs/huggingface_hub/how-to-downstream"
+    },
+    {
+      "field_id": "in_name",
+      "aliases": [
+        "in_name"
+      ],
+      "title_en": "Name",
+      "definition_en": "The model identifier used by the simulation engine in the YAML and output files. Can be any arbitrary name.",
+      "impact_en": "Used for tracking results and referencing this configuration in reports.",
+      "interpretation_en": "Use a descriptive, alphanumeric identifier without spaces.",
+      "caution_en": "Non-unique names may cause confusion in result analysis.",
+      "example_en": "Example: `custom-llm`, `deepseek-r1-671b-moe`, `internal-finetuned-v3`.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Model naming conventions",
+      "source_url": "https://en.wikipedia.org/wiki/Naming_convention"
+    },
+    {
+      "field_id": "in_total_params",
+      "aliases": [
+        "in_total_params"
+      ],
+      "title_en": "Total parameters (B)",
+      "definition_en": "The total number of model parameters in billions (e.g., 70B). Useful for MoE models where the total parameter count is larger than the actively used portion.",
+      "impact_en": "Used to track model size and differentiate between dense and MoE architectures.",
+      "interpretation_en": "For MoE models, this should be sum of all expert parameters.",
+      "caution_en": "Misreporting total parameters for MoE models leads to incorrect capacity estimates.",
+      "example_en": "Example: A Mixtral 8×22B model has ~141B total parameters, but only ~39B are active per token.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Model card specifications",
+      "source_url": "https://huggingface.co/docs/hub/model-cards"
+    },
+    {
+      "field_id": "in_active_params",
+      "aliases": [
+        "in_active_params"
+      ],
+      "title_en": "Active parameters (B)",
+      "definition_en": "The parameters actually active during the forward pass, in billions. For MoE models this is smaller than the total parameter count.",
+      "impact_en": "Critical for computing VRAM requirements; directly affects weight memory calculation.",
+      "interpretation_en": "For Mixtral 8×22B with 2 active experts, set to approximately 39B.",
+      "caution_en": "Using total params instead of active params for MoE models overestimates VRAM usage.",
+      "example_en": "Example: For Mixtral 8×22B with 2 active experts, set `Active parameters = 39`.",
+      "source_type": "official_vendor_doc",
+      "source_label": "MoE architecture specs",
+      "source_url": "https://arxiv.org/abs/1701.06538"
+    },
+    {
+      "field_id": "in_layers",
+      "aliases": [
+        "in_layers"
+      ],
+      "title_en": "Layer count",
+      "definition_en": "The number of transformer layers in the model. A higher number generally means greater KV cache and compute requirements.",
+      "impact_en": "Directly scales KV cache memory: doubling layers approximately doubles KV cache at same batch size.",
+      "interpretation_en": "Count only the transformer decoder blocks, not embedding or final classification layers.",
+      "caution_en": "Incorrect layer count leads to proportionally incorrect KV cache estimates.",
+      "example_en": "Example: Llama 3.1 70B has 80 layers; doubling the layer count roughly doubles KV cache memory at the same batch size.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Model architecture documentation",
+      "source_url": "https://huggingface.co/docs/transformers/model_doc/llama"
+    },
+    {
+      "field_id": "in_hidden_size",
+      "aliases": [
+        "in_hidden_size"
+      ],
+      "title_en": "Hidden size",
+      "definition_en": "The size of the hidden dimension (e.g., 8192). Critical for KV cache calculation: a larger value means more memory is required.",
+      "impact_en": "Scales KV cache linearly; larger hidden size multiplies KV memory proportionally.",
+      "interpretation_en": "Must match the actual model's transformer hidden size.",
+      "caution_en": "Underestimating hidden size leads to dangerously inadequate capacity planning.",
+      "example_en": "Example: `hidden_size = 8192` for a 70B model vs. `4096` for a 7B model — the former needs ~4× more memory per token in the KV cache.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Transformer architecture math",
+      "source_url": "https://huggingface.co/docs/transformers/model_doc/general"
+    },
+    {
+      "field_id": "in_head_dim",
+      "aliases": [
+        "in_head_dim"
+      ],
+      "title_en": "Head dim",
+      "definition_en": "The dimension of a single attention head (typically 128). Together with the number of attention heads, this determines the hidden size.",
+      "impact_en": "Used to validate the relationship: hidden_size = attention_heads × head_dim.",
+      "interpretation_en": "Standard value is 128; some models use 64 or 256.",
+      "caution_en": "Inconsistent head_dim with attention_heads and hidden_size will cause validation errors.",
+      "example_en": "Example: With `attention_heads = 64` and `head_dim = 128`, the hidden size is 64 × 128 = 8192.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Attention mechanism math",
+      "source_url": "https://en.wikipedia.org/wiki/Attention_(machine_learning)"
+    },
+    {
+      "field_id": "in_attn_heads",
+      "aliases": [
+        "in_attn_heads"
+      ],
+      "title_en": "Attention heads",
+      "definition_en": "The total number of attention heads (e.g., 64). This value influences the dimensionality of the KV cache.",
+      "impact_en": "More heads = more KV cache memory at the same batch size.",
+      "interpretation_en": "Standard range is 8-128 heads; larger models typically use more heads.",
+      "caution_en": "High head counts significantly increase KV memory requirements.",
+      "example_en": "Example: A model with 64 attention heads and FP16 KV cache uses twice as much KV memory per layer as a model with 32 heads.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Multi-head attention specs",
+      "source_url": "https://en.wikipedia.org/wiki/Attention_(machine_learning)#Multi-head_attention"
+    },
+    {
+      "field_id": "in_kv_heads",
+      "aliases": [
+        "in_kv_heads"
+      ],
+      "title_en": "KV heads",
+      "definition_en": "Specifies how many heads have dedicated Key and Value sections. In GQA and MQA architectures this is much smaller than the number of attention heads.",
+      "impact_en": "Dramatically reduces KV cache memory: GQA/MQA with kv_heads << attention_heads saves 8-64× memory.",
+      "interpretation_en": "For standard MHA, kv_heads = attention_heads. For GQA/MQA, it's much smaller.",
+      "caution_en": "Incorrectly setting kv_heads loses the benefits of GQA/MQA optimization.",
+      "example_en": "Example: Llama 3 70B uses GQA with `kv_heads = 8` vs. `attention_heads = 64`, reducing KV cache size by 8×.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Grouped Query Attention (GQA)",
+      "source_url": "https://arxiv.org/abs/2305.13245"
+    },
+    {
+      "field_id": "in_intermediate",
+      "aliases": [
+        "in_intermediate"
+      ],
+      "title_en": "Intermediate size",
+      "definition_en": "The size of the FFN (feed-forward network) hidden dimension. A larger value means more parameters and more computation after the attention block.",
+      "impact_en": "Affects total model size and computation; typically 3-4× the hidden size.",
+      "interpretation_en": "Must match the actual FFN intermediate dimension in the model.",
+      "caution_en": "Large intermediate sizes add significant memory overhead.",
+      "example_en": "Example: `intermediate_size = 28672` for a 70B model; increasing it to 32768 adds ~10% more parameters to each FFN layer.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Transformer FFN architecture",
+      "source_url": "https://huggingface.co/docs/transformers/model_doc/general"
+    },
+    {
+      "field_id": "in_moe_intermediate",
+      "aliases": [
+        "in_moe_intermediate"
+      ],
+      "title_en": "MoE intermediate size",
+      "definition_en": "The per-expert FFN dimension in Mixture of Experts models. Leave empty or set to 0 for non-MoE models.",
+      "impact_en": "Affects per-expert parameter count; typically smaller than dense FFN intermediate.",
+      "interpretation_en": "Only relevant for MoE architectures; ignore for dense models.",
+      "caution_en": "Setting this for non-MoE models causes validation errors.",
+      "example_en": "Example: In DeepSeek-V2, each expert has `moe_intermediate_size = 1536` while the model has 160 experts total.",
+      "source_type": "official_vendor_doc",
+      "source_label": "MoE architecture specs",
+      "source_url": "https://arxiv.org/abs/1701.06538"
+    },
+    {
+      "field_id": "in_num_experts",
+      "aliases": [
+        "in_num_experts"
+      ],
+      "title_en": "Expert count",
+      "definition_en": "The total number of experts in an MoE model. Leave empty or set to 0 for standard dense models.",
+      "impact_en": "Affects total model size calculation for MoE architectures.",
+      "interpretation_en": "Only used if MoE model flag is enabled.",
+      "caution_en": "Must be paired with correct experts_per_token for accurate parameter estimation.",
+      "example_en": "Example: Mixtral 8×7B has `expert_count = 8`; Grok-1 has `expert_count = 8` with a much larger per-expert size.",
+      "source_type": "official_vendor_doc",
+      "source_label": "MoE model specifications",
+      "source_url": "https://arxiv.org/abs/2101.03961"
+    },
+    {
+      "field_id": "in_experts_per_tok",
+      "aliases": [
+        "in_experts_per_tok"
+      ],
+      "title_en": "Experts / token",
+      "definition_en": "How many experts are activated simultaneously per token in MoE models. Leave empty or set to 0 for standard models.",
+      "impact_en": "Determines active parameter count: total_params × (experts_per_token / expert_count).",
+      "interpretation_en": "Typically 2-6 for balance between performance and efficiency.",
+      "caution_en": "Higher values approach dense model performance but increase computation.",
+      "example_en": "Example: Mixtral uses `experts_per_token = 2`; DeepSeek-V2 uses `experts_per_token = 6` out of 160 total experts.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Sparse MoE routing",
+      "source_url": "https://arxiv.org/abs/2101.03961"
+    },
+    {
+      "field_id": "in_vocab",
+      "aliases": [
+        "in_vocab"
+      ],
+      "title_en": "Vocab size",
+      "definition_en": "The size of the tokenizer vocabulary (e.g., 128256). This affects the embedding table size and the output logit dimension.",
+      "impact_en": "Affects embedding layer VRAM and output projection memory.",
+      "interpretation_en": "Must match the tokenizer vocabulary used by the model.",
+      "caution_en": "Vocab size mismatch causes model loading failures.",
+      "example_en": "Example: Llama 3 uses `vocab_size = 128256`; older Llama 2 used 32000 — the larger vocabulary increases the embedding layer's VRAM footprint.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Tokenizer specifications",
+      "source_url": "https://huggingface.co/docs/transformers/tokenizer_summary"
+    },
+    {
+      "field_id": "in_max_pos",
+      "aliases": [
+        "in_max_pos"
+      ],
+      "title_en": "Max position embeddings",
+      "definition_en": "The maximum sequence length supported by the model, in tokens (e.g., 131072). This is the upper limit for KV cache sizing.",
+      "impact_en": "Sets the theoretical maximum KV cache size; longer sequences scale linearly.",
+      "interpretation_en": "Determines the longest context the model can handle.",
+      "caution_en": "KV cache memory grows linearly with sequence length.",
+      "example_en": "Example: A model with `max_position_embeddings = 131072` can handle ~100K-token contexts, but the KV cache scales linearly with sequence length.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Positional embedding limits",
+      "source_url": "https://huggingface.co/docs/transformers/model_doc/general"
+    },
+    {
+      "field_id": "in_is_moe",
+      "aliases": [
+        "in_is_moe"
+      ],
+      "title_en": "MoE model?",
+      "definition_en": "Boolean flag (yes/no) indicating whether the model uses a Mixture of Experts architecture. This affects parameter calculations and memory estimation.",
+      "impact_en": "Enables MoE-specific parameter aggregation and sparse routing calculations.",
+      "interpretation_en": "Set to 'yes' only for confirmed MoE models.",
+      "caution_en": "Incorrectly flagging a model as MoE leads to wrong active parameter counts.",
+      "example_en": "Example: Set to `yes` for Mixtral, DeepSeek-V2, or Grok-1; leave `no` for dense models like Llama or Mistral.",
+      "source_type": "derived_system_behavior",
+      "source_label": "MoE model registry",
+      "source_url": "https://arxiv.org/abs/1701.06538"
+    },
+    {
+      "field_id": "in_attention_architecture",
+      "aliases": [
+        "in_attention_architecture"
+      ],
+      "title_en": "Attention architecture",
+      "definition_en": "The specific attention architecture type: Dense MHA, GQA, MQA, DeepSeek MLA, Hybrid Transformer-Mamba, Sliding-Window, Pure SSM/Mamba, or FFN-MoE. This is **critical** for KV cache multiplier calculation.",
+      "impact_en": "Directly affects KV cache memory: MLA saves ~67%, GQA/MQA save proportionally based on head ratios.",
+      "interpretation_en": "Select based on the model's official architecture specification.",
+      "caution_en": "Wrong architecture selection leads to severe under/over-estimation of KV cache.",
+      "example_en": "Example: Selecting `DeepSeek MLA` triggers a ~67% KV cache memory saving compared to standard MHA, while `GQA` saves memory proportional to the ratio of KV heads to attention heads.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Model architecture overview",
+      "source_url": "https://huggingface.co/docs/transformers/model_doc/general"
+    },
+    {
+      "field_id": "f_hw_vendor_filter",
+      "aliases": [
+        "f_hw_vendor_filter"
+      ],
+      "title_en": "Vendor filter",
+      "definition_en": "Filter hardware by manufacturer (e.g., Dell, NVIDIA, AMD). Narrows down the available hardware options in the catalogue.",
+      "impact_en": "Reduces the hardware list to only relevant vendors.",
+      "interpretation_en": "Select your target hardware vendor to narrow the search.",
+      "caution_en": "Filtering too narrowly may exclude viable options.",
+      "example_en": "Example: Set `Vendor = NVIDIA` to see only DGX and HGX systems and exclude AMD Instinct-based platforms.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Hardware vendor list",
+      "source_url": "https://en.wikipedia.org/wiki/GPU_computing"
+    },
+    {
+      "field_id": "f_hw_gpu_count_filter",
+      "aliases": [
+        "f_hw_gpu_count_filter"
+      ],
+      "title_en": "GPU count filter",
+      "definition_en": "The number of GPUs to filter by: 2, 4, 8, or all. The UI only shows hardware configurations that match the selection.",
+      "impact_en": "Narrows hardware options to servers with the desired GPU count.",
+      "interpretation_en": "Select based on your tensor parallelism strategy.",
+      "caution_en": "Filtering too strictly may eliminate required configurations.",
+      "example_en": "Example: Select `8` to find servers suitable for TP=8 tensor parallelism with a 70B+ model.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Tensor parallelism guide",
+      "source_url": "https://docs.vllm.ai/en/stable/serving/parallelism_scaling/"
+    },
+    {
+      "field_id": "f_hardware_catalog_id",
+      "aliases": [
+        "f_hardware_catalog_id",
+        "bp_hardware_catalog_id",
+        "tpl_hardware_catalog_id"
+      ],
+      "title_en": "Hardware catalog ID",
+      "definition_en": "The specific hardware server selected from the catalogue (e.g., `nvidia_dgx_h200_8gpu_latest`). This includes GPU, CPU, memory, and NVLink topology.",
+      "impact_en": "Determines total VRAM, interconnect topology, and physical limitations of the deployment.",
+      "interpretation_en": "Choose based on available infrastructure and budget.",
+      "caution_en": "Selecting insufficient VRAM will result in out-of-memory errors.",
+      "example_en": "Example: `dell_xe9680_8xa100_80gb` selects a Dell PowerEdge XE9680 with 8× A100 80 GB GPUs.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Hardware catalog documentation",
+      "source_url": "https://docs.nvidia.com/deeplearning/"
+    },
+    {
+      "field_id": "f_software_stack_id",
+      "aliases": [
+        "f_software_stack_id",
+        "bp_software_stack_id",
+        "tpl_software_stack_id"
+      ],
+      "title_en": "Software stack",
+      "definition_en": "The combination of serving engine and CUDA/cuDNN versions (e.g., `nvidia_vllm_cuda`, `nvidia_tensorrt_llm`). This affects overhead and performance.",
+      "impact_en": "Determines inference throughput, latency, and system overhead percentage.",
+      "interpretation_en": "Select based on your inference serving requirements and latency SLA.",
+      "caution_en": "Different stacks have different performance characteristics; test before production deployment.",
+      "example_en": "Example: `nvidia_vllm_cuda` uses vLLM's PagedAttention for efficient KV cache management; `nvidia_tensorrt_llm` may offer higher throughput for batch inference.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Serving framework comparison",
+      "source_url": "https://docs.vllm.ai/en/latest/"
+    },
+    {
+      "field_id": "f_deployment_profile_id",
+      "aliases": [
+        "f_deployment_profile_id",
+        "bp_deployment_profile_id",
+        "tpl_deployment_profile_id"
+      ],
+      "title_en": "Deployment profile",
+      "definition_en": "The operational setup: bare metal, Kubernetes, VM passthrough, vGPU time slicing, or MIG. This affects additional overhead and resource sharing.",
+      "impact_en": "Determines maximum concurrent utilization and system overhead.",
+      "interpretation_en": "Choose based on your data center architecture and operational model.",
+      "caution_en": "MIG and vGPU add 5-15% overhead compared to bare metal.",
+      "example_en": "Example: `mig` (Multi-Instance GPU) allows a single H100 to be partitioned into isolated GPU slices, reducing per-tenant VRAM but adding ~5–10% overhead.",
+      "source_type": "official_vendor_doc",
+      "source_label": "NVIDIA deployment options",
+      "source_url": "https://docs.nvidia.com/datacenter/tesla/mig-user-guide/"
+    },
+    {
+      "field_id": "f_tp",
+      "aliases": [
+        "f_tp"
+      ],
+      "title_en": "Tensor parallel",
+      "definition_en": "The model sharding level (e.g., TP=2, TP=4, TP=8). Recommended values are derived from the selected hardware (e.g., a Dell node may suggest TP=2).",
+      "impact_en": "Determines how model weights are distributed across GPUs; affects memory per GPU and communication overhead.",
+      "interpretation_en": "Higher TP reduces per-GPU VRAM but increases inter-GPU communication.",
+      "caution_en": "TP > GPU count or TP < 1 will fail.",
+      "example_en": "Example: A 70B model in FP16 requires ~140 GB VRAM; with 8× 80 GB GPUs and `TP=8`, each GPU holds ~17.5 GB of weights.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Tensor parallelism",
+      "source_url": "https://docs.vllm.ai/en/stable/serving/parallelism_scaling/"
+    },
+    {
+      "field_id": "f_weight_precision",
+      "aliases": [
+        "f_weight_precision"
+      ],
+      "title_en": "Weight quantization",
+      "definition_en": "The bit-width of LLM weights: INT8, FP16, BF16, INT4, or NVFP4 (Blackwell only). Lower bit-width = less VRAM, but potentially lower quality.",
+      "impact_en": "Directly scales model VRAM usage: INT4 uses 1/4 the memory of FP16.",
+      "interpretation_en": "Balance between VRAM savings and model quality; test quantization impact on your workload.",
+      "caution_en": "Aggressive quantization may reduce model accuracy significantly.",
+      "example_en": "Example: A 70B model at FP16 needs ~140 GB; at INT4 it drops to ~35 GB — fitting on a single 4× 80 GB node instead of two nodes.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Model quantization",
+      "source_url": "https://docs.vllm.ai/en/latest/features/quantization/"
+    },
+    {
+      "field_id": "f_kv_cache_precision",
+      "aliases": [
+        "f_kv_cache_precision"
+      ],
+      "title_en": "KV cache precision",
+      "definition_en": "The bit-width of Key/Value caches: FP16, BF16, FP8, or INT8. FP8 uses less memory but may introduce minor accuracy loss.",
+      "impact_en": "Directly scales KV cache memory: FP8 uses 1/2 the memory of FP16.",
+      "interpretation_en": "FP8 is recommended for latency-sensitive workloads; FP16 for maximum accuracy.",
+      "caution_en": "FP8 KV cache may cause subtle accuracy degradation in long-context scenarios.",
+      "example_en": "Example: Switching from FP16 to FP8 KV cache halves KV memory usage, allowing roughly 2× more concurrent tokens at the same batch size.",
+      "source_type": "official_vendor_doc",
+      "source_label": "KV cache optimization",
+      "source_url": "https://docs.vllm.ai/en/latest/"
+    },
+    {
+      "field_id": "f_overhead",
+      "aliases": [
+        "f_overhead"
+      ],
+      "title_en": "Runtime overhead (%)",
+      "definition_en": "The extra cost of containerization, virtualization, and system processes, expressed as a percentage (e.g., 10%). This is deducted from total VRAM before planning.",
+      "impact_en": "Reduces available VRAM; directly affects maximum concurrency calculations.",
+      "interpretation_en": "Bare metal: 3-5%; Docker: 8-12%; K8s: 10-15%; vGPU: 15-20%.",
+      "caution_en": "Underestimating overhead leads to overspend capacity predictions.",
+      "example_en": "Example: A Kubernetes + containerd deployment typically adds 8–12% overhead; bare metal deployments can use as low as 3–5%.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Containerization overhead",
+      "source_url": "https://en.wikipedia.org/wiki/Container_(virtualization)"
+    },
+    {
+      "field_id": "f_util",
+      "aliases": [
+        "f_util"
+      ],
+      "title_en": "Max VRAM utilization (%)",
+      "definition_en": "The maximum percentage of available VRAM that can be used for the workload (e.g., 95%). The remainder acts as a buffer for the OS and edge cases.",
+      "impact_en": "Affects available capacity for model weights and KV cache.",
+      "interpretation_en": "Typical range: 90-95%. Conservative: 85%. Tight: 98%.",
+      "caution_en": "Pushing above 95% risks out-of-memory errors under peak load.",
+      "example_en": "Example: With 80 GB VRAM and `max_utilization = 95%`, only 76 GB is available for model weights + KV cache.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Memory management",
+      "source_url": "https://en.wikipedia.org/wiki/Virtual_memory"
+    },
+    {
+      "field_id": "f_headroom",
+      "aliases": [
+        "f_headroom"
+      ],
+      "title_en": "Safety headroom (%)",
+      "definition_en": "A safety margin added on top of the estimated memory requirement, to handle extreme cases (e.g., 5%).",
+      "impact_en": "Increases effective capacity requirement, reducing maximum concurrency as a safety margin.",
+      "interpretation_en": "5-10% for standard workloads; 15-20% for highly variable workloads.",
+      "caution_en": "Overly conservative headroom wastes capacity.",
+      "example_en": "Example: With estimated usage of 70 GB and `safety_headroom = 5%`, the planner targets a maximum of 73.5 GB, rejecting configurations that exceed it.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Risk mitigation strategies",
+      "source_url": "https://en.wikipedia.org/wiki/Risk_management"
+    },
+    {
+      "field_id": "fb_prompt",
+      "aliases": [
+        "fb_prompt"
+      ],
+      "title_en": "Prompt tokens",
+      "definition_en": "The average prompt length in tokens for a batch request (e.g., 1200). This affects the KV cache size at the time of the first token generated.",
+      "impact_en": "Larger prompts = longer per-token latency during generation.",
+      "interpretation_en": "Estimate based on your typical use case.",
+      "caution_en": "Underestimating leads to insufficient KV cache planning.",
+      "example_en": "Example: Document summarization jobs often have `prompt_tokens = 4000+`; simple classification prompts may be as short as `128`.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Workload profiling",
+      "source_url": "https://docs.vllm.ai/en/latest/"
+    },
+    {
+      "field_id": "fb_output",
+      "aliases": [
+        "fb_output"
+      ],
+      "title_en": "Max output tokens",
+      "definition_en": "The maximum output sequence length in tokens (e.g., 500). This is the upper limit per user in the workload.",
+      "impact_en": "Determines total context growth during inference; longer outputs = more KV cache.",
+      "interpretation_en": "Set conservatively to handle outliers.",
+      "caution_en": "Users may request more output than specified, causing errors.",
+      "example_en": "Example: A batch translation job might use `max_output_tokens = 2000`; a sentiment classification job might only need `64`.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Generation length policies",
+      "source_url": "https://docs.vllm.ai/en/latest/features/generation_details/"
+    },
+    {
+      "field_id": "ag_prompt",
+      "aliases": [
+        "ag_prompt"
+      ],
+      "title_en": "Initial prompt tokens",
+      "definition_en": "The agent's initial system/context message in tokens (e.g., 1100). This remains in context for the entire duration of the agent run.",
+      "impact_en": "Fixed baseline KV cache per agent; all turns build upon this.",
+      "interpretation_en": "Include system instructions, tools list, and examples in this estimate.",
+      "caution_en": "Large initial prompts significantly increase baseline memory per agent.",
+      "example_en": "Example: A coding agent with a large system prompt describing tools and guidelines may have `initial_prompt_tokens = 3000`.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Prompt engineering",
+      "source_url": "https://en.wikipedia.org/wiki/Prompt_engineering"
+    },
+    {
+      "field_id": "ag_agents",
+      "aliases": [
+        "ag_agents"
+      ],
+      "title_en": "Concurrent agents",
+      "definition_en": "The number of simultaneously running agentic processes (e.g., 10). More agents = larger total KV cache demand.",
+      "impact_en": "Scales total KV cache linearly with concurrency.",
+      "interpretation_en": "Base estimate on your SLA and expected peak load.",
+      "caution_en": "High concurrency can saturate VRAM quickly.",
+      "example_en": "Example: Running 20 concurrent research agents each with a 2000-token context requires planning for 40,000 tokens of KV cache at minimum.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Concurrency planning",
+      "source_url": "https://en.wikipedia.org/wiki/Concurrency_(computer_science)"
+    },
+    {
+      "field_id": "ag_turns",
+      "aliases": [
+        "ag_turns"
+      ],
+      "title_en": "Max turn",
+      "definition_en": "The maximum number of turns for the agent (e.g., 10). More turns = more tokens and a longer context window needed.",
+      "impact_en": "Upper bound on agent context length; context grows for each turn.",
+      "interpretation_en": "5-15 is typical; 20+ for complex reasoning tasks.",
+      "caution_en": "Long multi-turn interactions rapidly consume VRAM.",
+      "example_en": "Example: A simple Q&A agent may complete in `max_turn = 3`; a complex planning agent may need `max_turn = 20+`.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Agent orchestration",
+      "source_url": "https://en.wikipedia.org/wiki/Intelligent_agent"
+    },
+    {
+      "field_id": "ag_toolprob",
+      "aliases": [
+        "ag_toolprob"
+      ],
+      "title_en": "Tool call probability (%)",
+      "definition_en": "The probability (in percent) that the agent calls a tool at a given step (e.g., 70%). Higher probability → more token consumption.",
+      "impact_en": "Affects average context length per turn; tool calls add tokens.",
+      "interpretation_en": "Measure or estimate from historical agent logs.",
+      "caution_en": "Underestimating leads to insufficient KV cache.",
+      "example_en": "Example: With `tool_call_probability = 80%` and `max_turn = 10`, the agent is expected to make ~8 tool calls per run on average.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Agent behavior patterns",
+      "source_url": "https://en.wikipedia.org/wiki/Agent_(programming)"
+    },
+    {
+      "field_id": "ag_toolresult",
+      "aliases": [
+        "ag_toolresult"
+      ],
+      "title_en": "Tool result tokens",
+      "definition_en": "The average token count of a single tool response (e.g., 400). This is added to the context length.",
+      "impact_en": "Directly increases context per tool call.",
+      "interpretation_en": "Estimate based on typical tool response sizes.",
+      "caution_en": "Large tool results rapidly grow context.",
+      "example_en": "Example: A web search tool returning a snippet may produce `tool_result_tokens = 300`; a database query returning rows could produce `2000+`.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Tool integration patterns",
+      "source_url": "https://en.wikipedia.org/wiki/Function_call"
+    },
+    {
+      "field_id": "ag_response",
+      "aliases": [
+        "ag_response"
+      ],
+      "title_en": "Assistant response tokens",
+      "definition_en": "The average response length in tokens when the agent is not making a tool call (e.g., 250). This influences the length of each turn.",
+      "impact_en": "Baseline per-turn context growth.",
+      "interpretation_en": "Measure from representative agent runs.",
+      "caution_en": "Large responses increase context exponentially over turns.",
+      "example_en": "Example: An agent that summarizes findings between tool calls may produce `assistant_response_tokens = 500` per turn.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Response generation",
+      "source_url": "https://en.wikipedia.org/wiki/Natural_language_generation"
+    },
+    {
+      "field_id": "ag_stop",
+      "aliases": [
+        "ag_stop"
+      ],
+      "title_en": "Stop probability / turn (%)",
+      "definition_en": "The probability (in percent) that the agent stops at a given turn (e.g., 15%). Higher → shorter average agent runs.",
+      "impact_en": "Affects average run length and KV cache consumption per run.",
+      "interpretation_en": "Low values (5-20%) for typical agents; high values (50%+) for short-running tasks.",
+      "caution_en": "Too-high stop probability may terminate critical workflows prematurely.",
+      "example_en": "Example: With `stop_probability = 20%` per turn, the expected number of turns is ~5 (geometric distribution mean = 1/0.2).",
+      "source_type": "derived_system_behavior",
+      "source_label": "Probabilistic termination",
+      "source_url": "https://en.wikipedia.org/wiki/Geometric_distribution"
+    },
+    {
+      "field_id": "ag_maxtoken",
+      "aliases": [
+        "ag_maxtoken"
+      ],
+      "title_en": "Max tokens / run",
+      "definition_en": "The maximum number of tokens for a complete agent run (e.g., 32768). This caps the exponential growth of the context.",
+      "impact_en": "Hard limit on KV cache per agent; prevents runaway context growth.",
+      "interpretation_en": "Set to model's max context window or a practical business limit.",
+      "caution_en": "Too-low limits may truncate important context.",
+      "example_en": "Example: With a 128K context window model, setting `max_tokens = 100000` reserves 28K for margin.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Context window limits",
+      "source_url": "https://huggingface.co/docs/transformers/"
+    },
+    {
+      "field_id": "bp_arrival_rate",
+      "aliases": [
+        "bp_arrival_rate"
+      ],
+      "title_en": "Arrival rate / sec",
+      "definition_en": "The arrival rate in requests per second (e.g., 3 req/sec). This defines the incoming query load on the system.",
+      "impact_en": "Directly determines total system load and required throughput.",
+      "interpretation_en": "Base on SLA and peak-hour traffic patterns.",
+      "caution_en": "Underestimating leads to capacity undersizing.",
+      "example_en": "Example: A high-traffic API might have `arrival_rate = 100 req/sec`; a niche service might have `2 req/sec`.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Traffic modeling",
+      "source_url": "https://en.wikipedia.org/wiki/Queueing_theory"
+    },
+    {
+      "field_id": "bp_sla_latency",
+      "aliases": [
+        "bp_sla_latency",
+        "tpl_sla_latency"
+      ],
+      "title_en": "SLA p95 latency (ms)",
+      "definition_en": "The 95-th percentile latency target in milliseconds (e.g., 2200ms). The planner uses this to size capacity.",
+      "impact_en": "Used to compute required throughput and batch sizes for SLA compliance.",
+      "interpretation_en": "Typical: 500-2500ms for chat; 100-500ms for classification.",
+      "caution_en": "Aggressive SLA targets require oversized infrastructure.",
+      "example_en": "Example: A customer-facing chatbot might target `sla_latency = 1000ms`; a batch analytics service might allow `5000ms`.",
+      "source_type": "derived_system_behavior",
+      "source_label": "SLA modeling",
+      "source_url": "https://en.wikipedia.org/wiki/Service-level_agreement"
+    },
+    {
+      "field_id": "bp_mc_trials",
+      "aliases": [
+        "bp_mc_trials",
+        "tpl_mc_trials"
+      ],
+      "title_en": "Monte Carlo iterations",
+      "definition_en": "The number of stochastic simulation iterations (e.g., 40). More iterations = more accurate but slower.",
+      "impact_en": "Affects simulation accuracy and runtime.",
+      "interpretation_en": "40-100 for rough estimates; 1000+ for production decisions.",
+      "caution_en": "High iteration counts slow down the planner.",
+      "example_en": "Example: A quick sanity check uses 40 trials; a business case analysis uses 10000.",
+      "source_type": "other_doc",
+      "source_label": "Monte Carlo method",
+      "source_url": "https://en.wikipedia.org/wiki/Monte_Carlo_method"
+    },
+    {
+      "field_id": "bp_horizon_sec",
+      "aliases": [
+        "bp_horizon_sec",
+        "tpl_horizon_sec"
+      ],
+      "title_en": "Time horizon (sec)",
+      "definition_en": "The simulated time window in seconds (e.g., 300 sec = 5 min). Longer = more representative of steady-state behavior.",
+      "impact_en": "Affects statistical variability and transient effects in simulation.",
+      "interpretation_en": "60-300 sec for testing; 3600+ sec for production profiles.",
+      "caution_en": "Very short horizons may miss realistic load patterns.",
+      "example_en": "Example: A 5-minute simulation captures typical traffic patterns; a 1-hour simulation includes long-tail effects.",
+      "source_type": "derived_system_behavior",
+      "source_label": "Temporal simulation",
+      "source_url": "https://en.wikipedia.org/wiki/Steady_state"
+    },
+    {
+      "field_id": "bp_planning_profile",
+      "aliases": [
+        "bp_planning_profile",
+        "tpl_planning_profile"
+      ],
+      "title_en": "Planning profile",
+      "definition_en": "The capacity-planning strategy: Baseline (standard packing), 24/7 safe (high margins), or High throughput (tight packing).",
+      "impact_en": "Sets reserved capacity and target utilization policy.",
+      "interpretation_en": "Baseline: 70-80% util; 24/7: 50-60%; High: 85-95%.",
+      "caution_en": "Tight profiles risk resource contention and failures under peak load.",
+      "example_en": "Example: Select `24/7 safe` for mission-critical systems; `High throughput` for batch workloads.",
+      "source_type": "official_vendor_doc",
+      "source_label": "Capacity planning",
+      "source_url": "https://en.wikipedia.org/wiki/Capacity_planning"
+    }
+  ]
+}

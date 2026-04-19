@@ -2300,12 +2300,12 @@ async function runBlueprintMonteCarlo(btn){
 
   const previousText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = 'Fut...';
+  btn.textContent = 'Running...';
   statusEl.textContent = 'Composing blueprint workload...';
 
   try {
     const composeData = await composeBlueprintWorkload(composePayload);
-    statusEl.textContent = 'Monte Carlo run in progress...';
+    statusEl.textContent = 'Monte Carlo simulation running...';
 
     const runResp = await fetch('/api/run', {
       method: 'POST',
@@ -2619,11 +2619,11 @@ async function runTemplateMonteCarlo(btn){
   if (!composePayload.template_id || !composePayload.hardware_catalog_id || !composePayload.software_stack_id || !composePayload.deployment_profile_id) { statusEl.textContent = 'Missing template/hardware/software stack/deployment selection.'; return; }
   const previousText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = 'Fut...';
+  btn.textContent = 'Running...';
   statusEl.textContent = 'Composing template workload...';
   try {
     const composeData = await composeTemplateWorkload(composePayload);
-    statusEl.textContent = 'Monte Carlo run in progress...';
+    statusEl.textContent = 'Monte Carlo simulation running...';
     const runResp = await fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({yaml: composeData.yaml})});
     const runData = await runResp.json();
     if (!runResp.ok || !runData.ok) throw new Error(runData.error || 'Monte Carlo run error');
@@ -2877,7 +2877,7 @@ async function previewHuggingFaceModel(btn){
     });
     const data = await resp.json();
     if (!resp.ok || !data.ok) {
-      throw new Error(data.error || 'Ismeretlen backend hiba');
+      throw new Error(data.error || 'Unknown backend error');
     }
     const m = data.model || {};
     box.innerHTML = `
@@ -2916,8 +2916,8 @@ async function runMonteCarlo(btn){
 
   const previousText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = 'Fut...';
-  statusEl.textContent = 'Monte Carlo run in progress...';
+  btn.textContent = 'Running...';
+  statusEl.textContent = 'Monte Carlo simulation running...';
 
   try {
     const resp = await fetch('/api/run', {
@@ -2927,7 +2927,7 @@ async function runMonteCarlo(btn){
     });
     const data = await resp.json();
     if (!resp.ok || !data.ok) {
-      throw new Error(data.error || 'Ismeretlen backend hiba');
+      throw new Error(data.error || 'Unknown backend error');
     }
 
     allResults = Array.isArray(data.results) ? data.results : [];
