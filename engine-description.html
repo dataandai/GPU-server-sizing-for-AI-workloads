@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engine Overview — On-Prem AI Capacity Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --surface2: #131921;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(99,255,180,0.25);
+    --accent: #3dffa0;
+    --accent2: #ff9f43;
+    --accent3: #4facfe;
+    --text: #e8edf2;
+    --text-muted: #5a6475;
+    --text-dim: #8a95a3;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Instrument Serif', serif;
+    --sans: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* ── GRID BG ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(61,255,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(61,255,160,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    padding: 5rem 2rem 4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    min-height: 88vh;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(61,255,160,0.08);
+    border: 1px solid var(--border-bright);
+    border-radius: 2px;
+    padding: 0.25rem 0.75rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .hero-title {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-title em {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    max-width: 480px;
+    font-weight: 400;
+  }
+
+  /* ── TERMINAL PANEL ── */
+  .terminal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    animation: slideUp 0.8s ease 0.3s both;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .terminal-bar {
+    background: #0a0f15;
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #ffbd2e; }
+  .dot-g { background: #28c840; }
+
+  .terminal-label {
+    margin-left: auto;
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+  }
+
+  .terminal-body { padding: 1.2rem 1.4rem; }
+
+  .tline {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+    line-height: 1.5;
+  }
+
+  .tprompt { color: var(--accent); }
+  .tcmd { color: var(--text); }
+  .tout { color: var(--text-muted); padding-left: 1.5rem; }
+  .tkey { color: var(--accent3); }
+  .tval { color: var(--accent2); }
+  .tsep { color: var(--border-bright); margin: 0.5rem 0; }
+
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 1em;
+    background: var(--accent);
+    animation: blink 1.2s step-end infinite;
+    vertical-align: text-bottom;
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ── SECTION WRAPPER ── */
+  .section {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem 5rem;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 80px;
+  }
+
+  .section-title {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 3rem;
+    line-height: 1.2;
+  }
+
+  /* ── ENGINES GRID ── */
+  .engines-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 5rem;
+  }
+
+  .engine-card {
+    background: var(--surface);
+    padding: 2.5rem;
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .engine-card:hover { background: var(--surface2); }
+
+  .engine-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .engine-card.mc::before { background: var(--accent); }
+  .engine-card.wl::before { background: var(--accent3); }
+  .engine-card.cat::before { background: var(--accent2); }
+  .engine-card.math::before { background: linear-gradient(90deg, var(--accent), var(--accent3)); }
+
+  .engine-num {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+
+  .engine-icon {
+    width: 44px; height: 44px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .engine-card.mc .engine-icon { background: rgba(61,255,160,0.1); border: 1px solid rgba(61,255,160,0.2); }
+  .engine-card.wl .engine-icon { background: rgba(79,172,254,0.1); border: 1px solid rgba(79,172,254,0.2); }
+  .engine-card.cat .engine-icon { background: rgba(255,159,67,0.1); border: 1px solid rgba(255,159,67,0.2); }
+  .engine-card.math .engine-icon { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+
+  .engine-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.6rem;
+  }
+
+  .engine-desc {
+    font-size: 0.875rem;
+    color: var(--text-dim);
+    line-height: 1.65;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── STEPS ── */
+  .steps { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .step {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    font-size: 0.82rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .step:last-child { border-bottom: none; }
+
+  .step-n {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    padding-top: 0.1rem;
+    flex-shrink: 0;
+    width: 1.2rem;
+  }
+
+  .step-text { color: var(--text-dim); line-height: 1.5; }
+  .step-text strong { color: var(--text); font-weight: 600; }
+
+  /* ── METRICS ROW ── */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 5rem;
+  }
+
+  .metric {
+    background: var(--surface);
+    padding: 1.75rem 1.5rem;
+    text-align: center;
+    transition: background 0.2s;
+  }
+
+  .metric:hover { background: var(--surface2); }
+
+  .metric-val {
+    font-family: var(--mono);
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .metric:nth-child(1) .metric-val { color: var(--accent); }
+  .metric:nth-child(2) .metric-val { color: var(--accent3); }
+  .metric:nth-child(3) .metric-val { color: var(--accent2); }
+  .metric:nth-child(4) .metric-val { color: var(--text); }
+
+  .metric-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+  }
+
+  /* ── PIPELINE ── */
+  .pipeline {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    margin-bottom: 5rem;
+    overflow-x: auto;
+  }
+
+  .pipe-stage {
+    flex: 1;
+    min-width: 150px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-right: none;
+    padding: 1.5rem 1rem;
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .pipe-stage:last-child { border-right: 1px solid var(--border); }
+  .pipe-stage:hover { background: var(--surface2); }
+
+  .pipe-stage::after {
+    content: '→';
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-size: 0.9rem;
+    z-index: 2;
+    background: var(--bg);
+    padding: 2px;
+  }
+
+  .pipe-stage:last-child::after { display: none; }
+
+  .pipe-num {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    margin-bottom: 0.6rem;
+  }
+
+  .pipe-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.01em;
+  }
+
+  .pipe-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── MATH SECTION ── */
+  .math-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 5rem;
+  }
+
+  .math-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+  }
+
+  .math-card:hover { border-color: rgba(61,255,160,0.2); }
+
+  .math-card-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  .formula {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+    background: rgba(61,255,160,0.04);
+    border: 1px solid rgba(61,255,160,0.1);
+    padding: 0.6rem 0.8rem;
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+
+  .formula span { color: var(--accent2); }
+  .formula em { color: var(--accent3); font-style: normal; }
+
+  .math-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin-top: 0.75rem;
+  }
+
+  /* ── USE CASES ── */
+  .use-cases {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 5rem;
+  }
+
+  .use-case {
+    background: var(--surface);
+    padding: 2rem;
+    transition: background 0.2s;
+  }
+
+  .use-case:hover { background: var(--surface2); }
+
+  .uc-tag {
+    font-family: var(--mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    display: inline-block;
+    border-radius: 2px;
+  }
+
+  .uc-tag.cli { background: rgba(61,255,160,0.1); color: var(--accent); }
+  .uc-tag.web { background: rgba(79,172,254,0.1); color: var(--accent3); }
+  .uc-tag.docker { background: rgba(255,159,67,0.1); color: var(--accent2); }
+
+  .uc-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .uc-desc {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* ── FOOTER BAND ── */
+  .footer-band {
+    position: relative;
+    z-index: 1;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .footer-band p {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  .footer-band span { color: var(--accent); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 3rem;
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeIn 0.6s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; transform: none; }
+  }
+
+  .fade-in:nth-child(1) { animation-delay: 0.05s; }
+  .fade-in:nth-child(2) { animation-delay: 0.12s; }
+  .fade-in:nth-child(3) { animation-delay: 0.19s; }
+  .fade-in:nth-child(4) { animation-delay: 0.26s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; gap: 2rem; min-height: auto; padding-top: 3rem; }
+    .engines-grid { grid-template-columns: 1fr; }
+    .metrics-row { grid-template-columns: repeat(2, 1fr); }
+    .math-grid { grid-template-columns: 1fr; }
+    .use-cases { grid-template-columns: 1fr; }
+    .pipeline { flex-direction: column; }
+    .pipe-stage { border-right: 1px solid var(--border); border-bottom: none; }
+    .pipe-stage:last-child { border-bottom: 1px solid var(--border); }
+    .pipe-stage::after { content: '↓'; right: 50%; top: auto; bottom: -14px; transform: translateX(50%); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div style="animation: fadeIn 0.7s ease both;">
+    <div class="hero-badge">Engine Overview · v2.0</div>
+    <h1 class="hero-title">
+      Simulation<br>
+      <em>Intelligence</em><br>
+      for On-Prem AI
+    </h1>
+    <p class="hero-sub">
+      Two probabilistic engines — Monte Carlo and Workload Simulation — combine to give precise VRAM, throughput, latency, and cost estimates before you commit a single dollar to hardware.
+    </p>
+  </div>
+
+  <div class="terminal" role="img" aria-label="Simulation output preview">
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="terminal-label">simulation · live output</span>
+    </div>
+    <div class="terminal-body">
+      <div class="tline"><span class="tprompt">›</span><span class="tcmd">run monte-carlo --iters 10000</span></div>
+      <div class="tline tout">Sampling token distributions...</div>
+      <div class="tline tout"><span class="tkey">VRAM p50</span>  <span class="tval">38.2 GB</span></div>
+      <div class="tline tout"><span class="tkey">VRAM p95</span>  <span class="tval">61.7 GB</span></div>
+      <div class="tline tout"><span class="tkey">VRAM p99</span>  <span class="tval">74.1 GB</span></div>
+      <div class="tline tout"><span class="tkey">OOM risk</span>   <span class="tval">1.4 %</span></div>
+      <div class="tsep">────────────────────────────</div>
+      <div class="tline tout"><span class="tkey">p50 lat</span>    <span class="tval">142 ms</span></div>
+      <div class="tline tout"><span class="tkey">p99 lat</span>    <span class="tval">891 ms</span></div>
+      <div class="tline tout"><span class="tkey">SLA pass</span>   <span class="tval">98.6 %</span></div>
+      <div class="tline tout"><span class="tkey">TCO/day</span>    <span class="tval">$3,210</span></div>
+      <div class="tsep">────────────────────────────</div>
+      <div class="tline tout">✓ Recommended: <span class="tval">4× H100 SXM</span></div>
+      <div class="tline"><span class="tprompt">›</span><span class="cursor"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ METRICS ═══ -->
+<div class="section" style="padding-bottom: 0; margin-bottom: 0;">
+  <div class="metrics-row">
+    <div class="metric fade-in">
+      <div class="metric-val">10k+</div>
+      <div class="metric-label">Monte Carlo Iterations</div>
+    </div>
+    <div class="metric fade-in">
+      <div class="metric-val">p99</div>
+      <div class="metric-label">Percentile Precision</div>
+    </div>
+    <div class="metric fade-in">
+      <div class="metric-val">3×</div>
+      <div class="metric-label">Memory Model Layers</div>
+    </div>
+    <div class="metric fade-in">
+      <div class="metric-val">TCO</div>
+      <div class="metric-label">End-to-end Cost View</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ENGINES ═══ -->
+<section class="section" style="padding-top: 5rem;">
+  <div class="section-label">Core Engines</div>
+  <h2 class="section-title">Two engines, one answer</h2>
+
+  <div class="engines-grid">
+
+    <!-- Monte Carlo -->
+    <div class="engine-card mc">
+      <div class="engine-num">ENGINE 01</div>
+      <div class="engine-icon">⬡</div>
+      <div class="engine-title">Monte Carlo Simulation</div>
+      <p class="engine-desc">
+        Instead of single fixed estimates, the Monte Carlo engine draws thousands of samples from probability distributions for token counts, concurrency, and batch sizes — producing a realistic statistical envelope of memory and performance outcomes.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <span class="step-n">01</span>
+          <span class="step-text"><strong>Input processing</strong> — model config, hardware profile, workload type and token distributions are ingested and validated</span>
+        </div>
+        <div class="step">
+          <span class="step-n">02</span>
+          <span class="step-text"><strong>Token sampling</strong> — random draws from prompt, output and concurrency distributions per iteration</span>
+        </div>
+        <div class="step">
+          <span class="step-n">03</span>
+          <span class="step-text"><strong>VRAM computation</strong> — model weights + KV-cache + active compute buffers summed per GPU</span>
+        </div>
+        <div class="step">
+          <span class="step-n">04</span>
+          <span class="step-text"><strong>OOM detection</strong> — flags iterations that exceed GPU memory limits and accumulates risk probability</span>
+        </div>
+        <div class="step">
+          <span class="step-n">05</span>
+          <span class="step-text"><strong>Statistical output</strong> — p50 / p95 / p99 VRAM, OOM %, KV-cache saturation, hardware recommendation</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Workload Sim -->
+    <div class="engine-card wl">
+      <div class="engine-num">ENGINE 02</div>
+      <div class="engine-icon">◈</div>
+      <div class="engine-title">Workload Simulation Engine</div>
+      <p class="engine-desc">
+        Models full production environments: Poisson request arrivals, FIFO queuing, SLA enforcement, and multi-stage pipelines — giving end-to-end latency, throughput, and GPU utilization distributions before you deploy.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <span class="step-n">01</span>
+          <span class="step-text"><strong>Scenario loading</strong> — pipeline stages, runtime family, deployment profile and simulation horizon</span>
+        </div>
+        <div class="step">
+          <span class="step-n">02</span>
+          <span class="step-text"><strong>Calibration anchors</strong> — real benchmark data matched to each pipeline stage for accuracy</span>
+        </div>
+        <div class="step">
+          <span class="step-n">03</span>
+          <span class="step-text"><strong>Stochastic trials</strong> — random arrival rates, token counts and SLA requirements applied per trial</span>
+        </div>
+        <div class="step">
+          <span class="step-n">04</span>
+          <span class="step-text"><strong>Queue simulation</strong> — M/M/1 and M/M/c models, drop policy, wait time accumulation</span>
+        </div>
+        <div class="step">
+          <span class="step-n">05</span>
+          <span class="step-text"><strong>Aggregated output</strong> — p50/p95/p99 latency, RPS, SLA compliance rate, GPU utilisation, TCO</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Catalog -->
+    <div class="engine-card cat">
+      <div class="engine-num">ENGINE 03</div>
+      <div class="engine-icon">▦</div>
+      <div class="engine-title">Catalog System</div>
+      <p class="engine-desc">
+        A live-updated catalog of hardware, models, and software stacks powers all simulations with accurate specs and performance priors.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <span class="step-n">HW</span>
+          <span class="step-text"><strong>Hardware catalog</strong> — GPU VRAM, bandwidth, node configs (2/4/8 GPU), network and storage specs</span>
+        </div>
+        <div class="step">
+          <span class="step-n">ML</span>
+          <span class="step-text"><strong>Model catalog</strong> — dynamic Hugging Face model loading with architecture parameters and memory models</span>
+        </div>
+        <div class="step">
+          <span class="step-n">SW</span>
+          <span class="step-text"><strong>Software stacks</strong> — vLLM, TGI, quantisation methods, attention backends, MIG and bare-metal profiles</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Math -->
+    <div class="engine-card math">
+      <div class="engine-num">ENGINE 04</div>
+      <div class="engine-icon">∑</div>
+      <div class="engine-title">Mathematical Models</div>
+      <p class="engine-desc">
+        Every estimate is grounded in first-principles memory accounting, calibrated inference timing, and standard queuing theory — not rule-of-thumb heuristics.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <span class="step-n">M</span>
+          <span class="step-text"><strong>Memory</strong> — weights (params × dtype), KV-cache (tokens × layers × heads × dtype), active compute</span>
+        </div>
+        <div class="step">
+          <span class="step-n">P</span>
+          <span class="step-text"><strong>Performance</strong> — calibrated inference timing, multi-GPU communication overhead modelling</span>
+        </div>
+        <div class="step">
+          <span class="step-n">Q</span>
+          <span class="step-text"><strong>Queuing</strong> — M/M/1 and M/M/c arrival-service models for wait time and saturation analysis</span>
+        </div>
+        <div class="step">
+          <span class="step-n">$</span>
+          <span class="step-text"><strong>Cost</strong> — GPU acquisition cost, power draw × tariff, full TCO breakdown</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ PIPELINE FLOW ═══ -->
+<section class="section">
+  <div class="section-label">Simulation Pipeline</div>
+  <h2 class="section-title">From parameters to recommendation</h2>
+
+  <div class="pipeline">
+    <div class="pipe-stage">
+      <div class="pipe-num">STEP 01</div>
+      <div class="pipe-name">Configure</div>
+      <div class="pipe-desc">Select model, GPU hardware, workload type and distribution parameters</div>
+    </div>
+    <div class="pipe-stage">
+      <div class="pipe-num">STEP 02</div>
+      <div class="pipe-name">Calibrate</div>
+      <div class="pipe-desc">Engine matches real benchmark anchors to each pipeline stage</div>
+    </div>
+    <div class="pipe-stage">
+      <div class="pipe-num">STEP 03</div>
+      <div class="pipe-name">Sample</div>
+      <div class="pipe-desc">10 000 stochastic draws across token, concurrency and arrival distributions</div>
+    </div>
+    <div class="pipe-stage">
+      <div class="pipe-num">STEP 04</div>
+      <div class="pipe-name">Evaluate</div>
+      <div class="pipe-desc">VRAM, latency, queue depth and SLA compliance computed per trial</div>
+    </div>
+    <div class="pipe-stage">
+      <div class="pipe-num">STEP 05</div>
+      <div class="pipe-name">Aggregate</div>
+      <div class="pipe-desc">Statistical distributions and worst-case extremes summarised across all trials</div>
+    </div>
+    <div class="pipe-stage">
+      <div class="pipe-num">STEP 06</div>
+      <div class="pipe-name">Recommend</div>
+      <div class="pipe-desc">Optimal hardware config, risk score and full TCO output delivered</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MATH ═══ -->
+<section class="section">
+  <div class="section-label">Mathematical Foundation</div>
+  <h2 class="section-title">First-principles memory &amp; performance accounting</h2>
+
+  <div class="math-grid">
+    <div class="math-card">
+      <div class="math-card-title">Model Weight Memory</div>
+      <div class="formula">VRAM<sub>w</sub> = <span>params</span> × <em>bytes_per_dtype</em></div>
+      <p class="math-desc">Parameter count multiplied by the dtype byte-width (FP32 = 4 B, FP16 = 2 B, INT8 = 1 B). Quantisation reduces this linearly.</p>
+    </div>
+    <div class="math-card">
+      <div class="math-card-title">KV-Cache Memory</div>
+      <div class="formula">VRAM<sub>kv</sub> = <span>T</span> × <em>L</em> × <span>H<sub>kv</sub></span> × <em>d</em> × 2 × bytes</div>
+      <p class="math-desc">Tokens × layers × KV heads × head dimension × 2 (key+value). Scales <strong style="color:var(--text)">linearly</strong> with context length. For GQA/MQA models (Llama 3, Mistral, Qwen…) H<sub>kv</sub> ≪ H<sub>q</sub>, reducing cache memory by 4–8×.</p>
+    </div>
+    <div class="math-card">
+      <div class="math-card-title">Active Compute Buffer</div>
+      <div class="formula">VRAM<sub>act</sub> = <span>B</span> × <em>S</em> × <span>A_complexity</span></div>
+      <p class="math-desc">Batch size × sequence length × a layer-dependent attention complexity factor. This is a placeholder approximation — the real value is architecture-specific and varies per activation. Used for conservative headroom estimation only.</p>
+    </div>
+    <div class="math-card">
+      <div class="math-card-title">Queuing Theory</div>
+      <div class="formula">W<sub>q</sub> = <span>λ</span> / (<em>μ</em>(<em>μ</em> − <span>λ</span>)) &nbsp;·&nbsp; W = 1/(<em>μ</em> − <span>λ</span>)</div>
+      <p class="math-desc">M/M/1 model: W<sub>q</sub> is mean <em>wait time in queue</em>; W is total time in system (queue + service). λ = arrival rate, μ = service rate. Extended to M/M/c for multi-GPU pools.</p>
+    </div>
+    <div class="math-card">
+      <div class="math-card-title">Hardware Cost</div>
+      <div class="formula">TCO = <span>GPU$</span> × <em>count</em> + <span>P_w</span> × <em>t</em> × <span>tariff</span></div>
+      <p class="math-desc">GPU acquisition cost plus energy spend over the operational period. MIG and bare-metal profiles adjust utilisation denominators.</p>
+    </div>
+    <div class="math-card">
+      <div class="math-card-title">OOM Risk</div>
+      <div class="formula">P<sub>oom</sub> = |{i : VRAM<sub>i</sub> &gt; <span>cap</span>}| / <em>N</em></div>
+      <p class="math-desc">Fraction of Monte Carlo trials where total VRAM exceeds the GPU's physical capacity. Drives hardware upgrade recommendations.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ USE CASES ═══ -->
+<section class="section">
+  <div class="section-label">Interfaces</div>
+  <h2 class="section-title">Run simulations your way</h2>
+
+  <div class="use-cases">
+    <div class="use-case">
+      <span class="uc-tag web">Web UI</span>
+      <div class="uc-title">Interactive Dashboard</div>
+      <p class="uc-desc">Configure models, hardware and workload distributions through a guided interface. Run Monte Carlo simulations with one click and explore VRAM distributions, OOM risk gauges and hardware recommendations live.</p>
+    </div>
+    <div class="use-case">
+      <span class="uc-tag cli">CLI</span>
+      <div class="uc-title">YAML Scenario Files</div>
+      <p class="uc-desc">Define arbitrarily complex workload scenarios in YAML and run them from the command line. Chain multiple hardware targets in a single sweep and pipe JSON results into your own reporting toolchain.</p>
+    </div>
+    <div class="use-case">
+      <span class="uc-tag docker">Docker</span>
+      <div class="uc-title">Containerised Runs</div>
+      <p class="uc-desc">Spin up an isolated, fully reproducible simulation environment in seconds. Pin versions, share configurations across teams and automate capacity planning as part of your CI pipeline.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ VALIDATION ═══ -->
+<section class="section">
+  <div class="section-label">Accuracy &amp; Trust</div>
+  <h2 class="section-title">Calibrated, validated, honest</h2>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+    <div style="background: var(--surface); border: 1px solid var(--border); padding: 1.75rem; border-left: 2px solid var(--accent);">
+      <div style="font-size:0.7rem; font-family: var(--mono); color: var(--accent); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.6rem;">Calibration</div>
+      <p style="font-size:0.875rem; color: var(--text-dim); line-height:1.65;">All performance priors are anchored to real inference benchmarks across GPU SKUs and model families. Calibration coverage scores tell you exactly how much of each estimate is data-driven versus extrapolated.</p>
+    </div>
+    <div style="background: var(--surface); border: 1px solid var(--border); padding: 1.75rem; border-left: 2px solid var(--accent3);">
+      <div style="font-size:0.7rem; font-family: var(--mono); color: var(--accent3); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.6rem;">Validation Rules</div>
+      <p style="font-size:0.875rem; color: var(--text-dim); line-height:1.65;">Every simulation input is validated against physical GPU memory limits, positive-value constraints, and logical distribution consistency. Physical impossibilities are rejected before any compute runs.</p>
+    </div>
+    <div style="background: var(--surface); border: 1px solid var(--border); padding: 1.75rem; border-left: 2px solid var(--accent2);">
+      <div style="font-size:0.7rem; font-family: var(--mono); color: var(--accent2); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.6rem;">Error Handling</div>
+      <p style="font-size:0.875rem; color: var(--text-dim); line-height:1.65;">Missing calibration data is filled from conservative defaults and flagged explicitly. Uncalibrated configurations receive a visible warning so you always know when an estimate is more uncertain.</p>
+    </div>
+    <div style="background: var(--surface); border: 1px solid var(--border); padding: 1.75rem; border-left: 2px solid rgba(255,255,255,0.2);">
+      <div style="font-size:0.7rem; font-family: var(--mono); color: var(--text-dim); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.6rem;">Multi-language Support</div>
+      <p style="font-size:0.875rem; color: var(--text-dim); line-height:1.65;">Language-mix scaling factors adjust throughput and memory estimates for multilingual deployments, reflecting real tokenizer and compute differences across scripts and languages.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer-band">
+  <p>On-Prem AI Workload, Serving &amp; Capacity Planner · <span>Engine v2.0</span> · Monte Carlo + Workload Simulation</p>
+</footer>
+
+<script>
+  // Staggered entrance for engine cards
+  const cards = document.querySelectorAll('.engine-card, .math-card, .use-case, .metric, .pipe-stage');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'none';
+        }, (entry.target.dataset.delay || 0) * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  cards.forEach((el, i) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(12px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    el.dataset.delay = i % 6;
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
