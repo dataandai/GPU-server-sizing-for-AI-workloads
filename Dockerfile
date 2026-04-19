@@ -16,6 +16,7 @@ COPY scenarios/ scenarios/
 COPY src/ src/
 COPY tests/ tests/
 COPY ui.html .
+COPY engine-description.html .
 COPY ui_server.py .
 COPY run_all.py .
 COPY README.md .
