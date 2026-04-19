@@ -140,7 +140,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         </div>
         <div class="form-group">
           <label>Target language</label>
-          <select id="f_target_language" onchange="applyBuilderLanguageHint(); generateYAML()">
+          <select id="f_target_language" onchange="onTargetLanguageChange()">
             <option value="hu">Hungarian</option>
             <option value="en" selected>English</option>
             <option value="de">German</option>
@@ -1650,9 +1650,27 @@ async function loadUiHelpCatalog(){
   TOOLTIP_CATALOG = {};
   if (!window.location.protocol.startsWith('http')) return;
   try {
-    const payload = await apiGetJson('/api/ui-help');
+    // Get the selected language from the UI
+    const targetLang = document.getElementById('f_target_language')?.value || 
+                       document.getElementById('bp_language_code')?.value || 
+                       document.getElementById('tpl_language_code')?.value || 'hu';
+    
+    const payload = await apiGetJson(`/api/ui-help?language=${encodeURIComponent(targetLang)}`);
     (payload.records || []).forEach(record => {
       if (!record || !record.field_id) return;
+      
+      // Normalize language-specific fields to _hu suffix for backward compatibility
+      const lang_suffix = targetLang === 'en' ? '_en' : (targetLang === 'de' ? '_de' : '_hu');
+      if (targetLang !== 'hu') {
+        record.title_hu = record[`title${lang_suffix}`] || record.title_hu;
+        record.definition_hu = record[`definition${lang_suffix}`] || record.definition_hu;
+        record.impact_hu = record[`impact${lang_suffix}`] || record.impact_hu;
+        record.interpretation_hu = record[`interpretation${lang_suffix}`] || record.interpretation_hu;
+        record.caution_hu = record[`caution${lang_suffix}`] || record.caution_hu;
+        record.example_hu = record[`example${lang_suffix}`] || record.example_hu;
+        record.label_hu = record[`label${lang_suffix}`] || record.label_hu;
+      }
+      
       tooltipCatalogKeys(record.field_id, record.aliases || [], record.title_hu || '', record.label_hu || '').forEach(key => {
         TOOLTIP_CATALOG[key] = record;
       });
@@ -1718,12 +1736,20 @@ function scaledValue(value, multiplier){
 function builderLanguageScalars(){
   return getLanguageScalars(document.getElementById('f_target_language')?.value || 'en', 1);
 }
-function applyBuilderLanguageHint(){
+async function applyBuilderLanguageHint(){
   const note = document.getElementById('builder-language-note');
   if (!note) return;
   const scale = builderLanguageScalars();
   if (scale.name === 'hungarian') note.textContent = `For Hungarian target language, the builder assumes roughly ${scale.prompt.toFixed(2)}× prompt/context tokens and ${scale.output.toFixed(2)}× generation tokens.`;
   else note.textContent = 'For non-Hungarian target languages, the builder applies only a mild or zero language token correction.';
+  
+  // Reload tooltip catalog when language changes
+  await loadUiHelpCatalog();
+  applyStaticHelpTooltips();
+}
+async function onTargetLanguageChange(){
+  await applyBuilderLanguageHint();
+  generateYAML();
 }
 function selectedHardwareRecord(prefixed='f_'){
   const id = document.getElementById(`${prefixed}hardware_catalog_id`)?.value || document.getElementById('f_hardware_catalog_id')?.value || '';

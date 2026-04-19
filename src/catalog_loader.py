@@ -63,6 +63,9 @@ CATALOG_PATHS: dict[str, tuple[str, ...]] = {
     "ui_help_tooltips_hu": (
         "ui_help/tooltips_hu.json",
     ),
+    "ui_help_tooltips_en": (
+        "ui_help/tooltips_en.json",
+    ),
 }
 
 
@@ -260,8 +263,20 @@ def resolve_hardware_profile(hardware_id: str) -> HardwareProfile:
 
 
 
-def list_ui_help_records() -> list[dict[str, Any]]:
-    return _records("ui_help_tooltips_hu", id_field="field_id")
+def list_ui_help_records(language: str = "hu") -> list[dict[str, Any]]:
+    """Load UI help records in the specified language (default: Hungarian).
+    
+    Args:
+        language: Language code ("hu" for Hungarian, "en" for English).
+    
+    Returns:
+        List of UI help records in the specified language.
+    """
+    language = language.lower().strip()
+    if language not in ("hu", "en", "de"):
+        language = "hu"  # Default to Hungarian
+    logical_name = f"ui_help_tooltips_{language}"
+    return _records(logical_name, id_field="field_id")
 
 
 def get_ui_help_record(field_id: str) -> dict[str, Any]:

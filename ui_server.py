@@ -95,7 +95,9 @@ class UIServerHandler(SimpleHTTPRequestHandler):
             self._send_json({"ok": True, "schema": get_workload_simulation_schema()})
             return
         if parsed.path == "/api/ui-help":
-            self._send_json({"ok": True, "records": list_ui_help_records()})
+            query = parse_qs(parsed.query or "")
+            language = str((query.get("language") or ["hu"])[0]).strip().lower()
+            self._send_json({"ok": True, "records": list_ui_help_records(language=language)})
             return
         if parsed.path == "/api/ui/template-form":
             query = parse_qs(parsed.query or "")
